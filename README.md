@@ -7,11 +7,16 @@ Team name: Artemis III
 Satellite name: Buzz Lightyear
 
 Name Specialisation/s
-Pranaya Mechatronics 
-Pratham Electronics
-Minying Wu Software
-Bhaavna Software
-Arpit Mechatronics
+
+- Pranaya Mechatronics
+  
+- Pratham Electronics
+  
+- Minying Wu Software
+  
+- Bhaavna Software
+  
+- Arpit Mechatronics
 
 
 
