@@ -14,7 +14,7 @@ void MotorControl::begin() {
   pinMode(ENCODER_A_PIN, INPUT_PULLUP);
   pinMode(ENCODER_B_PIN, INPUT_PULLUP);
 
-  // Attach encoder interrupt in main.cpp with attachInterrupt(), since
+  // Attach your encoder interrupt in main.cpp with attachInterrupt(), since
   // pin-to-ISR binding needs a free function, not a class member directly.
   // See main.cpp for the wiring example.
 }
@@ -49,7 +49,7 @@ void MotorControl::resetEncoder() {
 }
 
 float MotorControl::getHeadingEstimate() const {
-  // Placeholder conversion - replace COUNTS_PER_REV with actual encoder
+  // Placeholder conversion - replace COUNTS_PER_REV with your actual encoder
   // resolution and any gear/wheel ratio between reaction wheel and satellite body.
   const float COUNTS_PER_REV = 1000.0f; // TODO: confirm from FIT0186 datasheet
   float revs = _encoderCount / COUNTS_PER_REV;

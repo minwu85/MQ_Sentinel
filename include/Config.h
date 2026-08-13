@@ -24,6 +24,9 @@ static const uint8_t IR_SENSOR_PINS[NUM_IR_SENSORS] = {2, 3, 4};
 // ---------- Laser ----------
 #define LASER_PIN 6   // eye-safe laser diode module control pin
 
+// ---------- Mock beacon button (software-only testing, no IR hardware needed) ----------
+#define MOCK_BEACON_BUTTON_PIN 5   // pushbutton to GND, uses internal pullup
+
 // ---------- Timing ----------
 #define LASER_DWELL_MS 2000UL      // must hold laser on target for 2 seconds
 #define DEMO_DURATION_MS (5UL * 60UL * 1000UL) // 5 minute demonstration
