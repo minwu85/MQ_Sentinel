@@ -54,7 +54,7 @@ FORWARD: 1  (connected - encoder moved)
 
 REVERSE: 1  (connected - encoder moved)
 
-### motor_autonomous_main 
+### motor_autonomous_main - conntinue spin none stop
 
 - pio run -e motor_autonomous -t upload
 
