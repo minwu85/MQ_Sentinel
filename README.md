@@ -54,4 +54,12 @@ FORWARD: 1  (connected - encoder moved)
 
 REVERSE: 1  (connected - encoder moved)
 
+### motor_autonomous_main 
 
+- pio run -e motor_autonomous -t upload
+
+fully autonomous: no PC, no USB, no serial commands. Two things need to happen for that:
+
+Wiring change: the Nano itself needs power from the battery pack (not USB), since unplugging from the PC currently kills power to the board entirely.
+
+Code change: a sketch that starts running the moment power is applied, with no serial commands needed — it just loops forever.
