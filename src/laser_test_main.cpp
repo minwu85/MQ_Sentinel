@@ -14,7 +14,7 @@
 // ============================================================
 #include <Arduino.h>
 
-const int LASER_PIN = 6; // was 8 in your original - see note above
+const int LASER_PIN = 8; // was 8 in your original - see note above
 
 void setup() {
   Serial.begin(9600);

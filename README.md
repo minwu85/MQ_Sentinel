@@ -63,3 +63,11 @@ fully autonomous: no PC, no USB, no serial commands. Two things need to happen f
 Wiring change: the Nano itself needs power from the battery pack (not USB), since unplugging from the PC currently kills power to the board entirely.
 
 Code change: a sketch that starts running the moment power is applied, with no serial commands needed — it just loops forever.
+
+### laser_test_main - test laser
+
+
+- pio run -e laser_test -t upload
+- pio device monitor -e laser_test
+
+Serial Monitor will print Laser ON / Laser OFF each second in sync with the physical blink, so you get a clear terminal confirmation alongside the visual one — same pattern as your motor tests.
