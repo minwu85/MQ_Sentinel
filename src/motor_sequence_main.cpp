@@ -12,15 +12,16 @@
 // ============================================================
 #include <Arduino.h>
 
-const int MOTOR_PWM_PIN   = 9;
-const int MOTOR_DIR_PIN   = 8;
-const int MOTOR_SLEEP_PIN = 7;
+const int MOTOR_PWM_PIN   = 9;//
+const int MOTOR_DIR_PIN   = 8;//
+const int MOTOR_SLEEP_PIN = 7;//
 
 const int SPIN_SPEED = 200;              // 0-255
 const unsigned long SPIN_DURATION_MS = 5000UL; // 5 seconds each direction
 const unsigned long PAUSE_BETWEEN_MS = 500UL;  // brief stop between directions
 
 void runSequence() {
+  digitalWrite(MOTOR_SLEEP_PIN, HIGH);
   Serial.println("Sequence started.");
 
   Serial.println("Forward - 5 seconds");
