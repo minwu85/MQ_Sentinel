@@ -34,6 +34,17 @@ Type g + Enter to start — it'll spin continuously and print a status line ever
 
 This one runs automatically on power-up/upload — forward 5s → stop 2s → reverse 5s → stop 2s → done. No serial input needed; it's a one-shot test that halts after one cycle (matching your hasRun flag logic).
 
+### connection_test_main - Motor Connectivity Test
 
+- pio device monitor -e connection_test
+
+(Or in VS Code: click the plug icon at the bottom of the PlatformIO toolbar, or PROJECT TASKS → connection_test → Monitor.)
+
+You should see it print, repeating every ~6 seconds:
+
+=== Nano <-> Motor Connectivity Test ===
+Reply: 1 = motor confirmed connected, 0 = not connected
+FORWARD: 1  (connected - encoder moved)
+REVERSE: 1  (connected - encoder moved)
 
 
