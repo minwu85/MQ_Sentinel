@@ -1,41 +1,74 @@
 // ============================================================
-// MOTOR ON/OFF SPIN TEST - PlatformIO / VS Code version
+// MOTOR SPIN TEST - stop with spacebar, verbose terminal output
 // Build/upload with: pio run -e motor_onoff -t upload
 //
-// Purpose: simplest possible test - just turn the motor fully
-// ON for a few seconds, then fully OFF, and repeat. No encoder,
-// no direction switching, no PWM ramping - just confirm the
-// DRV8874 driver + battery pack + motor wiring actually works.
+// Behaviour:
+//   - Send 'g' (then Enter) to start spinning continuously
+//   - Send ' ' (space, then Enter) to stop
+//   - Prints live status (running/stopped, elapsed time) every
+//     second while spinning, so the terminal always tells you
+//     exactly what state the motor is in
 // ============================================================
 #include <Arduino.h>
 
-// --- Pin definitions (match your DRV8874 wiring) ---
-const int MOTOR_PWM_PIN   = 9;   // driver PWM (speed)
-const int MOTOR_DIR_PIN   = 8;   // driver DIR (direction)
-const int MOTOR_SLEEP_PIN = 7;   // driver nSLEEP - must be HIGH to enable
+const int MOTOR_PWM_PIN   = 9;
+const int MOTOR_DIR_PIN   = 8;
+const int MOTOR_SLEEP_PIN = 7;
+
+const int SPIN_SPEED = 255; // full speed
+
+bool motorRunning = false;
+unsigned long spinStartMs = 0;
+unsigned long lastStatusPrintMs = 0;
+
+void startMotor() {
+  digitalWrite(MOTOR_DIR_PIN, HIGH);
+  analogWrite(MOTOR_PWM_PIN, SPIN_SPEED);
+  motorRunning = true;
+  spinStartMs = millis();
+  Serial.println(">>> MOTOR STARTED <<<");
+}
+
+void stopMotor() {
+  analogWrite(MOTOR_PWM_PIN, 0);
+  motorRunning = false;
+  Serial.println(">>> MOTOR STOPPED <<<");
+}
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("=== Motor ON/OFF Test ===");
+  delay(500);
 
   pinMode(MOTOR_PWM_PIN, OUTPUT);
   pinMode(MOTOR_DIR_PIN, OUTPUT);
   pinMode(MOTOR_SLEEP_PIN, OUTPUT);
 
   digitalWrite(MOTOR_SLEEP_PIN, HIGH); // wake the driver - REQUIRED or nothing spins
-  digitalWrite(MOTOR_DIR_PIN, HIGH);   // pick one direction, doesn't matter for this test
   analogWrite(MOTOR_PWM_PIN, 0);       // start OFF
 
-  Serial.println("Setup complete. Starting ON/OFF loop in 2 seconds...");
-  delay(2000);
+  Serial.println("=== Motor Spin Test (space to stop) ===");
+  Serial.println("Send 'g' to start spinning, send ' ' (space) to stop.");
 }
 
 void loop() {
-  Serial.println("Motor ON (full speed)");
-  analogWrite(MOTOR_PWM_PIN, 255);   // full speed ON
-  delay(3000);
+  // --- Handle incoming commands without blocking ---
+  if (Serial.available() > 0) {
+    char c = Serial.read();
+    if (c == 'g' || c == 'G') {
+      if (!motorRunning) startMotor();
+    } else if (c == ' ') {
+      if (motorRunning) stopMotor();
+    }
+  }
 
-  Serial.println("Motor OFF");
-  analogWrite(MOTOR_PWM_PIN, 0);     // OFF
-  delay(2000);
+  // --- Print live status once per second while running ---
+  if (motorRunning && millis() - lastStatusPrintMs >= 1000) {
+    lastStatusPrintMs = millis();
+    unsigned long elapsedSec = (millis() - spinStartMs) / 1000;
+    Serial.print("Status: RUNNING | speed=");
+    Serial.print(SPIN_SPEED);
+    Serial.print(" | elapsed=");
+    Serial.print(elapsedSec);
+    Serial.println("s | send ' ' to stop");
+  }
 }
