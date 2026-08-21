@@ -25,7 +25,11 @@ Name Specialisation/s
 - pio run -e motor_onoff -t upload
 - pio device monitor -e motor_onoff
 
-Type g + Enter to start — it'll spin continuously and print a status line every second (Status: RUNNING | speed=255 | elapsed=4s...). Type a space + Enter at any time to stop it.
+Type g + Enter to start — it'll spin continuously and print a status line every second 
+
+Space to stop
+
+(Status: RUNNING | speed=255 | elapsed=4s...). Type a space + Enter at any time to stop it.
 
 ### motor_flag_sequence — your third file, running as-is (just with the pinMode ordering fixed and status prints added):
 
@@ -43,8 +47,11 @@ This one runs automatically on power-up/upload — forward 5s → stop 2s → re
 You should see it print, repeating every ~6 seconds:
 
 === Nano <-> Motor Connectivity Test ===
+
 Reply: 1 = motor confirmed connected, 0 = not connected
+
 FORWARD: 1  (connected - encoder moved)
+
 REVERSE: 1  (connected - encoder moved)
 
 
