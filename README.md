@@ -18,7 +18,21 @@ Name Specialisation/s
   
 - Arpit Mechatronics
 
+## Software
 
+### motor_onoff — continuous spin, stoppable with spacebar:
+
+- pio run -e motor_onoff -t upload
+- pio device monitor -e motor_onoff
+
+Type g + Enter to start — it'll spin continuously and print a status line every second (Status: RUNNING | speed=255 | elapsed=4s...). Type a space + Enter at any time to stop it.
+
+### motor_flag_sequence — your third file, running as-is (just with the pinMode ordering fixed and status prints added):
+
+- pio run -e motor_flag_sequence -t upload
+- pio device monitor -e motor_flag_sequence
+
+This one runs automatically on power-up/upload — forward 5s → stop 2s → reverse 5s → stop 2s → done. No serial input needed; it's a one-shot test that halts after one cycle (matching your hasRun flag logic).
 
 
 
