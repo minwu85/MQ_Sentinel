@@ -40,6 +40,7 @@ This one runs automatically on power-up/upload — forward 5s → stop 2s → re
 
 ### connection_test_main - Motor Connectivity Test
 
+- pio run -e connection_test -t upload
 - pio device monitor -e connection_test
 
 (Or in VS Code: click the plug icon at the bottom of the PlatformIO toolbar, or PROJECT TASKS → connection_test → Monitor.)
