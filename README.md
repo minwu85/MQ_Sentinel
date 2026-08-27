@@ -22,12 +22,26 @@ Open whichever board's folder you're working with directly in VS Code
 
 ### motor_onoff
 g = start continuous spin | space = stop | r = reverse direction and
-keep spinning continuously (works even if the motor was stopped - r
-will start it spinning in the new direction)
+keep spinning continuously. **Auto-starts spinning immediately on
+power-up** - works standalone off battery power with no USB needed.
+If USB IS connected, g/space/r still work as normal on top of that.
 
 ```
 pio run -e motor_onoff -t upload
 pio device monitor -e motor_onoff
+```
+
+### ir_triggered_spin
+Pipeline test: pairs with the Uno's `ir_transmitter_test`. Motor stays
+off until the IR receiver detects the transmitted 38kHz signal - once
+detected (even briefly), the motor triggers and spins continuously
+from then on, regardless of whether the signal is still present. This
+is a one-way latch, not a live on/off toggle - reset the board to
+re-arm it.
+
+```
+pio run -e ir_triggered_spin -t upload
+pio device monitor -e ir_triggered_spin
 ```
 
 ### connection_test

@@ -56,7 +56,7 @@ void reverseAndKeepSpinning() {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); // optional - harmless if no USB is connected
   delay(500);
 
   pinMode(MOTOR_PWM_PIN, OUTPUT);
@@ -64,11 +64,17 @@ void setup() {
   pinMode(MOTOR_SLEEP_PIN, OUTPUT);
 
   digitalWrite(MOTOR_SLEEP_PIN, HIGH); // wake the driver - REQUIRED or nothing spins
-  analogWrite(MOTOR_PWM_PIN, 0);       // start OFF
   applyDirection();
 
   Serial.println("=== Motor On/Off + Direction (Nano V3) ===");
   Serial.println("g = start | space = stop | r = reverse + keep spinning continuously");
+  Serial.println("Auto-starting spin now (works with or without USB connected)...");
+
+  // Auto-start immediately - this means the motor begins spinning the
+  // instant power is applied (battery on VIN, no USB needed), rather
+  // than waiting idle for a 'g' command that can only arrive over USB.
+  // If USB IS connected, you can still send g/space/r as normal.
+  startMotor();
 }
 
 void loop() {
