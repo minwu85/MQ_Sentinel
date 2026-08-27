@@ -1,74 +1,155 @@
-# engg2000_2026
-engg2000_S2 2026
+# MQ Sentinel - ENGG2000 Space Debris Cleanup Challenge
 
+Team: Artemis III | Satellite: Buzz Lightyear
 
-Team name: Artemis III
+This project has two separate boards, each with its own self-contained
+PlatformIO project:
 
-Satellite name: Buzz Lightyear
+- **Root folder** (`platformio.ini` here): **Arduino Nano V3** - the
+  original supplied board. The first Nano had a faulty auto-reset
+  circuit and has been replaced; this is the clean rebuild for the
+  replacement board.
+- **`uno/` folder**: **Arduino Uno R3** - used during development
+  because its genuine USB-serial chip gave far more reliable uploads
+  than the Nano clone while debugging hardware issues.
 
-Name Specialisation/s
+Open whichever board's folder you're working with directly in VS Code
+(PlatformIO reads the `platformio.ini` in the folder you open).
 
-- Pranaya Mechatronics
-  
-- Pratham Electronics
-  
-- Minying Wu Software
-  
-- Bhaavna Software
-  
-- Arpit Mechatronics
+---
 
-## Software
+## Nano V3 (this folder)
 
-### motor_onoff — continuous spin, stoppable with spacebar:
+### motor_onoff
+g = start continuous spin | space = stop | r = reverse direction and
+keep spinning continuously (works even if the motor was stopped - r
+will start it spinning in the new direction)
 
-- pio run -e motor_onoff -t upload
-- pio device monitor -e motor_onoff
+```
+pio run -e motor_onoff -t upload
+pio device monitor -e motor_onoff
+```
 
-Type g + Enter to start — it'll spin continuously and print a status line every second 
+### connection_test
+Confirms the Nano is actually driving the motor by pulsing it briefly
+and checking encoder counts before/after. Reply: `1` = connected,
+`0` = not connected.
 
-Space to stop
+```
+pio run -e connection_test -t upload
+pio device monitor -e connection_test
+```
 
-(Status: RUNNING | speed=255 | elapsed=4s...). Type a space + Enter at any time to stop it.
+### laser_test
+Blinks the laser diode ON 1s / OFF 1s. Wired to pin 6 (not 8, which is
+used by the motor's DIR signal).
 
-### motor_flag_sequence — your third file, running as-is (just with the pinMode ordering fixed and status prints added):
+```
+pio run -e laser_test -t upload
+pio device monitor -e laser_test
+```
 
-- pio run -e motor_flag_sequence -t upload
-- pio device monitor -e motor_flag_sequence
+### reactive_ir
+Motor spins by default; stops the moment the IR receiver detects a
+signal, resumes automatically when the signal clears.
 
-This one runs automatically on power-up/upload — forward 5s → stop 2s → reverse 5s → stop 2s → done. No serial input needed; it's a one-shot test that halts after one cycle (matching your hasRun flag logic).
+```
+pio run -e reactive_ir -t upload
+pio device monitor -e reactive_ir
+```
 
-### connection_test_main - Motor Connectivity Test
+### Pin reference (Nano V3)
+| Signal | Pin |
+|---|---|
+| Motor PWM | D9 |
+| Motor DIR | D8 |
+| Motor nSLEEP | D7 |
+| Encoder A | D2 |
+| Encoder B | D3 |
+| IR sensor (reactive_ir) | D2 |
+| Laser | D6 |
 
-- pio run -e connection_test -t upload
-- pio device monitor -e connection_test
+Note: `connection_test` uses D2/D3 for the encoder; `reactive_ir` uses
+D2 for the IR receiver. These are different environments/sketches and
+never run at the same time, so there's no actual pin conflict - just
+don't wire both encoder and IR receiver to D2 simultaneously if you
+combine them into one sketch later.
 
-(Or in VS Code: click the plug icon at the bottom of the PlatformIO toolbar, or PROJECT TASKS → connection_test → Monitor.)
+### IRSensor.cpp / IRSensor.h
+Kept in the project as the original multi-sensor IR ring class (from
+the full system design), but not currently wired into any environment
+above. This is reference code for when the full sensor ring is built -
+see `include/Config.h` for the IR pin array it expects.
 
-You should see it print, repeating every ~6 seconds:
+### If uploads fail
+See the troubleshooting notes at the top of `platformio.ini`. In
+short: check nothing is wired to D0/D1, disconnect battery power from
+VIN during upload, and try switching the bootloader variant if needed.
 
-=== Nano <-> Motor Connectivity Test ===
+---
 
-Reply: 1 = motor confirmed connected, 0 = not connected
+## Uno R3 (`uno/` folder)
 
-FORWARD: 1  (connected - encoder moved)
+Open the `uno/` folder in VS Code separately (it has its own
+`platformio.ini`).
 
-REVERSE: 1  (connected - encoder moved)
+### motor_control
+g = start | space = stop | r = reverse direction (applies immediately
+if running, or on next start if stopped)
 
-### motor_autonomous_main - conntinue spin none stop
+```
+pio run -e motor_control -t upload
+pio device monitor -e motor_control
+```
 
-- pio run -e motor_autonomous -t upload
+### motor_autospin
+Starts spinning clockwise the instant power is applied - no PC or
+commands needed.
 
-fully autonomous: no PC, no USB, no serial commands. Two things need to happen for that:
+```
+pio run -e motor_autospin -t upload
+pio device monitor -e motor_autospin
+```
 
-Wiring change: the Nano itself needs power from the battery pack (not USB), since unplugging from the PC currently kills power to the board entirely.
+### motor_ir_led
+Motor spins by default, stops when IR detects a signal. White LED =
+IR detected, green LED = motor spinning (should always be opposite).
 
-Code change: a sketch that starts running the moment power is applied, with no serial commands needed — it just loops forever.
+```
+pio run -e motor_ir_led -t upload
+pio device monitor -e motor_ir_led
+```
 
-### laser_test_main - test laser
+### connectivity
+Pure board<->PC connectivity check, no motor wiring needed.
 
+```
+pio run -e connectivity -t upload
+pio device monitor -e connectivity
+```
 
-- pio run -e laser_test -t upload
-- pio device monitor -e laser_test
+### ir_transmitter_test
+Generates a genuine 38kHz square wave on pin D3 via Timer2 hardware
+PWM - drives an IR LED as a beacon transmitter, matching your
+project's 38kHz modulation spec. This signal is invisible to the eye
+(38,000 flashes/second), so a separate visible status LED (D5) lights
+up solid to confirm the transmitter is active, and the onboard LED
+blinks as a heartbeat to confirm the sketch hasn't frozen.
 
-Serial Monitor will print Laser ON / Laser OFF each second in sync with the physical blink, so you get a clear terminal confirmation alongside the visual one — same pattern as your motor tests.
+```
+pio run -e ir_transmitter_test -t upload
+pio device monitor -e ir_transmitter_test
+```
+
+Wiring: D3 -> IR LED (with current-limiting resistor). D5 -> resistor
+-> visible status LED -> GND.
+
+### Pin reference (Uno R3)
+| Signal | Pin |
+|---|---|
+| Motor PWM | D9 |
+| Motor DIR | D8 |
+| Motor nSLEEP | D7 |
+| IR sensor | D2 |
+| White LED | D4 |
+| Green LED | D5 |

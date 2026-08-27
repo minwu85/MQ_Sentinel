@@ -21,7 +21,6 @@ class IRSensor {
     int getActiveSensorIndex() const;
 
     // Rough bearing estimate in degrees (0-359) based on which sensor(s) triggered.
-    // Useful as the setpoint for the rotation controller.
     float getBearingEstimate() const;
 
   private:

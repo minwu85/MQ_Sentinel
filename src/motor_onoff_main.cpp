@@ -1,13 +1,15 @@
 // ============================================================
-// MOTOR SPIN TEST - stop with spacebar, verbose terminal output
+// MOTOR ON/OFF + DIRECTION - Nano V3
 // Build/upload with: pio run -e motor_onoff -t upload
+// Then:              pio device monitor -e motor_onoff
 //
-// Behaviour:
-//   - Send 'g' (then Enter) to start spinning continuously
-//   - Send ' ' (space, then Enter) to stop
-//   - Prints live status (running/stopped, elapsed time) every
-//     second while spinning, so the terminal always tells you
-//     exactly what state the motor is in
+// Commands (send via Serial, then Enter):
+//   g  - start spinning continuously
+//   ' ' (space) - stop
+//   r  - reverse direction - switches to continuous spin in the
+//        OTHER direction. If the motor was stopped, 'r' also
+//        starts it spinning in the new direction. Press 'r' again
+//        to flip back, and it keeps spinning continuously each time.
 // ============================================================
 #include <Arduino.h>
 
@@ -15,24 +17,42 @@ const int MOTOR_PWM_PIN   = 9;
 const int MOTOR_DIR_PIN   = 8;
 const int MOTOR_SLEEP_PIN = 7;
 
-const int SPIN_SPEED = 255; // full speed
+const int SPIN_SPEED = 255;
 
 bool motorRunning = false;
+bool directionForward = true; // true = HIGH/clockwise, false = LOW/anti-clockwise
 unsigned long spinStartMs = 0;
 unsigned long lastStatusPrintMs = 0;
 
+void applyDirection() {
+  digitalWrite(MOTOR_DIR_PIN, directionForward ? HIGH : LOW);
+}
+
 void startMotor() {
-  digitalWrite(MOTOR_DIR_PIN, HIGH);
+  applyDirection();
   analogWrite(MOTOR_PWM_PIN, SPIN_SPEED);
   motorRunning = true;
   spinStartMs = millis();
-  Serial.println(">>> MOTOR STARTED <<<");
+  Serial.print(">>> MOTOR STARTED (");
+  Serial.print(directionForward ? "clockwise" : "anti-clockwise");
+  Serial.println(") <<<");
 }
 
 void stopMotor() {
   analogWrite(MOTOR_PWM_PIN, 0);
   motorRunning = false;
   Serial.println(">>> MOTOR STOPPED <<<");
+}
+
+void reverseAndKeepSpinning() {
+  directionForward = !directionForward;
+  applyDirection();
+  analogWrite(MOTOR_PWM_PIN, SPIN_SPEED); // (re)apply speed so it spins continuously either way
+  motorRunning = true;
+  spinStartMs = millis();
+  Serial.print(">>> DIRECTION REVERSED - now spinning continuously (");
+  Serial.print(directionForward ? "clockwise" : "anti-clockwise");
+  Serial.println(") <<<");
 }
 
 void setup() {
@@ -45,30 +65,33 @@ void setup() {
 
   digitalWrite(MOTOR_SLEEP_PIN, HIGH); // wake the driver - REQUIRED or nothing spins
   analogWrite(MOTOR_PWM_PIN, 0);       // start OFF
+  applyDirection();
 
-  Serial.println("=== Motor Spin Test (space to stop) ===");
-  Serial.println("Send 'g' to start spinning, send ' ' (space) to stop.");
+  Serial.println("=== Motor On/Off + Direction (Nano V3) ===");
+  Serial.println("g = start | space = stop | r = reverse + keep spinning continuously");
 }
 
 void loop() {
-  // --- Handle incoming commands without blocking ---
   if (Serial.available() > 0) {
     char c = Serial.read();
     if (c == 'g' || c == 'G') {
       if (!motorRunning) startMotor();
     } else if (c == ' ') {
       if (motorRunning) stopMotor();
+    } else if (c == 'r' || c == 'R') {
+      reverseAndKeepSpinning();
     }
   }
 
-  // --- Print live status once per second while running ---
   if (motorRunning && millis() - lastStatusPrintMs >= 1000) {
     lastStatusPrintMs = millis();
     unsigned long elapsedSec = (millis() - spinStartMs) / 1000;
-    Serial.print("Status: RUNNING | speed=");
+    Serial.print("Status: RUNNING | dir=");
+    Serial.print(directionForward ? "CW" : "CCW");
+    Serial.print(" | speed=");
     Serial.print(SPIN_SPEED);
     Serial.print(" | elapsed=");
     Serial.print(elapsedSec);
-    Serial.println("s | send ' ' to stop");
+    Serial.println("s");
   }
 }

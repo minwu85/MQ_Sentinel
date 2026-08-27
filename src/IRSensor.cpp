@@ -38,9 +38,6 @@ float IRSensor::getBearingEstimate() const {
   if (_activeIndex == -1) return -1.0f;
 
   // Sensors assumed evenly spaced around the ring (360 / NUM_IR_SENSORS apart).
-  // Replace with an interpolated estimate once you have real sensor spacing
-  // and signal-strength (analog) data - digital TSOP output only gives
-  // coarse "which sensor" resolution, not fine bearing.
   float spacing = 360.0f / NUM_IR_SENSORS;
   return _activeIndex * spacing;
 }

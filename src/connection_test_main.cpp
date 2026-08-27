@@ -1,19 +1,15 @@
 // ============================================================
-// NANO <-> MOTOR CONNECTIVITY TEST
+// NANO V3 <-> MOTOR CONNECTIVITY TEST
 // Build/upload with: pio run -e connection_test -t upload
+// Then:              pio device monitor -e connection_test
 //
 // Purpose: prove the full signal chain actually works, not just
-// "the motor looked like it spun". This test:
-//   1. Checks encoder pin states are readable (not floating/stuck)
-//   2. Pulses the motor briefly and measures encoder count BEFORE
-//      and AFTER - if the count didn't change, something in the
-//      Nano -> driver -> motor -> encoder -> Nano loop is broken
-//   3. Repeats in both directions
-//   4. Prints a clear PASS/FAIL verdict for each check
+// "the motor looked like it spun". Pulses the motor briefly and
+// measures encoder count before/after in both directions.
+// Reply: 1 = motor confirmed connected, 0 = not connected
 // ============================================================
 #include <Arduino.h>
 
-// --- Pin definitions (match your wiring) ---
 const int MOTOR_PWM_PIN   = 9;
 const int MOTOR_DIR_PIN   = 8;
 const int MOTOR_SLEEP_PIN = 7;
@@ -44,8 +40,8 @@ void runDirectionTest(const char* label, bool forward) {
   Serial.print(": ");
 
   long before = encoderCount;
-  pulseMotor(forward, 200, 500); // half-second pulse, decent speed
-  delay(100); // let any last interrupts land
+  pulseMotor(forward, 200, 500);
+  delay(100);
   long after = encoderCount;
   long delta = after - before;
 
@@ -59,7 +55,7 @@ void runDirectionTest(const char* label, bool forward) {
 void setup() {
   Serial.begin(9600);
   delay(500);
-  Serial.println("=== Nano <-> Motor Connectivity Test ===");
+  Serial.println("=== Nano V3 <-> Motor Connectivity Test ===");
   Serial.println("Reply: 1 = motor confirmed connected, 0 = not connected");
   Serial.println();
 
@@ -74,9 +70,6 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(ENCODER_A_PIN), encoderISR, RISING);
 
-  // Sanity check: are the encoder pins reading something sane at rest?
-  // (with INPUT_PULLUP, an unconnected pin reads HIGH - if it reads
-  // LOW at rest with nothing moving, that can indicate a wiring issue too)
   Serial.print("Encoder A idle state: ");
   Serial.println(digitalRead(ENCODER_A_PIN) ? "HIGH" : "LOW");
   Serial.print("Encoder B idle state: ");
