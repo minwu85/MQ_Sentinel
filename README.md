@@ -179,3 +179,58 @@ Wiring: D3 -> IR LED (with current-limiting resistor). D5 -> resistor
 | IR sensor | D2 |
 | White LED | D4 |
 | Green LED | D5 |
+
+
+-------------
+
+
+## Code explain
+
+### motor_onoff_main.cpp
+Controls the motor manually or automatically. Three functions: startMotor() turns the driver on at full speed in the current direction; stopMotor() cuts power; reverseAndKeepSpinning() flips direction and keeps spinning continuously. setup() auto-starts the motor immediately on power-up (so it works standalone off battery, no USB needed), then loop() listens for optional serial commands (g=start, space=stop, r=reverse) if a computer happens to be connected.
+
+Arduino Nano
+    │
+    ├── Pin 9 ──> PWM ──> Motor Driver ──> Motor speed
+    │
+    ├── Pin 8 ──> DIR ──> Motor Driver ──> Motor direction
+    │
+    └── Pin 7 ──> SLEEP ─> Motor Driver ──> Wake/Sleep
+    
+Power ON
+   ↓
+Wake motor driver
+   ↓
+Set direction = clockwise
+   ↓
+Set speed = 255
+   ↓
+Motor starts spinning
+
+- HIGH → wake driver
+- LOW  → sleep driver
+
+- Speed 
+- - 0   = motor off
+- - 64  = roughly 25%
+- - 128 = roughly 50%
+- - 192 = roughly 75%
+- - 255 = 100%
+
+### connection_test_main.cpp
+A diagnostic, not a real feature — proves the Nano is actually driving the motor. encoderISR() is an interrupt handler that counts motor shaft rotation via the encoder. pulseMotor() briefly spins the motor one direction. runDirectionTest() records the encoder count before and after a pulse — if it changed, prints 1 (motor confirmed connected); if not, prints 0. loop() repeats this in both directions every few seconds.
+
+### laser_test_main.cpp
+The simplest file — just blinks the laser diode on pin D10 on/off every second, with status printed to Serial, to confirm the laser wiring works in isolation.
+
+### reactive_ir_main.cpp
+Motor spins by default; startMotor()/stopMotor() toggle it based on whether the IR sensor (pin D6) currently detects a signal. loop() continuously checks the sensor and reacts live — motor stops the instant a signal appears, resumes the instant it's gone.
+
+### directional_ir_main.cpp
+The most complex one — reads three IR sensors (left/right/centre) for 50ms, counts how many times each read "detected," and steers the motor toward whichever side had the strongest signal (or stops if centre wins or nothing's detected). This is a basic proportional-ish steering test, not the final targeting logic.
+
+### ir_triggered_spin_main.cpp
+A one-way "trigger" — motor stays off until the IR sensor detects a signal even once, then it starts spinning and never stops (a latch, not a live toggle). Meant to pair with the Uno's IR transmitter to test a simple send-signal → motor-reacts pipeline.
+
+### IRSensor.cpp (+ include/IRSensor.h)
+A more built-out C++ class version of IR sensing (not a standalone sketch — nothing currently uses it). begin() sets up the pins; update() scans all sensors each loop and records which one is active; beaconDetected() returns whether anything's currently triggered; getBearingEstimate() gives a rough angle guess based on which sensor fired. This is scaffolding for a future multi-sensor version, currently unused by any of the six sketches above.
