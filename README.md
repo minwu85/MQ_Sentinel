@@ -55,12 +55,24 @@ pio device monitor -e connection_test
 ```
 
 ### laser_test
-Blinks the laser diode ON 1s / OFF 1s. Wired to pin 6 (not 8, which is
-used by the motor's DIR signal).
+Blinks the laser diode ON 1s / OFF 1s. Wired to pin 10 (pins 4/5/6 are
+now used by the IR array, 8/9 by the motor).
 
 ```
 pio run -e laser_test -t upload
 pio device monitor -e laser_test
+```
+
+### directional_ir
+Samples three IR receivers (left/right/centre) and turns the motor
+toward whichever side has the strongest signal; centre or no signal
+stops the motor. Fix applied: the original snippet didn't enable the
+DRV8874's nSLEEP pin, which is required for the motor to spin at all -
+added back in.
+
+```
+pio run -e directional_ir -t upload
+pio device monitor -e directional_ir
 ```
 
 ### reactive_ir
@@ -75,25 +87,25 @@ pio device monitor -e reactive_ir
 ### Pin reference (Nano V3)
 | Signal | Pin |
 |---|---|
-| Motor PWM | D9 |
 | Motor DIR | D8 |
+| Motor PWM | D9 |
 | Motor nSLEEP | D7 |
-| Encoder A | D2 |
-| Encoder B | D3 |
-| IR sensor (reactive_ir) | D2 |
-| Laser | D6 |
+| IR Left | D4 |
+| IR Right | D5 |
+| IR Centre | D6 |
+| Encoder A (connection_test only) | D2 |
+| Encoder B (connection_test only) | D3 |
+| Laser | D10 |
 
-Note: `connection_test` uses D2/D3 for the encoder; `reactive_ir` uses
-D2 for the IR receiver. These are different environments/sketches and
-never run at the same time, so there's no actual pin conflict - just
-don't wire both encoder and IR receiver to D2 simultaneously if you
-combine them into one sketch later.
+`reactive_ir` and `ir_triggered_spin` use a single sensor on D6
+(matching IR_CENTRE), so the same physical sensor position works
+across every IR-related test without rewiring.
 
 ### IRSensor.cpp / IRSensor.h
 Kept in the project as the original multi-sensor IR ring class (from
 the full system design), but not currently wired into any environment
-above. This is reference code for when the full sensor ring is built -
-see `include/Config.h` for the IR pin array it expects.
+above. `include/Config.h`'s pin array now matches the same
+left/right/centre convention: {4, 5, 6}.
 
 ### If uploads fail
 See the troubleshooting notes at the top of `platformio.ini`. In

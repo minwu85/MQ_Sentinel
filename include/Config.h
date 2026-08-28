@@ -8,7 +8,7 @@
 #define NUM_IR_SENSORS 3
 
 // Digital pins for each IR receiver (demodulated output, e.g. TSOP-style module)
-// Fill these in once your sensor ring wiring is finalised
-static const uint8_t IR_SENSOR_PINS[NUM_IR_SENSORS] = {2, 3, 4};
+// Matches the left/right/centre convention used elsewhere in the project
+static const uint8_t IR_SENSOR_PINS[NUM_IR_SENSORS] = {4, 5, 6}; // left, right, centre
 
 #endif

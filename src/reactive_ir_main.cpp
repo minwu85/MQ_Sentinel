@@ -7,10 +7,12 @@
 // IR receiver detects a signal, the motor stops. When the signal
 // goes away, the motor resumes automatically.
 //
-// IR_SENSOR_PIN uses INPUT_PULLUP so an unconnected/floating pin
-// defaults to HIGH (= "not detected"). Most demodulating IR
-// receiver modules (TSOP382x etc.) are active-LOW. If yours is
-// active-HIGH instead, flip IR_ACTIVE_STATE below.
+// IR_SENSOR_PIN is pin 6, matching IR_CENTRE in the 3-sensor
+// directional_ir test - same physical sensor position reused
+// consistently across tests. Uses INPUT_PULLUP so an unconnected/
+// floating pin defaults to HIGH (= "not detected"). Most
+// demodulating IR receiver modules (TSOP382x etc.) are active-LOW.
+// If yours is active-HIGH instead, flip IR_ACTIVE_STATE below.
 // ============================================================
 #include <Arduino.h>
 
@@ -18,7 +20,7 @@ const int MOTOR_PWM_PIN   = 9;
 const int MOTOR_DIR_PIN   = 8;
 const int MOTOR_SLEEP_PIN = 7;
 
-const int IR_SENSOR_PIN = 2;
+const int IR_SENSOR_PIN = 6; // matches IR_CENTRE elsewhere in the project
 const int IR_ACTIVE_STATE = LOW; // change to HIGH if your module is active-HIGH
 const int MOTOR_SPEED = 200;
 

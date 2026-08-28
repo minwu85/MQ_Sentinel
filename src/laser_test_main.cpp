@@ -3,9 +3,9 @@
 // Build/upload with: pio run -e laser_test -t upload
 // Then:              pio device monitor -e laser_test
 //
-// NOTE: pin is 6, NOT 8. Pin 8 is used for the motor's DIR
-// signal in motor_onoff and connection_test - using it for the
-// laser too would conflict once subsystems are combined.
+// NOTE: pin is 10. Pins 4/5/6 are now used by the 3-sensor IR
+// array (IR_LEFT/IR_RIGHT/IR_CENTRE), and 8/9 by the motor - pin
+// 10 avoids all of those.
 //
 // Behaviour: blinks the laser ON 1s / OFF 1s, with status printed
 // to Serial so you can confirm it's actually running even before
@@ -13,7 +13,7 @@
 // ============================================================
 #include <Arduino.h>
 
-const int LASER_PIN = 6;
+const int LASER_PIN = 10;
 
 void setup() {
   Serial.begin(9600);
