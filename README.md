@@ -190,10 +190,13 @@ Wiring: D3 -> IR LED (with current-limiting resistor). D5 -> resistor
 Controls the motor manually or automatically. Three functions: startMotor() turns the driver on at full speed in the current direction; stopMotor() cuts power; reverseAndKeepSpinning() flips direction and keeps spinning continuously. setup() auto-starts the motor immediately on power-up (so it works standalone off battery, no USB needed), then loop() listens for optional serial commands (g=start, space=stop, r=reverse) if a computer happens to be connected.
 
 Arduino Nano
+
     │
     ├── Pin 9 ──> PWM ──> Motor Driver ──> Motor speed
+
     │
     ├── Pin 8 ──> DIR ──> Motor Driver ──> Motor direction
+    
     │
     └── Pin 7 ──> SLEEP ─> Motor Driver ──> Wake/Sleep
     
@@ -211,11 +214,11 @@ Motor starts spinning
 - LOW  → sleep driver
 
 - Speed 
-- - 0   = motor off
-- - 64  = roughly 25%
-- - 128 = roughly 50%
-- - 192 = roughly 75%
-- - 255 = 100%
+  - 0   = motor off
+  - 64  = roughly 25%
+  - 128 = roughly 50%
+  - 192 = roughly 75%
+  - 255 = 100%
 
 ### connection_test_main.cpp
 A diagnostic, not a real feature — proves the Nano is actually driving the motor. encoderISR() is an interrupt handler that counts motor shaft rotation via the encoder. pulseMotor() briefly spins the motor one direction. runDirectionTest() records the encoder count before and after a pulse — if it changed, prints 1 (motor confirmed connected); if not, prints 0. loop() repeats this in both directions every few seconds.
