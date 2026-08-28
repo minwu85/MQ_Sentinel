@@ -1,0 +1,74 @@
+const int IR_LEFT   = 4;
+const int IR_RIGHT  = 5;
+const int IR_CENTRE = 6;
+
+const int MOTOR_DIR = 8;   // DRV8874 IN2 / PH
+const int MOTOR_PWM = 9;   // DRV8874 IN1 / EN
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(IR_LEFT, INPUT_PULLUP);
+  pinMode(IR_RIGHT, INPUT_PULLUP);
+  pinMode(IR_CENTRE, INPUT_PULLUP);
+
+  pinMode(MOTOR_DIR, OUTPUT);
+  pinMode(MOTOR_PWM, OUTPUT);
+
+  analogWrite(MOTOR_PWM, 0);
+
+  Serial.println("3-sensor directional test ready");
+}
+
+void loop() {
+  int leftCount = 0;
+  int rightCount = 0;
+  int centreCount = 0;
+
+  // Sample sensors for about 50 ms
+  unsigned long start = millis();
+
+  while (millis() - start < 50) {
+    if (digitalRead(IR_LEFT) == LOW) {
+      leftCount++;
+    }
+
+    if (digitalRead(IR_RIGHT) == LOW) {
+      rightCount++;
+    }
+
+    if (digitalRead(IR_CENTRE) == LOW) {
+      centreCount++;
+    }
+
+    delayMicroseconds(200);
+  }
+
+  // Nothing detected
+  if (leftCount == 0 && rightCount == 0 && centreCount == 0) {
+    analogWrite(MOTOR_PWM, 0);
+    Serial.println("NO IR - STOP");
+  }
+
+  // Centre has strongest signal
+  else if (centreCount >= leftCount && centreCount >= rightCount) {
+    analogWrite(MOTOR_PWM, 0);
+    Serial.println("CENTRE - STOP");
+  }
+
+  // Left has strongest signal
+  else if (leftCount > rightCount) {
+    digitalWrite(MOTOR_DIR, LOW);
+    analogWrite(MOTOR_PWM, 140);
+    Serial.println("LEFT - TURN");
+  }
+
+  // Right has strongest signal
+  else {
+    digitalWrite(MOTOR_DIR, HIGH);
+    analogWrite(MOTOR_PWM, 140);
+    Serial.println("RIGHT - TURN");
+  }
+
+  delay(50);
+}
