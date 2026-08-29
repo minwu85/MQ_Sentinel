@@ -196,17 +196,21 @@ Arduino Nano
 
     │
     ├── Pin 8 ──> DIR ──> Motor Driver ──> Motor direction
-    
+
     │
     └── Pin 7 ──> SLEEP ─> Motor Driver ──> Wake/Sleep
     
 Power ON
+
    ↓
 Wake motor driver
+
    ↓
 Set direction = clockwise
+
    ↓
 Set speed = 255
+
    ↓
 Motor starts spinning
 
