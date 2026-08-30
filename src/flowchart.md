@@ -1,48 +1,48 @@
 ## Appendix H — Individual Contribution Graph
 
+Min:
+
 ```text
-WEEK 1
-  │
-  ├── Scrum participation
-  └── Project/documentation setup
-  │
-  ▼
-WEEK 2
-  │
-  ├── PlatformIO environment
-  ├── Arduino/C++ development
-  └── Scrum meeting documentation
-  │
-  ▼
+WEEK 1–2
+│
+├── Scrum / project organisation
+├── Arduino / C++ / PlatformIO setup
+├── Software approach investigation
+└── Initial project documentation
+|      │
+       ▼
 WEEK 3
-  │
-  ├── Motor/encoder testing
-  ├── Motor control development
-  ├── Hardware-independent software testing
-  └── Scrum/documentation
-  │
-  ▼
+│
+├── Motor / encoder testing
+├── Motor connectivity test
+├── Continuous motor control
+└── Hardware-independent software structure
+└── Scrum/project documentation
+        │
+        ▼
 WEEK 4
-  │
-  ├── Motor connectivity testing
-  ├── Continuous motor spin
-  ├── Direction and speed control
-  ├── IR-reactive control
-  └── Driver troubleshooting documentation
-  │
-  ▼
+│
+├── Motor direction control
+├── Motor speed / PWM control
+├── Motor-driver troubleshooting
+├── IR-reactive motor control
+└── IR trigger / transmitter-receiver test
+└── Scrum/project documentation
+        │
+        ▼
 WEEK 5
-  │
-  ├── Arduino Uno backup development
-  ├── IR trigger testing
-  ├── Three-sensor directional control
-  ├── GitHub technical documentation
-  └── Scrum/project documentation
-  │
-  ▼
+│
+├── Arduino Uno backup development
+├── IR-reactive testing
+├── IR-triggered motor testing
+├── Three-sensor directional control
+├── Technical documentation
+└── Scrum/project documentation
+        │
+        ▼
 PROTOTYPE V1
-  │
-  └── Software foundation:
+│
+└── Software foundation:
       IR sensing
           ↓
       Decision logic
@@ -50,6 +50,6 @@ PROTOTYPE V1
       Motor direction/speed
           ↓
       Physical prototype integration
-```
 
-**Figure H1. Individual software and project-documentation contribution progression across Weeks 1–5.**
+```
+**Figure H2. Individual software and project-documentation contribution progression across Weeks 1–5.**
