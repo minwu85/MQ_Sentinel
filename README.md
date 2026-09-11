@@ -170,6 +170,21 @@ pio device monitor -e ir_transmitter_test
 Wiring: D3 -> IR LED (with current-limiting resistor). D5 -> resistor
 -> visible status LED -> GND.
 
+### mpu6050_gyro
+Reads accel/gyro/temp from an MPU6050 (GY-521) breakout and prints it
+over serial. Uses software (bit-banged) I2C on D8 (SDA) / D9 (SCL),
+since the Uno's hardware I2C is fixed to A4/A5 - no external I2C
+library required. D8/D9 are also the motor DIR/PWM pins on every other
+env above, so run this on its own board (not wired to the motor at the
+same time).
+
+Wiring: VCC -> 5V, GND -> GND, SDA -> D8, SCL -> D9, AD0 -> GND.
+
+```
+pio run -e mpu6050_gyro -t upload
+pio device monitor -e mpu6050_gyro
+```
+
 ### Pin reference (Uno R3)
 | Signal | Pin |
 |---|---|
