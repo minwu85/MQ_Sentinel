@@ -1,0 +1,34 @@
+MQ Sentinel 60 mm Gap Final
+All dimensions 1:1 mm
+
+CHASSIS
+Chassis OD: 150.6
+Bottom plate thickness: 8.0
+Clear lower electronics gap: 60.0
+Middle deck thickness: 20.0
+Middle deck underside Z: 68.0
+Middle deck top Z: 88.0
+
+SENSOR RING
+OD: 150.0
+ID: 112.0
+Thickness: 6.0
+Centreline Z: 130.0
+Bottom Z: 127.0
+Top Z: 133.0
+Upper post height: 39.0
+
+MOTOR / MOUNT
+Measured motor overall height: 91.0
+Measured max lower envelope: 39.0
+Motor pocket diameter: 40.5
+Motor mount width: 60.0
+Motor mount depth: 34.0
+Motor mount height: 70.0
+Motor mount bottom Z: 60.5
+Nominal motor-mount sidewall thickness: 9.75
+
+The motor mount was kept at the original 60.5 mm base height even though
+the middle deck moved upward. The middle deck therefore has a central
+40.5 mm pass-through. This prevents the 60 mm electronics gap from
+pushing the motor/reaction-wheel assembly upward by 27.5 mm.
