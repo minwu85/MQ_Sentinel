@@ -13,7 +13,9 @@ Receiver: Vishay **TSOP4138** – 38 kHz carrier, output **active-LOW**, directi
 | v0.2 | `src/spin_until_ir_main.cpp` / `spin_until_ir` | Motor spins; any sensor with count ≥ threshold stops it; resumes after the signal has been clear for 2 windows. | this release – needs bench test |
 | v0.3 | `src/directional_ir_main.cpp` / `directional_ir` | 6-sensor ring (60° apart), steer toward the strongest sensor. | written, not yet bench tested |
 | v0.4 | – | Tune threshold / window / speed from measured data (section 6). | planned |
-| v1.0 | `src/spin_detect_main.cpp` / `spin_detect` | Simple rewrite of `spin_until_ir`: 3 sensors, per-sensor turn direction, 4 s stop with the laser ON, Acc/Gyro output. Maths: [spin_detect.md](spin_detect.md). (`spin_detect_one` keeps the earlier encoder/gyro logic: [spin_detect_one.md](spin_detect_one.md).) | written, needs bench test |
+| v1.0 | `src/spin_detect_main.cpp` / `spin_detect` | Simple rewrite of `spin_until_ir`: 3 sensors, per-sensor turn direction, 4 s stop with the laser ON, Acc/Gyro output. Maths: [spin_detect.md](spin_detect.md).  | written, needs bench test |
+| v1.0 | `spin_detect_one` | `spin_detect` with one sensor (D6): detect, stop 4 s with the laser ON, resume. [spin_detect_one.md](spin_detect_one.md) | written, needs bench test |
+| v0.1 clock | `spin_detect_clock` | `spin_detect` + PID rotation that keeps D6 (centre, laser axis) on the message. [spin_detect_clock.md](spin_detect_clock.md) | written, simulated only |
 
 Process per version: **(1)** build the measurement version (v0.1) → **(2)** record counts with the beacon off / on / at ±45° → **(3)** set constants from the maths below → **(4)** add motion (v0.2) → **(5)** re-measure stop angle → **(6)** only then add more sensors.
 
@@ -149,4 +151,7 @@ pio device monitor -e spin_detect
 
 pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one
+
+pio run -e spin_detect_clock -t upload
+pio device monitor -e spin_detect_clock
 ```

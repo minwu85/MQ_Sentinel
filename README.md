@@ -117,20 +117,30 @@ pio run -e spin_detect -t upload
 pio device monitor -e spin_detect
 ```
 
-### spin_detect_one (v0.2)
-Simplified, fully automatic version with a single sensor (D6) and the
-single laser (D10): no serial input is used. It initialises, spins with
-the laser OFF, confirms a detection with the same filtering, stops
-immediately, turns the laser ON at the stopped position for 5 s, turns it
-OFF and resumes - repeating forever. Same encoder/MPU6050 tracking,
-telemetry and fault protection (faults restart automatically 3 times,
-then stay safe). `ALIGN_ENABLED` is true; set it false while the geometry and
-`COUNTS_PER_REV` are unverified. Details and differences:
-[spin_detect_one.md](spin_detect_one.md).
+### spin_detect_one (v1.0)
+`spin_detect` with a single sensor (D6, on the laser axis): the motor spins
+clockwise with the laser OFF; a detection stops it, the laser is ON for the
+whole 4 s stop, then OFF and scanning resumes. Same window/K/re-arm, same
+output (`S1(D6): 72  DETECTED | Acc(g) ... | Gyro(dps) ... | SCAN CW`),
+115200 baud. Details: [spin_detect_one.md](spin_detect_one.md).
 
 ```
 pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one
+```
+
+### spin_detect_clock (v0.1)
+Copy of `spin_detect` (which is unchanged) with a PID rotation: D6 is the
+centre sensor on the laser axis, D4/D5 the sides. After a detection a PID
+loop turns the assembly clockwise/anti-clockwise, using the balance
+(D5-D4)/(D4+D5+D6) and D6's peak strength as the error, until D6 is centred
+on the message; then it stops, the laser is ON for 4 s, OFF, and scanning
+resumes. The motor keeps turning until D6 is centred (6 s limit). PID
+gains, simulation and tuning: [spin_detect_clock.md](spin_detect_clock.md).
+
+```
+pio run -e spin_detect_clock -t upload
+pio device monitor -e spin_detect_clock
 ```
 
 ### reactive_ir

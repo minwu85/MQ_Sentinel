@@ -1,6 +1,6 @@
 # Advanced 3-sensor system (former spin_detect v0.9) – encoder + gyro + bearing maths
 
-> **Archived.** The `spin_detect` environment was rewritten as a simple `spin_until_ir`-based program (see [spin_detect.md](spin_detect.md)). This document describes the earlier encoder/gyro/bearing design; its maths is still the reference for `spin_detect_one` ([spin_detect_one.md](spin_detect_one.md)), which keeps that logic. Statements below about the `spin_detect` environment refer to the old v0.9 firmware.
+> **Archived.** The `spin_detect` environment was rewritten as a simple `spin_until_ir`-based program (see [spin_detect.md](spin_detect.md)). This document describes the earlier encoder/gyro/bearing design; `spin_detect_one` was also simplified (see [spin_detect_one.md](spin_detect_one.md)), so this document no longer matches any environment; it is kept for the encoder/gyro/bearing maths. Statements below about the `spin_detect` environment refer to the old v0.9 firmware.
 
 Environment `spin_detect` · source [src/spin_detect_main.cpp](src/spin_detect_main.cpp) · Nano V3.
 Base code: `motor_onoff` (auto-start, `g` / space / `r`, motor pins) and `spin_until_ir` (window count ≥ K, clear before resume). Sensor-window background maths: [IR_Spin_Stop_Math.md](IR_Spin_Stop_Math.md).
