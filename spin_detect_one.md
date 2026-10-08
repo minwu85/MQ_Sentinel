@@ -1,4 +1,4 @@
-# Spin Detect One (v0.1) – single detection channel, single laser
+# Spin Detect One (v0.2) – single detection channel, single laser
 
 Environment `spin_detect_one` · source [src/spin_detect_one_main.cpp](src/spin_detect_one_main.cpp) · Nano V3.
 Simplified, fully automatic sibling of `spin_detect` ([spin_detect.md](spin_detect.md)): one TSOP4138 channel and one laser, **no serial input** (no `g`, `r`, space, `l`). Shared maths (gyro, encoder, cross-checks, hold timing) is identical and is summarised below; the three-sensor geometry is removed.
@@ -8,7 +8,7 @@ pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one        (output only – telemetry)
 ```
 
-> **Status: compiles; not bench tested.** All geometry and calibration values are configurable placeholders. **`ALIGN_ENABLED = false`** until `COUNTS_PER_REV`, the laser/sensor geometry and the stop behaviour have been measured and verified (section 11). With alignment off the system stops where the detection was confirmed, lights the laser there for 5 s, and resumes.
+> **Status: compiles; not bench tested.** All geometry and calibration values are configurable placeholders. `ALIGN_ENABLED = true` by default (the assembly rotates onto the target before the laser turns on); set it to `false` to stop in place while `COUNTS_PER_REV` and the laser/sensor geometry are unverified (section 11).
 
 ---
 
@@ -18,7 +18,7 @@ pio device monitor -e spin_detect_one        (output only – telemetry)
 power-up → init (laser OFF, motor driver, encoder, MPU6050 verify + bias) → auto-start
  → continuous spin (laser OFF) → strong message → confirm (window count + 3-window debounce + armed)
  → motor stops immediately → record encoder, gyro, bearing
- → [ALIGN_ENABLED] rotate the shortest way onto the target (laser OFF)
+ → [ALIGN_ENABLED, needs an angle source] rotate the shortest way onto the target (laser OFF)
  → laser ON at the confirmed stopped position → hold 5 s → laser OFF → resume spin → repeat
 ```
 
@@ -69,7 +69,7 @@ The 5 s hold starts at `enterHold()`, the instant the laser turns ON, so printin
 
 ## 5. Encoder, gyro and pose
 Encoder: `θ_enc = rotateSign · counts · 360 / COUNTS_PER_REV` (resolution `360/COUNTS_PER_REV` deg/count; `COUNTS_PER_REV = 0` = uncalibrated).
-MPU6050 gyro: enabled only after ACK at 0x68, `WHO_AM_I = 0x68`, `GYRO_CONFIG` read-back and a bias calibration (spread ≤ 4 dps over 1 s, assembly still).
+MPU6050 gyro: enabled only after ACK at 0x68, `WHO_AM_I = 0x68`, `GYRO_CONFIG` read-back and a bias calibration (spread ≤ 4 dps over 1 s). If the assembly is still moving (e.g. coasting after a reset) the calibration waits and retries every second, up to 10 times; if the gyro still failed at boot it tries once more during the next hold.
 ```
 ω = raw / LSB − bias                 LSB = 32.8 per deg/s at the default ±1000 dps range
 θ_gyro += gyroSign · ω · Δt          Δt ≈ 10 ms (100 Hz), |ω| < 0.3 dps ignored
@@ -155,7 +155,7 @@ Acc(g) X:0.04 Y:-0.19 Z:0.97 | Gyro(dps) X:-1.5 Y:0.4 Z:-1.4 | T:26.6C | Enc:123
 | `ALIGN_LEAD_DEG`, `ALIGN_ACCEPT_DEG` | brake lead, accept band | 3°, 5° | tune with `t_stop` |
 | `GYRO_AXIS`, `GYRO_RANGE_SEL` | spin axis, range | Z, ±1000 dps | verify |
 | `HOLD_MS` | hold | 5000 | check with timestamps |
-| `ALIGN_ENABLED` | rotate to target | **false** | enable only after step 8 |
+| `ALIGN_ENABLED` | rotate to target | **true** | `false` = stop in place while the geometry is unverified |
 | `MAX_AUTO_RETRIES`, `FAULT_RETRY_MS` | auto-restart | 3, 5000 | design choice |
 
 Other assumptions: the beacon produces a 38 kHz signal the TSOP can pass (a steady carrier may be suppressed by its AGC); `HIGH` on D10 switches the laser ON; the motor brakes with `PWM = 0` in PH/EN mode (verify); the MPU6050 is mounted flat with its Z axis parallel to the spin axis.
@@ -169,7 +169,7 @@ Other assumptions: the beacon produces a 38 kHz signal the TSOP can pass (a stea
 5. **Spin speed and stop time.** Time a revolution (ω). After a detection, `stop − first_seen` = `ω·(≈80 ms + t_stop)` → `t_stop`; set `ALIGN_LEAD_DEG ≈ ω_align·t_stop`.
 6. **Beam width and `EDGE_HALF_DEG`.** Place a beacon at a known bearing `B_known`; over ≥ 10 passes read `first_seen` in the `DETECT` line and take `h = d·wrap180(B_known − θ_first − φ)`; average.
 7. **Threshold.** Beacon off → noise max; beacon on at the beam edge → min; keep `K` between them, checked with telemetry running.
-8. **Bearing, then alignment.** With `ALIGN_ENABLED = false` compare `Brg` with `B_known` (accept ≤ 5°). Then set `ALIGN_ENABLED = true` with an LED on D10 instead of the laser; confirm the shortest direction, `aligned, residual error`, completion inside 8 s, and the LED lit only in HOLD. Connect the laser and confirm the beam hits the target.
+8. **Bearing, then alignment.** With `ALIGN_ENABLED = false` compare `Brg` with `B_known` (accept ≤ 5°). Then set `ALIGN_ENABLED = true` (default) with an LED on D10 instead of the laser; confirm the shortest direction, `aligned, residual error`, completion inside 8 s, and the LED lit only in HOLD. Connect the laser and confirm the beam hits the target.
 9. **Hold timing.** `pio device monitor -e spin_detect_one --filter time`: `>>> HOLD` to the next `>>> SCANNING` must be 5.0 s.
 10. **Fault recovery.** Stall the motor briefly: expect `NO_MOTION`, laser OFF, an automatic restart after 5 s, and a safe stop after 3 failed retries.
 
@@ -180,7 +180,7 @@ Other assumptions: the beacon produces a 38 kHz signal the TSOP can pass (a stea
 | Detection channels | 3 sensors, D4/D5/D6 at 0°/120°/240° | 1 sensor, D6 |
 | Laser | D10, ON only in HOLD | D10, ON only in HOLD (same) |
 | Instantaneous coverage / worst-case first detection | 270° / 30° of rotation | 90° / 270° of rotation |
-| Sensor identity, multi-sensor rule | yes, `MULTI_SENSOR` fault | none (single channel) |
+| Sensor identity, several sensors at once | yes, strongest sensor wins | none (single channel) |
 | Geometry constants | `SENSOR_MOUNT_DEG[3]`, `LASER_MOUNT_DEG` | `SENSOR_MOUNT_DEG`, `LASER_MOUNT_DEG` |
 | Serial input | `g`, space, `r`, `z`, `p`, `l` | none – fully automatic |
 | After a fault | waits for `g` | automatic restart (3 tries, 5 s apart), then safe |

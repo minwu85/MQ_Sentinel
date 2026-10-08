@@ -1,5 +1,5 @@
 // ============================================================
-// SPIN DETECT (v0.8) - Nano V3
+// SPIN DETECT (v0.9) - Nano V3
 // 3x TSOP4138 @ 120 deg + encoder + MPU6050 gyro + red laser
 // Build/upload with: pio run -e spin_detect -t upload
 // Then:              pio device monitor -e spin_detect
@@ -24,7 +24,9 @@
 // reads 0x68 and the gyro bias calibration passes.
 //
 // All geometry/calibration values below are CONFIGURABLE PLACEHOLDERS.
-// Set ALIGN_ENABLED = false to log bearings without moving to the target.
+// Several sensors seeing the beacon at once is NOT a fault: the sensor with the most
+// LOW reads over the confirming windows wins. Faults restart automatically (3 tries).
+// Set ALIGN_ENABLED = false to stop in place instead of rotating onto the target.
 // Maths, wiring and bench calibration: spin_detect.md
 //
 // Serial: g = start/resume (also clears a fault) | space = stop
@@ -62,8 +64,8 @@ const long COUNTS_PER_REV = 0;
 // ---------- Motor ----------
 const int SPIN_SPEED  = 200;              // PWM while scanning (spin_until_ir value)
 const int ALIGN_SPEED = 150;              // PWM while turning to the target
-const bool ALIGN_ENABLED = false;         // false = detect + log bearing, stop in place, hold.
-                                          // Enable only after COUNTS_PER_REV and the geometry are verified.
+const bool ALIGN_ENABLED = true;          // true = rotate the shortest way onto the target, then laser ON.
+                                          // false = stop in place, laser ON there (use while geometry is unverified).
 const unsigned long MOTION_GRACE_MS = 600;
 const unsigned long MOTION_CHECK_MS = 500;
 const long STALL_MIN_COUNTS = 3;          // encoder counts that count as "moving"
@@ -76,12 +78,13 @@ const unsigned long WINDOW_MS = 20;       // ~200 samples per window
 const int DETECT_K = 5;                   // LOW reads per window = signal
 const int CONFIRM_WINDOWS = 3;            // same single sensor, consecutive windows
 const int REARM_CLEAR_WINDOWS = 10;       // 10 x 20 ms = 200 ms clear before next detection
-const int MAX_MULTI_WINDOWS = 10;
 const unsigned long STUCK_MS = 3000;
 
 // ---------- Cycle ----------
 const unsigned long HOLD_MS = 5000;       // hold at the target, laser ON
 const unsigned long SCAN_TIMEOUT_MS = 0;  // 0 = scan indefinitely
+const int MAX_AUTO_RETRIES = 3;           // automatic restarts after a fault (reset after a good cycle or 'g')
+const unsigned long FAULT_RETRY_MS = 5000;
 const float ALIGN_LEAD_DEG = 3.0f;        // command stop when this much turn remains (brake lead)
 const float ALIGN_ACCEPT_DEG = 5.0f;      // final |error| accepted after settling
 const unsigned long ALIGN_TIMEOUT_MS = 8000;
@@ -105,6 +108,7 @@ const float GYRO_LSB[4] = {131.0f, 65.5f, 32.8f, 16.4f};
 const unsigned long GYRO_POLL_MS = 10;    // 100 Hz
 const int GYRO_BIAS_SAMPLES = 200;        // 200 x 5 ms = 1 s, assembly must be still
 const float GYRO_STILL_TOL_DPS = 4.0f;    // max-min spread allowed during bias measurement
+const int GYRO_INIT_ATTEMPTS = 10;        // 1 s each: wait for the assembly to stop coasting after a reset
 const float GYRO_DEADBAND_DPS = 0.3f;     // ignore |rate - bias| below this (limits drift)
 const unsigned long GYRO_REBIAS_SETTLE_MS = 1000; // during HOLD: skip first second, then average
 const bool CROSSCHECK_FAULT = true;       // fault when encoder and gyro disagree
@@ -113,7 +117,7 @@ const float CROSSCHECK_FRACTION = 0.15f;  // or this fraction of the movement, w
 
 // ---------- State ----------
 enum State { ST_ROTATING, ST_ALIGN, ST_HOLD, ST_PAUSED, ST_FAULT };
-enum Fault { F_NONE, F_NO_MOTION, F_SENSOR_STUCK, F_MULTI_SENSOR, F_ALIGN_FAIL, F_POS_MISMATCH, F_TIMEOUT };
+enum Fault { F_NONE, F_NO_MOTION, F_SENSOR_STUCK, F_ALIGN_FAIL, F_POS_MISMATCH, F_TIMEOUT };
 
 State state = ST_PAUSED;      // laser stays OFF until setup() finishes
 Fault fault = F_NONE;
@@ -139,6 +143,8 @@ unsigned long lastGyroUs = 0;
 // hold-time gyro re-bias statistics
 float holdSum = 0.0f, holdMin = 0.0f, holdMax = 0.0f;
 int holdN = 0;
+bool gyroRetryDone = false;   // one gyro re-init attempt per hold (assembly is still then)
+int faultRetries = 0;
 
 // sampling window
 unsigned long lastSampleUs = 0;
@@ -150,9 +156,10 @@ uint16_t samples = 0;
 // detection bookkeeping
 bool armed = false;
 int clearRun = 0;
-int candidate = -1;
 int confirmRun = 0;
-int multiRun = 0;
+uint16_t runSum[NUM_SENSORS];     // LOW reads summed over the confirming windows
+float runFirstPose[NUM_SENSORS]; // pose where each sensor first reached K in this run
+bool runFirstSet[NUM_SENSORS];
 unsigned long lowRunMs[NUM_SENSORS];
 float candidateStartPose = NAN;
 
@@ -192,6 +199,8 @@ bool haveDetection = false;    // a target has been confirmed since boot
 char telemBuf[256];
 uint16_t telemLen = 0, telemPos = 0;
 unsigned long lastTelemMs = 0;
+
+void resetConfirm();
 
 // ---------- Angle helpers ----------
 float wrap360(float d) {
@@ -284,30 +293,37 @@ bool mpuReadAll(float a[3], float g[3], float &tempC) {
   return true;
 }
 
-bool gyroCalibrateBias() {
-  float sum = 0.0f, mn = 1e9f, mx = -1e9f;
-  for (int i = 0; i < GYRO_BIAS_SAMPLES; i++) {
-    float dps;
-    if (!mpuReadGyroDps(dps)) return false;
-    sum += dps;
-    if (dps < mn) mn = dps;
-    if (dps > mx) mx = dps;
-    delay(5);
+// Waits (up to `attempts` x 1 s) for the assembly to be still, e.g. after a reset while it was coasting.
+bool gyroCalibrateBias(int attempts) {
+  for (int a = 0; a < attempts; a++) {
+    float sum = 0.0f, mn = 1e9f, mx = -1e9f;
+    for (int i = 0; i < GYRO_BIAS_SAMPLES; i++) {
+      float dps;
+      if (!mpuReadGyroDps(dps)) return false;
+      sum += dps;
+      if (dps < mn) mn = dps;
+      if (dps > mx) mx = dps;
+      delay(5);
+    }
+    if (mx - mn <= GYRO_STILL_TOL_DPS) {
+      gyroBiasDps = sum / GYRO_BIAS_SAMPLES;
+      Serial.print(F("MPU6050 gyro bias = "));
+      Serial.print(gyroBiasDps, 3);
+      Serial.println(F(" dps"));
+      return true;
+    }
+    Serial.print(F("MPU6050: assembly not still (spread "));
+    Serial.print(mx - mn, 1);
+    Serial.print(F(" dps), waiting "));
+    Serial.print(a + 1);
+    Serial.print('/');
+    Serial.println(attempts);
   }
-  if (mx - mn > GYRO_STILL_TOL_DPS) {
-    Serial.print(F("MPU6050 bias calibration rejected: assembly moving (spread "));
-    Serial.print(mx - mn, 2);
-    Serial.println(F(" dps)"));
-    return false;
-  }
-  gyroBiasDps = sum / GYRO_BIAS_SAMPLES;
-  Serial.print(F("MPU6050 gyro bias = "));
-  Serial.print(gyroBiasDps, 3);
-  Serial.println(F(" dps"));
-  return true;
+  Serial.println(F("MPU6050: bias calibration failed - keep the assembly and board still"));
+  return false;
 }
 
-bool mpuInit() {
+bool mpuInit(int attempts) {
   Wire.begin();
   Wire.setClock(400000);
 #ifdef WIRE_HAS_TIMEOUT
@@ -333,7 +349,8 @@ bool mpuInit() {
   if (!mpuReadReg(REG_GYRO_CONFIG, cfg) || cfg != (uint8_t)(GYRO_RANGE_SEL << 3)) return false;
   delay(50);
 
-  if (!gyroCalibrateBias()) return false;
+  if (!gyroCalibrateBias(attempts)) return false;
+  gyroFailRun = 0;
   Serial.println(F("MPU6050 verified at 0x68 - gyro logic ENABLED"));
   return true;
 }
@@ -439,7 +456,6 @@ const __FlashStringHelper *faultName(Fault f) {
   switch (f) {
     case F_NO_MOTION:    return F("NO_MOTION (neither encoder nor gyro sees rotation)");
     case F_SENSOR_STUCK: return F("SENSOR_STUCK (sensor solid LOW)");
-    case F_MULTI_SENSOR: return F("MULTI_SENSOR (several sensors at once)");
     case F_ALIGN_FAIL:   return F("ALIGN_FAIL (rotation to target failed)");
     case F_POS_MISMATCH: return F("POS_MISMATCH (encoder and gyro disagree)");
     case F_TIMEOUT:      return F("TIMEOUT (no detection)");
@@ -454,7 +470,13 @@ void enterFault(Fault f) {
   setState(ST_FAULT); // laser goes OFF here
   Serial.print(F("!!! FAULT: "));
   Serial.println(faultName(f));
-  Serial.println(F("Send 'g' to restart."));
+  if (faultRetries < MAX_AUTO_RETRIES) {
+    Serial.print(F("auto-restart in "));
+    Serial.print(FAULT_RETRY_MS / 1000);
+    Serial.println(F(" s (or send 'g')"));
+  } else {
+    Serial.println(F("retries used up - send 'g' to restart"));
+  }
 }
 
 void enterRotating() {
@@ -463,9 +485,7 @@ void enterRotating() {
   fault = F_NONE;
   armed = false;
   clearRun = 0;
-  candidate = -1;
-  confirmRun = 0;
-  multiRun = 0;
+  resetConfirm();
   mismatchRun = 0;
   for (int i = 0; i < NUM_SENSORS; i++) lowRunMs[i] = 0;
   rotateStartMs = now;
@@ -491,6 +511,7 @@ void enterHold() {
   holdStartPose = poseDeg();
   holdSum = 0.0f;
   holdN = 0;
+  gyroRetryDone = false;
   setState(ST_HOLD);
   Serial.print(F(">>> HOLD "));
   Serial.print(HOLD_MS / 1000.0f, 1);
@@ -578,8 +599,16 @@ void acceptDetection(int sensor) {
 }
 
 // ---------- Per-window evaluation ----------
+void resetConfirm() {
+  confirmRun = 0;
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    runSum[i] = 0;
+    runFirstSet[i] = false;
+  }
+}
+
 void evaluateWindow() {
-  int nHit = 0, idx = -1;
+  int nHit = 0;
 
   lastWinBest = 0;
   for (int i = 1; i < NUM_SENSORS; i++) {
@@ -589,7 +618,7 @@ void evaluateWindow() {
   lastWinSamples = samples;
 
   for (int i = 0; i < NUM_SENSORS; i++) {
-    if (counts[i] >= DETECT_K) { nHit++; idx = i; }
+    if (counts[i] >= DETECT_K) nHit++;
 
     if (samples > 0 && (unsigned long)counts[i] * 20UL >= (unsigned long)samples * 19UL) {
       lowRunMs[i] += WINDOW_MS;
@@ -608,30 +637,32 @@ void evaluateWindow() {
     return;
   }
 
-  if (nHit >= 2) {
-    candidate = -1;
-    confirmRun = 0;
-    if (++multiRun >= MAX_MULTI_WINDOWS) enterFault(F_MULTI_SENSOR);
-    return;
-  }
-  multiRun = 0;
-
+  // No sensor in signal: the run is broken
   if (nHit == 0) {
-    candidate = -1;
-    confirmRun = 0;
+    resetConfirm();
     return;
   }
 
-  if (idx == candidate) {
-    confirmRun++;
-  } else {
-    candidate = idx;
-    confirmRun = 1;
-    candidateStartPose = windowStartPose; // where this sensor first reached K
+  // One or several sensors in signal (a beacon can reach neighbouring sensors at once):
+  // keep a run of consecutive windows, remember where each sensor first reached K,
+  // and let the sensor with the most LOW reads over the run win.
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    if (counts[i] >= DETECT_K) {
+      if (!runFirstSet[i]) {
+        runFirstSet[i] = true;
+        runFirstPose[i] = windowStartPose;
+      }
+      runSum[i] += counts[i];
+    }
   }
 
-  if (confirmRun >= CONFIRM_WINDOWS) {
-    acceptDetection(idx);
+  if (++confirmRun >= CONFIRM_WINDOWS) {
+    int winner = 0;
+    for (int i = 1; i < NUM_SENSORS; i++) {
+      if (runSum[i] > runSum[winner]) winner = i;
+    }
+    candidateStartPose = runFirstPose[winner];
+    acceptDetection(winner);
   }
 }
 
@@ -771,7 +802,6 @@ const __FlashStringHelper *faultShort(Fault f) {
   switch (f) {
     case F_NO_MOTION:    return F("NO_MOTION");
     case F_SENSOR_STUCK: return F("SENSOR_STUCK");
-    case F_MULTI_SENSOR: return F("MULTI_SENSOR");
     case F_ALIGN_FAIL:   return F("ALIGN_FAIL");
     case F_POS_MISMATCH: return F("POS_MISMATCH");
     case F_TIMEOUT:      return F("TIMEOUT");
@@ -854,6 +884,7 @@ void handleSerial() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c == 'g' || c == 'G') {
+      faultRetries = 0;
       if (state != ST_ROTATING) enterRotating();
     } else if (c == ' ') {
       if (state != ST_PAUSED) enterPaused();
@@ -896,9 +927,9 @@ void setup() {
   pinMode(ENCODER_B_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(ENCODER_A_PIN), encoderISR, RISING);
 
-  Serial.println(F("=== Spin Detect v0.8 (S1=D4@0, S2=D5@120, S3=D6@240, laser=D10, MPU6050=A4/A5) ==="));
+  Serial.println(F("=== Spin Detect v0.9 (S1=D4@0, S2=D5@120, S3=D6@240, laser=D10, MPU6050=A4/A5) ==="));
   Serial.println(F("Keep the assembly still: measuring gyro bias..."));
-  gyroOk = mpuInit();
+  gyroOk = mpuInit(GYRO_INIT_ATTEMPTS);
   lastGyroUs = micros();
   if (!gyroOk) {
     Serial.println(F("Gyro logic DISABLED - using encoder only"));
@@ -908,7 +939,7 @@ void setup() {
                           : F("WARNING: no angle source - bearing/alignment disabled"));
   }
   if (!ALIGN_ENABLED) {
-    Serial.println(F("NOTE: ALIGN_ENABLED = false - bearings are logged, no rotation to target"));
+    Serial.println(F("NOTE: ALIGN_ENABLED = false - stop in place, no rotation to target"));
   }
   Serial.println(F("g start | space stop | r reverse | z zero | p status | l laser"));
   delay(500);
@@ -1005,11 +1036,18 @@ void loop() {
     }
 
     case ST_HOLD:
+      // gyro failed at boot (e.g. the assembly was still coasting): try once while it is still
+      if (!gyroOk && !gyroRetryDone && now - holdStartMs >= 1500 && now - holdStartMs < HOLD_MS - 2500) {
+        gyroRetryDone = true;
+        gyroOk = mpuInit(1);
+        lastGyroUs = micros();
+      }
       if (now - holdStartMs >= HOLD_MS) {
         Serial.print(F("hold drift = "));
         float p = poseDeg();
         printAngle(isnan(p) || isnan(holdStartPose) ? NAN : p - holdStartPose);
         Serial.println(F(" deg"));
+        faultRetries = 0;              // a complete cycle: clear the retry budget
         // assembly has been still: refresh the gyro bias if the data were clean
         if (gyroOk && holdN >= 50 && (holdMax - holdMin) <= GYRO_STILL_TOL_DPS) {
           gyroBiasDps = holdSum / holdN;
@@ -1022,6 +1060,12 @@ void loop() {
 
     case ST_PAUSED:
     case ST_FAULT:
+      if (faultRetries < MAX_AUTO_RETRIES && now - stateSinceMs >= FAULT_RETRY_MS) {
+        faultRetries++;
+        Serial.print(F("auto-restart attempt "));
+        Serial.println(faultRetries);
+        enterRotating();
+      }
       break;
   }
 }

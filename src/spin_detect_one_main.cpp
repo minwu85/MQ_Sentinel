@@ -1,5 +1,5 @@
 // ============================================================
-// SPIN DETECT ONE (v0.1) - Nano V3
+// SPIN DETECT ONE (v0.2) - Nano V3
 // single TSOP4138 detection channel + encoder + MPU6050 gyro + one laser
 // Build/upload with: pio run -e spin_detect_one -t upload
 // Then:              pio device monitor -e spin_detect_one
@@ -24,7 +24,7 @@
 // Telemetry: compact IMU + system state line every TELEMETRY_MS.
 //
 // All geometry/calibration values are CONFIGURABLE PLACEHOLDERS and
-// ALIGN_ENABLED is false until they have been measured and verified.
+// ALIGN_ENABLED is true: set false to stop in place until they are verified.
 // Maths, wiring and bench calibration: spin_detect_one.md
 // ============================================================
 #include <Arduino.h>
@@ -53,8 +53,8 @@ const int   SCAN_DIR = 1;              // +1 = DIR HIGH (clockwise), -1 = DIR LO
 // ---------- Motor ----------
 const int SPIN_SPEED  = 200;           // PWM while scanning (spin_until_ir value)
 const int ALIGN_SPEED = 150;
-const bool ALIGN_ENABLED = false;      // false = stop in place, laser ON there, hold.
-                                       // Enable only after COUNTS_PER_REV and geometry are verified.
+const bool ALIGN_ENABLED = true;       // true = rotate the shortest way onto the target, then laser ON.
+                                       // false = stop in place, laser ON there (use while geometry is unverified).
 const unsigned long MOTION_GRACE_MS = 600;
 const unsigned long MOTION_CHECK_MS = 500;
 const long STALL_MIN_COUNTS = 3;
@@ -95,6 +95,7 @@ const float GYRO_LSB[4] = {131.0f, 65.5f, 32.8f, 16.4f};
 const unsigned long GYRO_POLL_MS = 10;
 const int GYRO_BIAS_SAMPLES = 200;
 const float GYRO_STILL_TOL_DPS = 4.0f;
+const int GYRO_INIT_ATTEMPTS = 10;     // 1 s each: wait for the assembly to stop coasting after a reset
 const float GYRO_DEADBAND_DPS = 0.3f;
 const unsigned long GYRO_REBIAS_SETTLE_MS = 1000;
 const bool CROSSCHECK_FAULT = true;
@@ -129,6 +130,7 @@ unsigned long lastGyroUs = 0;
 
 float holdSum = 0.0f, holdMin = 0.0f, holdMax = 0.0f;
 int holdN = 0;
+bool gyroRetryDone = false;   // one gyro re-init attempt per hold (assembly is still then)
 
 unsigned long lastSampleUs = 0;
 unsigned long windowStartMs = 0;
@@ -261,30 +263,37 @@ bool mpuReadAll(float a[3], float g[3], float &tempC) {
   return true;
 }
 
-bool gyroCalibrateBias() {
-  float sum = 0.0f, mn = 1e9f, mx = -1e9f;
-  for (int i = 0; i < GYRO_BIAS_SAMPLES; i++) {
-    float dps;
-    if (!mpuReadGyroDps(dps)) return false;
-    sum += dps;
-    if (dps < mn) mn = dps;
-    if (dps > mx) mx = dps;
-    delay(5);
+// Waits (up to `attempts` x 1 s) for the assembly to be still, e.g. after a reset while it was coasting.
+bool gyroCalibrateBias(int attempts) {
+  for (int a = 0; a < attempts; a++) {
+    float sum = 0.0f, mn = 1e9f, mx = -1e9f;
+    for (int i = 0; i < GYRO_BIAS_SAMPLES; i++) {
+      float dps;
+      if (!mpuReadGyroDps(dps)) return false;
+      sum += dps;
+      if (dps < mn) mn = dps;
+      if (dps > mx) mx = dps;
+      delay(5);
+    }
+    if (mx - mn <= GYRO_STILL_TOL_DPS) {
+      gyroBiasDps = sum / GYRO_BIAS_SAMPLES;
+      Serial.print(F("MPU6050 gyro bias = "));
+      Serial.print(gyroBiasDps, 3);
+      Serial.println(F(" dps"));
+      return true;
+    }
+    Serial.print(F("MPU6050: assembly not still (spread "));
+    Serial.print(mx - mn, 1);
+    Serial.print(F(" dps), waiting "));
+    Serial.print(a + 1);
+    Serial.print('/');
+    Serial.println(attempts);
   }
-  if (mx - mn > GYRO_STILL_TOL_DPS) {
-    Serial.print(F("MPU6050 bias calibration rejected: assembly moving (spread "));
-    Serial.print(mx - mn, 2);
-    Serial.println(F(" dps)"));
-    return false;
-  }
-  gyroBiasDps = sum / GYRO_BIAS_SAMPLES;
-  Serial.print(F("MPU6050 gyro bias = "));
-  Serial.print(gyroBiasDps, 3);
-  Serial.println(F(" dps"));
-  return true;
+  Serial.println(F("MPU6050: bias calibration failed - keep the assembly and board still"));
+  return false;
 }
 
-bool mpuInit() {
+bool mpuInit(int attempts) {
   Wire.begin();
   Wire.setClock(400000);
 #ifdef WIRE_HAS_TIMEOUT
@@ -303,14 +312,15 @@ bool mpuInit() {
     Serial.println(F(" (expected 0x68)"));
     return false;
   }
-  if (!mpuWriteReg(REG_PWR_MGMT_1, 0x00)) return false;
+  if (!mpuWriteReg(REG_PWR_MGMT_1, 0x00)) return false; // wake from sleep
   delay(100);
   if (!mpuWriteReg(REG_GYRO_CONFIG, (uint8_t)(GYRO_RANGE_SEL << 3))) return false;
   uint8_t cfg = 0xFF;
   if (!mpuReadReg(REG_GYRO_CONFIG, cfg) || cfg != (uint8_t)(GYRO_RANGE_SEL << 3)) return false;
   delay(50);
 
-  if (!gyroCalibrateBias()) return false;
+  if (!gyroCalibrateBias(attempts)) return false;
+  gyroFailRun = 0;
   Serial.println(F("MPU6050 verified at 0x68 - gyro logic ENABLED"));
   return true;
 }
@@ -461,6 +471,7 @@ void enterHold() {
   holdStartPose = poseDeg();
   holdSum = 0.0f;
   holdN = 0;
+  gyroRetryDone = false;
   setState(ST_HOLD);              // laser ON here, at the stopped target position
   Serial.print(F(">>> HOLD "));
   Serial.print(HOLD_MS / 1000.0f, 1);
@@ -770,9 +781,9 @@ void setup() {
   pinMode(ENCODER_B_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(ENCODER_A_PIN), encoderISR, RISING);
 
-  Serial.println(F("=== Spin Detect One v0.1 (sensor=D6, laser=D10, MPU6050=A4/A5) ==="));
+  Serial.println(F("=== Spin Detect One v0.2 (sensor=D6, laser=D10, MPU6050=A4/A5) ==="));
   Serial.println(F("Keep the assembly still: measuring gyro bias..."));
-  gyroOk = mpuInit();
+  gyroOk = mpuInit(GYRO_INIT_ATTEMPTS);
   lastGyroUs = micros();
   if (!gyroOk) {
     Serial.println(F("Gyro logic DISABLED - using encoder only"));
@@ -873,6 +884,12 @@ void loop() {
     }
 
     case ST_HOLD:
+      // gyro failed at boot (e.g. the assembly was still coasting): try once while it is still
+      if (!gyroOk && !gyroRetryDone && now - holdStartMs >= 1500 && now - holdStartMs < HOLD_MS - 2500) {
+        gyroRetryDone = true;
+        gyroOk = mpuInit(1);
+        lastGyroUs = micros();
+      }
       if (now - holdStartMs >= HOLD_MS) {
         Serial.print(F("hold drift = "));
         float p = poseDeg();

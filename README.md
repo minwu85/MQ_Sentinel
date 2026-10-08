@@ -98,14 +98,14 @@ pio run -e spin_until_ir -t upload
 pio device monitor -e spin_until_ir
 ```
 
-### spin_detect (v0.8)
+### spin_detect (v0.9)
 Single environment combining `motor_onoff`, `spin_until_ir`, the encoder,
 an MPU6050 gyro and the red laser. The assembly spins continuously with
 the laser OFF; when one of three TSOP4138 sensors (S1 D4 @ 0 deg, S2 D5 @
 120, S3 D6 @ 240) sees a strong, confirmed signal (window count, 3-window
 debounce, armed after 200 ms clear), the motor stops and the encoder,
 gyro, sensor and calculated bearing are recorded. With `ALIGN_ENABLED`
-(false by default) it then rotates the shortest way (angle_error in +/-180
+(true by default) it then rotates the shortest way (angle_error in +/-180
 deg) onto the target. The laser turns ON only after the system has
 stopped at the detected position, holds 5 s, then turns OFF before
 scanning resumes.
@@ -125,15 +125,15 @@ pio run -e spin_detect -t upload
 pio device monitor -e spin_detect
 ```
 
-### spin_detect_one (v0.1)
+### spin_detect_one (v0.2)
 Simplified, fully automatic version with a single sensor (D6) and the
 single laser (D10): no serial input is used. It initialises, spins with
 the laser OFF, confirms a detection with the same filtering, stops
 immediately, turns the laser ON at the stopped position for 5 s, turns it
 OFF and resumes - repeating forever. Same encoder/MPU6050 tracking,
 telemetry and fault protection (faults restart automatically 3 times,
-then stay safe). `ALIGN_ENABLED` is false until the geometry and
-`COUNTS_PER_REV` are verified. Details and differences:
+then stay safe). `ALIGN_ENABLED` is true; set it false while the geometry and
+`COUNTS_PER_REV` are unverified. Details and differences:
 [spin_detect_one.md](spin_detect_one.md).
 
 ```
