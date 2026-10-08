@@ -34,6 +34,6 @@ void loop() {
   delay(1000);
 
   Serial.println("Laser OFF");
-  digitalWrite(LASER_PIN, LOW);
+  digitalWrite(LASER_PIN, HIGH);
   delay(1000);
 }

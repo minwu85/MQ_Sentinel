@@ -98,6 +98,24 @@ pio run -e spin_until_ir -t upload
 pio device monitor -e spin_until_ir
 ```
 
+### rotating_detect (v0.5)
+Rotating detection system: the assembly spins about a fixed centre with
+three TSOP4138 sensors 120 degrees apart (S1=D4, S2=D5, S3=D6). A
+detection needs one sensor to hit the threshold for 3 consecutive
+20 ms windows (software debounce); the motor then stops immediately, the
+encoder position is recorded, the assembly optionally turns so the red
+laser (D10) points at the target, the laser pulses for 300 ms, and
+rotation resumes. Faults (no detection timeout, encoder stall, sensor
+stuck, several sensors at once, align timeout) stop the motor and laser
+until `r` is sent. Set `COUNTS_PER_REV` in the file first (see the
+maths file). Serial: `r` reset, `g` resume, `z` zero, `p` status.
+Details: [IR_Spin_Stop_Math.md](IR_Spin_Stop_Math.md).
+
+```
+pio run -e rotating_detect -t upload
+pio device monitor -e rotating_detect
+```
+
 ### reactive_ir
 Motor spins by default; stops the moment the IR receiver detects a
 signal, resumes automatically when the signal clears.
