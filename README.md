@@ -239,71 +239,8 @@ pio device monitor -e mpu6050_gyro
 | White LED | D4 |
 | Green LED | D5 |
 
-avrdude done.  Thank you.
-
-======================================== [SUCCESS] Took 7.59 seconds ========================================
-Environment    Status    Duration
--------------  --------  ------------
-======================================== 1 succeeded in 00:00:07.593 ========================================PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> pio device monitor -e mpu6050_gyro
---- Terminal on COM7 | 9600 8-N-1
---- Available filters and text transformations: debug, default, direct, hexlify, log2file, nocontrol, printable, send_on_enter, time
---- More details at https://bit.ly/pio-monitor-filters
+Testing result: 
 --- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
-␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀␀MPU6050 initialized.
-Accel(g) X: -0.124 Y: 0.016 Z: 0.991   Gyro(deg/s) X: -2.60 Y: 1.45 Z: -0.57   Temp: 25.5 C
-Accel(g) X: -0.127 Y: 0.007 Z: 0.981   Gyro(deg/s) X: -2.59 Y: 1.38 Z: -0.33   Temp: 25.5 C
-Accel(g) X: -0.121 Y: 0.009 Z: 0.974   Gyro(deg/s) X: -2.70 Y: 1.24 Z: -0.05   Temp: 25.5 C
-Accel(g) X: -0.124 Y: 0.010 Z: 0.978   Gyro(deg/s) X: -2.89 Y: 1.51 Z: -0.74   Temp: 25.4 C
-Accel(g) X: -0.127 Y: 0.011 Z: 0.983   Gyro(deg/s) X: -2.68 Y: 1.37 Z: -0.74   Temp: 25.5 C
-Accel(g) X: -0.123 Y: 0.010 Z: 0.979   Gyro(deg/s) X: -2.66 Y: 1.66 Z: -0.54   Temp: 25.5 C
-Accel(g) X: -0.127 Y: 0.010 Z: 0.987   Gyro(deg/s) X: -2.7
-PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> pio device monitor -e mpu6050_gyro
---- Terminal on COM7 | 9600 8-N-1
---- Available filters and text transformations: debug, default, direct, hexlify, log2file, nocontrol, printable, send_on_enter, time
---- More details at https://bit.ly/pio-monitor-filters
---- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
-Gyro(deg/s) X: -2.67 Y: 1.27.984   Gyro(deg/s) X: -2.75 Y: 1.27 Z: -0.55   Temp: 25.9 C
-Accel(g) X: -0.128 Y: 0.008 Z: 0.985   Gyro(deg/s) X: -2.67 Y: 1.27MPU6050 initialized.
-Accel(g) X: -0.125 Y: 0.016 Z: 0.973   Gyro(deg/s) X: -2.81 Y: 1.41 Z: -0.53   Temp: 25.9 C
-Accel(g) X: -0.126 Y: 0.011 Z: 0.970   Gyro(deg/s) X: -2.61 Y: 1.47 Z: -0.56   Temp: 25.8 C
-Accel(g) X: 0.302 Y: -0.031 Z: 0.912   Gyro(deg/s) X: 9.97 Y: -45.74 Z: -5.38   Temp: 25.9 C
-Accel(g) X: 0.465 Y: 0.005 Z: 0.903   Gyro(deg/s) X: -1.18 Y: -6.26 Z: -1.21   Temp: 25.8 C
-Accel(g) X: 0.518 Y: 0.025 Z: 0.864   Gyro(deg/s) X: -1.96 Y: -1.71 Z: -1.18   Temp: 25.9 C
-Accel(g) X: 0.548 Y: 0.037 Z: 0.861   Gyro(deg/s) X: -1.21 Y: -3.52 Z: 0.43   Temp: 25.9 C
-Accel(g) X: 0.484 Y: -0.058 Z: 0.892   Gyro(deg/s) X: -25.08 Y: 16.14 Z: 7.08   Temp: 25.8 C
-Accel(g) X: 0.384 Y: -0.210 Z: 0.947   Gyro(deg/s) X: -11.67 Y: 12.37 Z: 2.85   Temp: 25.8 C
-Accel(g) X: 0.342 Y: -0.243 Z: 0.904   Gyro(deg/s) X: -2.98 Y: 0.11 Z: -0.86   Temp: 25.8 C
-Accel(g) X: 0.321 Y: -0.280 Z: 0.917   Gyro(deg/s) X: -4.49 Y: 5.51 Z: 0.99   Temp: 25.8 C
-Accel(g) X: 0.288 Y: -0.284 Z: 0.913   Gyro(deg/s) X: -4.34 Y: 17.98 Z: 1.18   Temp: 25.8 C
-Accel(g) X: 0.034 Y: -0.273 Z: 0.969   Gyro(deg/s) X: 2.73 Y: 15.58 Z: 4.47   Temp: 25.8 C
-Accel(g) X: -0.104 Y: -0.227 Z: 0.956   Gyro(deg/s) X: 3.42 Y: 28.70 Z: 2.60   Temp: 25.8 C
-Accel(g) X: -0.010 Y: -0.123 Z: 1.013   Gyro(deg/s) X: 9.36 Y: -25.60 Z: 8.18   Temp: 25.9 C
-Accel(g) X: -0.130 Y: 0.014 Z: 0.976   Gyro(deg/s) X: -2.31 Y: 2.89 Z: -0.35   Temp: 25.9 C
-Accel(g) X: -0.120 Y: 0.012 Z: 0.971   Gyro(deg/s) X: -2.55 Y: 1.39 Z: -0.34   Temp: 25.8 C
-PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> git add .
-warning: in the working copy of 'uno/platformio.ini', LF will be replaced by CRLF the next time Git touches it
-PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> git commit -a -m "update mpu6050 gyro in cpp at uno folder"
-warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
-[main 5e95f82] update mpu6050 gyro in cpp at uno folder
- 5 files changed, 208 insertions(+), 82 deletions(-)
- delete mode 100644 MPU6050_Mega_I2C.ino
- create mode 100644 uno/src/mpu6050_gyro_main.cpp
-PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> git push
-Enumerating objects: 16, done.
-Counting objects: 100% (16/16), done.
-Delta compression using up to 8 threads
-Compressing objects: 100% (8/8), done.
-Writing objects: 100% (9/9), 3.03 KiB | 1.51 MiB/s, done.
-Total 9 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
-remote: Resolving deltas: 100% (5/5), completed with 5 local objects.
-To https://github.com/minwu85/MQ_Sentinel.git
-   e25c9fa..5e95f82  main -> main
-PS C:\Users\minwu\University\2026\MQ_Sentinel\uno> pio device monitor -e mpu6050_gyro                         
---- Terminal on COM7 | 9600 8-N-1
---- Available filters and text transformations: debug, default, direct, hexlify, log2file, nocontrol, printable, send_on_enter, time
---- More details at https://bit.ly/pio-monitor-filters
---- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
-2   Gyro(deg/s) X: -1.47 Y: 0.42 Z: -1.37   Temp: 26.6 C
 Accel(g) X: 0.044 Y: -0.190 Z: 0.970   Gyro(X: 0.057 Y: -0.192 Z: 0.972   Gyro(deg/s) X: -1.47 Y: 0.42 Z: -1.37   Temp: 26.6 C
 Accel(g) X: 0.044 Y: -0.190 Z: 0.970   Gyro(MPU6050 initialized.
 Accel(g) X: 0.110 Y: -0.190 Z: 1.033   Gyro(deg/s) X: 2.23 Y: -22.60 Z: 11.11   Temp: 26.6 C
@@ -315,30 +252,7 @@ Accel(g) X: 0.775 Y: 0.079 Z: 0.659   Gyro(deg/s) X: -6.87 Y: 9.41 Z: 3.43   Tem
 Accel(g) X: 0.563 Y: -0.166 Z: 0.771   Gyro(deg/s) X: -18.89 Y: 27.92 Z: 18.66   Temp: 26.6 C
 Accel(g) X: 0.476 Y: -0.295 Z: 0.855   Gyro(deg/s) X: -10.85 Y: 7.82 Z: 8.22   Temp: 26.6 C
 Accel(g) X: 0.474 Y: -0.318 Z: 0.827   Gyro(deg/s) X: -3.81 Y: 3.50 Z: 0.47   Temp: 26.6 C
-Accel(g) X: 0.453 Y: -0.310 Z: 0.843   Gyro(deg/s) X: -2.00 Y: 0.21 Z: -2.53   Temp: 26.5 C
-Accel(g) X: 0.452 Y: -0.306 Z: 0.836   Gyro(deg/s) X: -2.36 Y: 1.14 Z: -1.36   Temp: 26.6 C
-Accel(g) X: 0.433 Y: -0.250 Z: 0.883   Gyro(deg/s) X: 18.06 Y: 20.27 Z: -31.86   Temp: 26.6 C
-Accel(g) X: 0.355 Y: -0.069 Z: 0.935   Gyro(deg/s) X: 3.13 Y: 3.53 Z: -4.01   Temp: 26.6 C
-Accel(g) X: 0.340 Y: -0.079 Z: 0.942   Gyro(deg/s) X: -5.32 Y: 3.58 Z: 0.66   Temp: 26.5 C
-Accel(g) X: 0.335 Y: -0.080 Z: 0.933   Gyro(deg/s) X: -0.14 Y: -1.87 Z: -1.68   Temp: 26.6 C
-Accel(g) X: 0.343 Y: -0.060 Z: 0.958   Gyro(deg/s) X: -0.72 Y: 1.40 Z: -1.57   Temp: 26.6 C
-Accel(g) X: 0.347 Y: -0.047 Z: 0.933   Gyro(deg/s) X: -1.23 Y: 1.11 Z: 0.90   Temp: 26.6 C
-Accel(g) X: 0.344 Y: -0.009 Z: 0.922   Gyro(deg/s) X: -5.32 Y: 3.86 Z: 2.08   Temp: 26.6 C
-Accel(g) X: 0.203 Y: -0.039 Z: 0.947   Gyro(deg/s) X: -1.74 Y: 20.87 Z: 8.03   Temp: 26.5 C
-Accel(g) X: 0.330 Y: -0.146 Z: 1.057   Gyro(deg/s) X: -9.22 Y: -15.21 Z: -14.43   Temp: 26.6 C
-Accel(g) X: 0.164 Y: -0.227 Z: 0.909   Gyro(deg/s) X: -68.31 Y: 86.52 Z: -11.31   Temp: 26.6 C
-Accel(g) X: 0.030 Y: -0.295 Z: 0.963   Gyro(deg/s) X: -1.85 Y: 5.78 Z: -3.75   Temp: 26.5 C
-Accel(g) X: 0.040 Y: -0.193 Z: 1.021   Gyro(deg/s) X: 25.40 Y: -39.90 Z: 10.27   Temp: 26.5 C
-Accel(g) X: -0.072 Y: -0.164 Z: 0.922   Gyro(deg/s) X: 5.65 Y: -14.97 Z: -12.34   Temp: 26.6 C
-Accel(g) X: 0.019 Y: -0.237 Z: 0.949   Gyro(deg/s) X: 7.50 Y: -4.42 Z: 13.00   Temp: 26.6 C
-Accel(g) X: 0.045 Y: -0.149 Z: 0.931   Gyro(deg/s) X: 9.74 Y: -3.34 Z: 14.60   Temp: 26.6 C
-Accel(g) X: 0.040 Y: 0.018 Z: 0.999   Gyro(deg/s) X: -2.85 Y: 1.49 Z: -0.31   Temp: 26.5 C
-Accel(g) X: 0.032 Y: 0.008 Z: 0.994   Gyro(deg/s) X: -2.87 Y: 1.69 Z: -0.49   Temp: 26.6 C
-Accel(g) X: 0.040 Y: 0.013 Z: 0.998   Gyro(deg/s) X: -2.71 Y: 1.53 Z: -0.47   Temp: 26.6 C
-Accel(g) X: 0.030 Y: 0.012 Z: 0.994   Gyro(deg/s) X: -2.79 Y: 1.62 Z: -0.60   Temp: 26.6 C
-Accel(g) X: 0.031 Y: 0.012 Z: 0.994   Gyro(deg/s) X: -2.56 Y: 1.40 Z: -0.62   Temp: 26.6 C
-Accel(g) X: 0.036 Y: 0.013 Z: 0.991   Gyro(deg/s) X: -2.70 Y: 1.53 Z: -0.41   Temp: 26.5 C
-Accel(g) X: 0.032 Y: 0.019 Z: 0.999   Gyro(deg/s) X: -2.67 Y: 1.19 Z: -0.66   Temp: 26.6 C
+
 
 -------------
 
