@@ -98,22 +98,28 @@ pio run -e spin_until_ir -t upload
 pio device monitor -e spin_until_ir
 ```
 
-### rotating_detect (v0.5)
-Rotating detection system: the assembly spins about a fixed centre with
-three TSOP4138 sensors 120 degrees apart (S1=D4, S2=D5, S3=D6). A
-detection needs one sensor to hit the threshold for 3 consecutive
-20 ms windows (software debounce); the motor then stops immediately, the
-encoder position is recorded, the assembly optionally turns so the red
-laser (D10) points at the target, the laser pulses for 300 ms, and
-rotation resumes. Faults (no detection timeout, encoder stall, sensor
-stuck, several sensors at once, align timeout) stop the motor and laser
-until `r` is sent. Set `COUNTS_PER_REV` in the file first (see the
-maths file). Serial: `r` reset, `g` resume, `z` zero, `p` status.
-Details: [IR_Spin_Stop_Math.md](IR_Spin_Stop_Math.md).
+### spin_detect (v0.7)
+Single environment combining `motor_onoff`, `spin_until_ir`, the encoder,
+an MPU6050 gyro and the red laser. The assembly spins continuously with
+the laser ON; when one of three TSOP4138 sensors (S1 D4 @ 0 deg, S2 D5 @
+120, S3 D6 @ 240) sees a strong, confirmed signal (window count, 3-window
+debounce, armed after 200 ms clear), the motor stops, the encoder, gyro,
+sensor and calculated bearing are recorded, the assembly rotates the
+shortest way (angle_error in +/-180 deg) onto the target, stops, holds
+exactly 5 s with the laser ON, then resumes scanning.
+
+MPU6050: VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68), INT/XDA/XCL
+not connected. Gyro logic is enabled only after the chip ACKs at 0x68,
+WHO_AM_I reads 0x68 and the bias calibration passes (keep the assembly
+still at power-up). Serial: `g` start/resume (clears a fault), space stop,
+`r` reverse, `z` zero, `p` status, `l` laser master. All geometry and
+calibration values are configurable placeholders: set `COUNTS_PER_REV`
+and follow the bench procedure in [spin_detect.md](spin_detect.md);
+`ALIGN_ENABLED = false` logs bearings without rotating to the target.
 
 ```
-pio run -e rotating_detect -t upload
-pio device monitor -e rotating_detect
+pio run -e spin_detect -t upload
+pio device monitor -e spin_detect
 ```
 
 ### reactive_ir
@@ -140,6 +146,7 @@ pio device monitor -e reactive_ir
 | Encoder A (connection_test only) | D2 |
 | Encoder B (connection_test only) | D3 |
 | Laser | D10 |
+| MPU6050 SDA / SCL (spin_detect only) | A4 / A5 |
 
 `reactive_ir` and `ir_triggered_spin` use a single sensor on D6
 (matching IR_CENTRE), so the same physical sensor position works
