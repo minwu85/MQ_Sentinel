@@ -129,14 +129,16 @@ pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one
 ```
 
-### spin_detect_clock (v0.1)
-Copy of `spin_detect` (which is unchanged) with a PID rotation: D6 is the
-centre sensor on the laser axis, D4/D5 the sides. After a detection a PID
-loop turns the assembly clockwise/anti-clockwise, using the balance
-(D5-D4)/(D4+D5+D6) and D6's peak strength as the error, until D6 is centred
-on the message; then it stops, the laser is ON for 4 s, OFF, and scanning
-resumes. The motor keeps turning until D6 is centred (6 s limit). PID
-gains, simulation and tuning: [spin_detect_clock.md](spin_detect_clock.md).
+### spin_detect_clock (v0.2)
+Copy of `spin_detect` (which is unchanged) with a faster compare-and-stop.
+D6 is the centre sensor on the laser axis, D4/D5 the sides. The sensors are
+counted in 10 ms slices and compared 100 times per second (last 50 ms): if
+D6 is the greatest it stops within 30 ms and the laser is ON for 4 s; if a
+side sensor is greater, a PID turns D6 toward it (D4 anti-clockwise, D5
+clockwise) until D6 takes the lead. If D6 never becomes the greatest in 4 s
+it scans again without stopping or firing the laser, and warns if D6 never
+received the message. Details, PID and tuning:
+[spin_detect_clock.md](spin_detect_clock.md).
 
 ```
 pio run -e spin_detect_clock -t upload
