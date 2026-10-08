@@ -13,7 +13,7 @@ Receiver: Vishay **TSOP4138** – 38 kHz carrier, output **active-LOW**, directi
 | v0.2 | `src/spin_until_ir_main.cpp` / `spin_until_ir` | Motor spins; any sensor with count ≥ threshold stops it; resumes after the signal has been clear for 2 windows. | this release – needs bench test |
 | v0.3 | `src/directional_ir_main.cpp` / `directional_ir` | 6-sensor ring (60° apart), steer toward the strongest sensor. | written, not yet bench tested |
 | v0.4 | – | Tune threshold / window / speed from measured data (section 6). | planned |
-| v0.7 | `src/spin_detect_main.cpp` / `spin_detect` | `motor_onoff` + `spin_until_ir` base with 3 sensors @ 120°, encoder + MPU6050 gyro, laser ON while scanning, shortest-path rotation to the target, 5 s hold. Full maths: [spin_detect.md](spin_detect.md). | written, needs bench test |
+| v0.8 | `src/spin_detect_main.cpp` / `spin_detect`, `src/spin_detect_one_main.cpp` / `spin_detect_one` | 3-sensor system and its single-sensor automatic sibling: encoder + MPU6050, laser ON only during the 5 s hold, live telemetry. Maths: [spin_detect.md](spin_detect.md), [spin_detect_one.md](spin_detect_one.md). | written, needs bench test |
 
 Process per version: **(1)** build the measurement version (v0.1) → **(2)** record counts with the beacon off / on / at ±45° → **(3)** set constants from the maths below → **(4)** add motion (v0.2) → **(5)** re-measure stop angle → **(6)** only then add more sensors.
 
@@ -127,7 +127,7 @@ The two-window clear requirement is hysteresis: it stops the motor chattering wh
 
 ---
 
-## 8. v0.7 – Spin detect
+## 8. v0.8 – Spin detect
 
 The rotating 3-sensor system (environment `spin_detect`) has its own document with the geometry, bearing maths, laser alignment, calibration values and bench procedure: **[spin_detect.md](spin_detect.md)**.
 
@@ -146,4 +146,7 @@ pio device monitor -e spin_until_ir
 
 pio run -e spin_detect -t upload
 pio device monitor -e spin_detect
+
+pio run -e spin_detect_one -t upload
+pio device monitor -e spin_detect_one
 ```

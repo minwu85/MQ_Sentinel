@@ -1,4 +1,4 @@
-# Spin Detect (v0.7) – mathematics, geometry, calibration, coding process
+# Spin Detect (v0.8) – mathematics, geometry, calibration, coding process
 
 Environment `spin_detect` · source [src/spin_detect_main.cpp](src/spin_detect_main.cpp) · Nano V3.
 Base code: `motor_onoff` (auto-start, `g` / space / `r`, motor pins) and `spin_until_ir` (window count ≥ K, clear before resume). Sensor-window background maths: [IR_Spin_Stop_Math.md](IR_Spin_Stop_Math.md).
@@ -8,19 +8,21 @@ pio run -e spin_detect -t upload
 pio device monitor -e spin_detect
 ```
 
-> **Status: compiles; not bench tested.** Every geometry and calibration value is a *configurable placeholder* taken from the intended layout. Do the calibration in section 12 before trusting a bearing or letting the assembly rotate to a target. `ALIGN_ENABLED = false` logs bearings without rotating to the target.
+> **Status: compiles; not bench tested.** Every geometry and calibration value is a *configurable placeholder* taken from the intended layout. Do the calibration in section 13 before trusting a bearing. **`ALIGN_ENABLED = false` by default**: the system detects, stops in place, turns the laser ON there for the hold and logs the bearing, but does not rotate to the target. Enable alignment only after `COUNTS_PER_REV` and the physical geometry have been measured and verified. The single-sensor sibling is documented in [spin_detect_one.md](spin_detect_one.md) (comparison in section 15).
 
 ---
 
 ## 1. Intended sequence
 
 ```
-continuous spin (laser ON)
+continuous spin (laser OFF)
  → strong message on one sensor → confirm (window count + 3-window debounce + armed)
  → motor stops → record encoder, gyro, sensor, bearing
- → angle_error = wrap180(bearing − laser_axis) → rotate the SHORTEST way
- → stop → laser stays ON → hold 5 s → resume continuous spin → repeat
+ → [ALIGN_ENABLED] angle_error = wrap180(bearing − laser_axis) → rotate the SHORTEST way (laser still OFF)
+ → stopped at the target position → laser ON → hold 5 s → laser OFF → resume continuous spin → repeat
 ```
+
+The laser is **never ON while searching**: it is ON only during the hold.
 
 ## 2. Wiring
 
@@ -147,14 +149,26 @@ Closed loop on the pose: `progress = ±(θ_now − θ_align_start)` (sign = dire
 `HOLD_MS = 5000`. The timer starts when the motor has been stopped at the verified target position and ends when `millis() − holdStartMs ≥ 5000`. `millis()` ticks every 1 ms (1.024 ms), the loop checks it every pass (≲ 1 ms), so the hold is 5000 ms plus up to ~1 ms; oscillator error is added on top (≈ ±0.25 ms for a 50 ppm crystal, up to ±25 ms for a 0.5 % ceramic resonator). The hold is passive braking (`PWM = 0`); there is no position-hold controller. The drift during the hold is printed at its end (`hold drift = x deg`). Detection is ignored during the hold; after it the system re-arms before it can detect again.
 
 ## 10. Laser
-* D10 explicitly driven LOW first thing in `setup()`; `laserOn` mirrors the pin.
-* One rule (`applyLaser()`): laser ON only in states SCANNING, ALIGN, HOLD and only if the master flag is on (`LASER_ENABLED_AT_BOOT`, toggle with `l`). OFF at boot until initialisation is done, in FAULT, and when stopped with space.
-* Alignment offset: the laser axis ψ is radial; turning it onto bearing B (section 8) points it at the target with no parallax. A laser mounted off the radial line by lateral distance e needs `asin(e/D)` extra – not in the code, keep e ≈ 0.
-* Safety: continuous scanning means a continuously lit beam – use the low-power eye-safe module, never aim at eyes or mirrors, and keep `l` / space as the manual kill.
+* D10 is explicitly driven LOW first thing in `setup()`; `laserOn` mirrors the pin.
+* One rule, in `applyLaser()`: **the laser is ON only in the HOLD state** (target confirmed, motor stopped at the detected position) and only if the master flag is on (`LASER_ENABLED_AT_BOOT`, `l` toggles it). It is OFF at boot, while scanning, while rotating to the target, when stopped with space, and in a fault.
+* The state change itself drives the pin: `enterRotating()` sets the state (laser pin LOW) *before* it starts the motor, so the laser is already OFF when scanning resumes.
+
+Laser state machine:
+
+| State | Motor | Laser | Leaves when |
+|---|---|---|---|
+| BOOT / `setup()` | off | **OFF** (explicit) | init done |
+| SCANNING | spinning | **OFF** | confirmed detection |
+| ALIGN (only if `ALIGN_ENABLED`) | turning to the target | **OFF** | aligned within 5° and encoder/gyro agree |
+| HOLD (5 s) | stopped (brake) | **ON** | `now − holdStart ≥ 5000 ms` → laser OFF → SCANNING |
+| PAUSED (space) / FAULT | off | **OFF** | `g` |
+
+* Alignment offset: the laser axis ψ is radial; turning it onto bearing B (section 8) points it at the target with no parallax. A laser mounted off the radial line by lateral distance e needs `asin(e/D)` extra – not in the code, keep e ≈ 0. With `ALIGN_ENABLED = false` the laser lights at the stopped position, which is off the target by roughly `|angle_error|` (up to `ω·t_react` plus the edge offset).
+* Safety: use the low-power eye-safe module and never aim at eyes or mirrors; `l` and space are the manual kills.
 
 ## 11. State machine, faults, commands
 ```
-SCANNING → ALIGN (if bearing available, ALIGN_ENABLED, |error| > 5°) → HOLD 5 s → SCANNING
+SCANNING (laser OFF) → ALIGN (if bearing available, ALIGN_ENABLED, |error| > 5°; laser OFF) → HOLD 5 s (laser ON) → SCANNING
 SCANNING → HOLD (no move needed / no angle source / ALIGN_ENABLED = false)
 any fault → FAULT (motor off, driver asleep, laser OFF) --'g'--> SCANNING
 ```
@@ -169,7 +183,40 @@ any fault → FAULT (motor off, driver asleep, laser OFF) --'g'--> SCANNING
 
 Serial: `g` start/resume (also clears a fault) · space stop · `r` reverse scan direction and keep spinning (as `motor_onoff`) · `z` zero encoder + gyro · `p` status · `l` laser master. The motor auto-starts on power-up. The first scan needs ~1 s of rotation to learn the encoder/gyro signs before detection is armed.
 
-## 12. Calibration values and bench procedure
+### Detection-to-stop timing
+```
+t_react ≤ (CONFIRM + 1) · WINDOW_MS + t_stop = 80 ms + t_stop          (motor stops before anything is printed)
+travel before the stop  Δθ = ω · t_react                                (30 rpm = 180 °/s, t_stop 50 ms → 23°)
+t_laser_on = t_react + t_print [+ t_align]                              t_print ≈ 0.1–0.2 s: the DETECT/bearing lines go out at 9600 baud (~1 ms/char)
+```
+Without alignment the laser lights `t_react + t_print` after the signal first reached K. The 5 s hold is timed from the instant the laser turns ON (`enterHold()`), after those prints, so printing never shortens the hold.
+
+## 12. Telemetry (live diagnostic line)
+One line every `TELEMETRY_MS` (500 ms; 0 = off), e.g.
+```
+Acc(g) X:0.04 Y:-0.19 Z:0.97 | Gyro(dps) X:-1.5 Y:0.4 Z:-1.4 | T:26.6C | Enc:1234cnt 45.2deg | GyroAng:44.8deg | Sig:S2 7/200lo conf2/3 | Det:S2 Brg:155.0deg LaserAx:0.0deg Err:+141.0deg | Mot:CW pwm200 | Laser:OFF | SCAN armed
+```
+| Field | Meaning / unit |
+|---|---|
+| `Acc(g) X Y Z` | MPU6050 accelerometer, g (±2 g range, LSB 16384 per g) |
+| `Gyro(dps) X Y Z` | raw gyro output of all three axes, deg/s (bias **not** removed; the active axis is `GYRO_AXIS`) |
+| `T` | die temperature, °C = raw/340 + 36.53 |
+| `Enc` | encoder counts and angle in degrees (`n/a` until `COUNTS_PER_REV` is set), wrapped to 0–360 |
+| `GyroAng` | integrated gyro angle, deg, 0–360, relative to boot or `z` |
+| `Sig` | strongest sensor in the last 20 ms window, its LOW reads / samples (`lo`), and the confirm counter `conf n/3` (0 outside SCANNING) |
+| `Det` | sensor of the last confirmed detection (`--` before the first) |
+| `Brg` | calculated target bearing, deg |
+| `LaserAx` | current laser-axis angle `pose + ψ`, deg |
+| `Err` | live `angle_error` to the target, signed deg; only during ALIGN/HOLD, else `--` |
+| `Mot` | `OFF` or `CW`/`CCW` with the PWM value |
+| `Laser` | `ON`/`OFF` (the pin state) |
+| state | `SCAN armed/arming` · `ALIGN rem:±x deg` · `HOLD x.x s left` · `STOP` · `FAULT <name>` |
+
+`IMU:OFF` replaces the first three fields if the MPU6050 was not verified or has dropped out. Event lines (`DETECT`, `armed`, `XCHECK`, …) are printed as before.
+
+The line is built in a buffer and fed to the UART only as TX space frees up (`availableForWrite()`), so it never blocks the 100 µs sampling loop; the burst IMU read costs ≈ 0.5 ms once per interval. At 9600 baud a ~230-character line takes ~240 ms, i.e. ~48 % of the line capacity at 500 ms intervals.
+
+## 13. Calibration values and bench procedure
 
 | Constant | Meaning | Default | Status |
 |---|---|---|---|
@@ -183,10 +230,10 @@ Serial: `g` start/resume (also clears a fault) · space stop · `r` reverse scan
 | `GYRO_AXIS`, `GYRO_RANGE_SEL` | spin axis, range | Z, ±1000 dps | verify (step 2) |
 | `ALIGN_LEAD_DEG`, `ALIGN_ACCEPT_DEG` | brake lead, accept band | 3°, 5° | tune (step 4) |
 | `HOLD_MS` | hold at target | 5000 | check (step 10) |
-| `ALIGN_ENABLED` | rotate to target | true | set false for steps 1–8 |
+| `ALIGN_ENABLED` | rotate to target | **false** | enable only at step 9, after steps 1–8 |
 
 Procedure:
-1. **Wiring and I²C.** Power up with the assembly still. The banner must show `MPU6050 verified at 0x68 - gyro logic ENABLED`. If not, check SDA = A4, SCL = A5, AD0 = GND, 5 V and the common ground. Set `ALIGN_ENABLED = false` (laser still follows the scan rule, use the master `l` if needed).
+1. **Wiring and I²C.** Power up with the assembly still. The banner must show `MPU6050 verified at 0x68 - gyro logic ENABLED`. If not, check SDA = A4, SCL = A5, AD0 = GND, 5 V and the common ground. `ALIGN_ENABLED` stays `false`; the laser is OFF while scanning and lights only during the 5 s hold (`l` disables it entirely).
 2. **Gyro axis and sign.** Turn the assembly by hand about the spin axis and send `p`: `rate` should be large, and the other axes small (change `GYRO_AXIS` if not). After the first scan the log shows `gyro sign learned`. Check ω stays below the range limit.
 3. **Encoder counts per revolution.** Send `z`, turn the assembly one full revolution by hand against a mark, send `p`; repeat 3× and average → `COUNTS_PER_REV`. Compare with the `CPR_est` from the gyro (agree within a few %).
 4. **Spin speed and stop time.** One revolution time at `SPIN_SPEED` gives ω; the `Status:` line shows rate. After a detection the travel `stop − first_seen` = `ω·(≈80 ms + t_stop)` gives `t_stop`; set `ALIGN_LEAD_DEG ≈ ω_align·t_stop`.
@@ -194,10 +241,10 @@ Procedure:
 6. **Beam width.** With `ir_sensor_test`, turn slowly and note the angle where each sensor enters and leaves `count ≥ K` → `β = out − in`, `h = β/2`.
 7. **`EDGE_HALF_DEG`.** With a beacon at known bearing `B_known`, spin ≥ 10 passes per sensor, take `θ_first` from the DETECT line (`first_seen=`), `h = d·wrap180(B_known − θ_first − φ_i)`; average → `EDGE_HALF_DEG`. Sensors disagreeing by > 5° → recheck step 5.
 8. **Threshold.** Beacon off → noise max; beacon on at the beam edge → min; keep `K` in between (re-check with the gyro polling running).
-9. **Bearing, then alignment.** With `ALIGN_ENABLED = false` compare the printed `target bearing` to `B_known` (3 sensors × 3 distances, accept ≤ 5°). Then set `ALIGN_ENABLED = true` with a resistor + LED on D10 instead of the laser; check the shortest direction, the residual (`aligned, residual error`), and that it finishes inside 8 s. Connect the laser and confirm the beam hits the target.
+9. **Bearing, then alignment.** With `ALIGN_ENABLED = false` (default) compare the printed `target bearing` to `B_known` (3 sensors × 3 distances, accept ≤ 5°). Then set `ALIGN_ENABLED = true` with a resistor + LED on D10 instead of the laser; check the shortest direction, the residual (`aligned, residual error`), and that it finishes inside 8 s. Connect the laser and confirm the beam hits the target.
 10. **Hold and cycle.** Use `pio device monitor -e spin_detect --filter time`: time between `>>> HOLD` and the next `>>> SCANNING` must be 5.0 s (± the oscillator tolerance). Check the `hold drift` and that the same target does not re-trigger.
 
-## 13. Coding process
+## 14. Coding process
 
 | Version | Env / file | Step |
 |---|---|---|
@@ -205,6 +252,20 @@ Procedure:
 | v0.2 | `spin_until_ir` | spin, stop on detection, resume when clear (proven base) |
 | v0.5 | `src/spin_detect_main.cpp` (earlier name of this file) | 3 sensors @ 120°, confirm windows, encoder, faults |
 | v0.6 | `spin_detect` | `spin_until_ir` K and re-arm time, first-crossing bearing, ALIGN gate |
-| v0.7 | `spin_detect` (this) | `motor_onoff` base + g/space/r, MPU6050 (A4/A5, verified 0x68), encoder/gyro fusion and cross-check, laser ON while scanning, shortest-path rotation, 5 s hold |
+| v0.7 | `spin_detect` | `motor_onoff` base + g/space/r, MPU6050 (A4/A5, verified 0x68), encoder/gyro fusion and cross-check, laser ON while scanning, shortest-path rotation, 5 s hold |
+| v0.8 | `spin_detect` (this) | laser ON only during the 5 s hold (never while searching); live IMU + system telemetry; `ALIGN_ENABLED` default false. Single-sensor sibling `spin_detect_one` added |
 
-Rules: one change per version, compile with `pio run -e <env>`, bench-test, write the measured values into section 12 before the next version.
+Rules: one change per version, compile with `pio run -e <env>`, bench-test, write the measured values into section 13 before the next version.
+
+## 15. spin_detect vs spin_detect_one
+
+| | `spin_detect` (this) | `spin_detect_one` ([doc](spin_detect_one.md)) |
+|---|---|---|
+| Detection channels | 3 sensors, D4/D5/D6 at 0°/120°/240° | 1 sensor, D6 (`SENSOR_MOUNT_DEG`) |
+| Laser | D10, ON only in HOLD | D10, ON only in HOLD (same) |
+| Instantaneous coverage | 270° | 90° (β) |
+| Worst-case first detection | 30° of rotation | 270° of rotation (`360° − β`) |
+| Multi-sensor rule / fault | exactly one sensor, `MULTI_SENSOR` | none |
+| Serial commands | `g`, space, `r`, `z`, `p`, `l` | none – fully automatic |
+| After a fault | wait for `g` | automatic restart, `MAX_AUTO_RETRIES` = 3 every 5 s |
+| Encoder, gyro, cross-checks, telemetry, hold | as described here | identical maths |
