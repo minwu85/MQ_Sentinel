@@ -1,7 +1,7 @@
 # Spin Detect One (v0.2) – single detection channel, single laser
 
 Environment `spin_detect_one` · source [src/spin_detect_one_main.cpp](src/spin_detect_one_main.cpp) · Nano V3.
-Simplified, fully automatic sibling of `spin_detect` ([spin_detect.md](spin_detect.md)): one TSOP4138 channel and one laser, **no serial input** (no `g`, `r`, space, `l`). Shared maths (gyro, encoder, cross-checks, hold timing) is identical and is summarised below; the three-sensor geometry is removed.
+Simplified, fully automatic sibling of `spin_detect` ([spin_detect_advanced.md](spin_detect_advanced.md)): one TSOP4138 channel and one laser, **no serial input** (no `g`, `r`, space, `l`). Shared maths (gyro, encoder, cross-checks, hold timing) is identical and is summarised below; the three-sensor geometry is removed.
 
 ```
 pio run -e spin_detect_one -t upload

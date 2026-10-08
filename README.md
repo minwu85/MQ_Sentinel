@@ -98,27 +98,19 @@ pio run -e spin_until_ir -t upload
 pio device monitor -e spin_until_ir
 ```
 
-### spin_detect (v0.9)
-Single environment combining `motor_onoff`, `spin_until_ir`, the encoder,
-an MPU6050 gyro and the red laser. The assembly spins continuously with
-the laser OFF; when one of three TSOP4138 sensors (S1 D4 @ 0 deg, S2 D5 @
-120, S3 D6 @ 240) sees a strong, confirmed signal (window count, 3-window
-debounce, armed after 200 ms clear), the motor stops and the encoder,
-gyro, sensor and calculated bearing are recorded. With `ALIGN_ENABLED`
-(true by default) it then rotates the shortest way (angle_error in +/-180
-deg) onto the target. The laser turns ON only after the system has
-stopped at the detected position, holds 5 s, then turns OFF before
-scanning resumes.
-
-MPU6050: VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68), INT/XDA/XCL
-not connected. Gyro logic is enabled only after the chip ACKs at 0x68,
-WHO_AM_I reads 0x68 and the bias calibration passes (keep the assembly
-still at power-up). A compact telemetry line (accel g, gyro deg/s, temp C,
-encoder, gyro angle, signal confidence, bearing, angle error, motor,
-laser, state) prints every 500 ms. Serial: `g` start/resume (clears a
-fault), space stop, `r` reverse, `z` zero, `p` status, `l` laser master.
-Set `COUNTS_PER_REV` and follow the bench procedure in
-[spin_detect.md](spin_detect.md).
+### spin_detect (v1.0, simple)
+Rewrite based on `spin_until_ir`. The motor spins clockwise with the laser
+OFF and reads three sensors (S1 D4, S2 D5, S3 D6) in 100 ms windows. When
+one sees the signal, the motor turns clockwise or anti-clockwise depending
+on which sensor it is (S2 clockwise, S3 anti-clockwise; configurable in
+`SENSOR_TURN`) until S1 - the sensor on the laser axis - sees it, then
+stops. Every stop lasts 4 s with the laser ON for all of it; then the laser
+goes OFF and scanning resumes. Output (115200 baud) per window:
+`S1(D4): 72  S2(D5): 71  S3(D6): 71  DETECTED | Acc(g) X:.. | Gyro(dps) X:.. | SCAN CW`.
+MPU6050 (display only): VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68).
+Maths and bench procedure: [spin_detect.md](spin_detect.md). The earlier
+encoder/gyro/bearing design is archived in
+[spin_detect_advanced.md](spin_detect_advanced.md).
 
 ```
 pio run -e spin_detect -t upload
@@ -165,7 +157,7 @@ pio device monitor -e reactive_ir
 | Encoder A (connection_test only) | D2 |
 | Encoder B (connection_test only) | D3 |
 | Laser | D10 |
-| MPU6050 SDA / SCL (spin_detect only) | A4 / A5 |
+| MPU6050 SDA / SCL (spin_detect, spin_detect_one) | A4 / A5 |
 
 `reactive_ir` and `ir_triggered_spin` use a single sensor on D6
 (matching IR_CENTRE), so the same physical sensor position works
