@@ -77,6 +77,27 @@ pio run -e directional_ir -t upload
 pio device monitor -e directional_ir
 ```
 
+### ir_sensor_test (v0.1)
+Prints LOW-read counts for three TSOP4138 receivers (S1=D4, S2=D5,
+S3=D6) over 100 ms windows. Motor driver is held asleep. Use it to
+choose the detection threshold.
+
+```
+pio run -e ir_sensor_test -t upload
+pio device monitor -e ir_sensor_test
+```
+
+### spin_until_ir (v0.2)
+Motor spins continuously and stops when any of the three sensors
+detects the 38 kHz signal; resumes once the signal has been clear for
+two windows (set `LATCH_ON_DETECT = true` to stay stopped). Maths and
+tuning: [IR_Spin_Stop_Math.md](IR_Spin_Stop_Math.md).
+
+```
+pio run -e spin_until_ir -t upload
+pio device monitor -e spin_until_ir
+```
+
 ### reactive_ir
 Motor spins by default; stops the moment the IR receiver detects a
 signal, resumes automatically when the signal clears.
