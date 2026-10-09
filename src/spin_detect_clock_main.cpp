@@ -1,34 +1,40 @@
 // ============================================================
-// SPIN DETECT CLOCK (v0.2) - spin_detect with a fast "compare and centre" PID - Nano V3
+// SPIN DETECT CLOCK (v0.3) - clock rotation (centroid PID) + fast, robust stop - Nano V3
 // Build/upload with: pio run -e spin_detect_clock -t upload
 // Then:              pio device monitor -e spin_detect_clock     (115200 baud)
 //
 // Same as spin_detect (scan, K = 5 per 100 ms, 4 s stop with the laser ON,
-// laser OFF while moving, Acc/Gyro output). The rotation and the stop are new:
+// laser OFF while moving, Acc/Gyro output). Rotation = the v0.1 "clock" PID:
 //
 //   * D6 is the CENTRE sensor on the laser axis. D4 = anti-clockwise side,
 //     D5 = clockwise side.
-//   * The sensors are read in 10 ms slices; the decision is re-made EVERY
-//     slice (100 times per second) from the last 50 ms of counts.
-//   * Compare: which sensor has the greatest count?
-//       - D6 is the greatest (within a small margin) -> STOP at once
-//         (3 slices = 30 ms), then the laser is ON for 4 s.
-//       - a side sensor is greater -> turn D6 TOWARD it (D4: anti-clockwise,
-//         D5: clockwise). The PID output sets the speed from the size of the
-//         difference between that sensor and D6:
-//              e = weight * (side - D6) / (side + D6)       setpoint 0, + = clockwise
-//              u = Kp*e + Ki*integral(e) + Kd*de/dt
-//   * No stop and no laser if D6 never becomes the greatest: after
-//     TRACK_TIMEOUT_MS it gives up and goes back to scanning.
+//   * position   pos = (D5 - D4) / (D4 + D5 + D6)       -1 .. +1, + = message clockwise of D6
+//     setpoint 0 (message centred on D6), error e = pos
+//     u = Kp*e + Ki*integral(e) + Kd*de/dt   (u > 0 clockwise, u < 0 anti-clockwise,
+//     PWM = |u| limited to MIN_TRACK_PWM .. MAX_TRACK_PWM)
+//
+// What is new in v0.3 is the STOP. v0.1 needed five conditions at once
+// (D6 strong, not weaker than the sides, balanced, at its peak, not rising)
+// and, with noisy bursty counts, they rarely held together - it ran into
+// the timeout and needed seconds to stop. Now:
+//   * decisions are made every 10 ms (rolling 50 ms of counts), not every 50 ms
+//   * STOP as soon as the message is centred: |pos| <= a dead band that
+//     widens with time (0.15 -> 0.60 over 1.2 s), OR pos has crossed zero
+//     (the message passed the centre), for 3 slices (30 ms)
+//   * the dead band does not need D6 to be strong, so it also works if D6
+//     receives only a little
+//   * hard limit: FORCE_STOP_MS after the turn started, the motor stops
+//     anyway while the message is on the sensors
 //
 // Output (every 100 ms; counts are the last 100 ms):
 //   S1(D4): 5  S2(D5): 40  S3(D6): 60  DETECTED | Acc(g) X:.. | Gyro(dps) X:.. | TURN CW pwm130 e:+0.40
 //
 // MPU6050 (display only): VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68).
-// Maths, PID tuning, bench procedure: spin_detect_clock.md
+// Maths, flowchart, version history: spin_detect_clock.md (code) and spin_detect_clock_process.md (overview)
 // ============================================================
 #include <Arduino.h>
 #include <Wire.h>
+#include <math.h>
 
 // ---------- Pins ----------
 const int NUM_SENSORS = 3;
@@ -52,21 +58,12 @@ const unsigned long REVERSE_PAUSE_MS = 30;        // pause before the motor chan
 // ---------- Fast counting: 10 ms slices, rolling windows ----------
 const unsigned long SLICE_MS = 10;
 const int RING = 10;                              // 10 slices = 100 ms
-const int FAST_SLICES = 5;                        // 5 slices = 50 ms: used for the compare / stop
+const int FAST_SLICES = 5;                        // 5 slices = 50 ms: used while turning / stopping
 const int DETECT_THRESHOLD = 5;                   // LOW reads per 100 ms = signal (spin_until_ir value)
 const int TRACK_THRESHOLD = 3;                    // LOW reads per 50 ms (same duty)
 const int CLEAR_SLICES_TO_REARM = 20;             // 200 ms without signal before the next detection
 
-// ---------- Compare / stop ----------
-const int CENTRE_SLICES = 3;                      // D6 greatest for 3 slices (30 ms) -> stop
-const int CENTRE_PERCENT = 100;                   // D6 wins when D6 + MIN_MARGIN >= CENTRE_PERCENT % of the strongest OTHER sensor.
-                                                  // 100 = D6 is at least as strong (always stops); 130-150 = D6 clearly
-                                                  // stronger -> centres tighter, but needs beams that overlap less.
-const int MIN_MARGIN = 2;                         // counts of tolerance (noise)
-const unsigned long TRACK_TIMEOUT_MS = 4000;      // D6 never became the greatest -> give up (no stop, no laser)
-const int LOST_SLICES = 50;                       // no signal for 0.5 s -> back to scanning
-
-// ---------- PID (speed of the turn toward the greatest sensor) ----------
+// ---------- PID rotation (v0.1 clock rotation) ----------
 const float KP = 140.0f;                          // PWM per unit of error
 const float KI = 40.0f;                           // PWM per (unit of error x second)
 const float KD = 6.0f;                            // PWM per (unit of error / second)
@@ -75,6 +72,14 @@ const int MIN_TRACK_PWM = 110;                    // smallest PWM that still tur
 const int MAX_TRACK_PWM = 200;
 
 // ---------- Stop ----------
+const float DEAD_START = 0.15f;                   // |pos| <= this = centred (at the start of the turn) ...
+const float DEAD_END = 0.60f;                     // ... widening to this
+const unsigned long RELAX_MS = 1200;              // ... over this time
+const float SIGN_MIN = 0.05f;                     // |pos| above this counts as a side (for zero-crossing)
+const int STOP_SLICES = 3;                        // condition true for 3 slices (30 ms) -> stop
+const unsigned long FORCE_STOP_MS = 1800;         // hard limit: stop here while the message is on the sensors
+const unsigned long TRACK_TIMEOUT_MS = 2500;      // safety net (message flickering for too long) -> scan again
+const int LOST_SLICES = 50;                       // no signal for 0.5 s -> back to scanning
 const unsigned long STOP_MS = 4000;               // stop time, laser ON for all of it
 
 // ---------- Output / MPU6050 (display only) ----------
@@ -90,13 +95,15 @@ State state = ST_SCAN;
 uint8_t ring[RING][NUM_SENSORS];
 int ringHead = 0;
 int c100[NUM_SENSORS];                            // last 100 ms (printed, scan detection)
-int c50[NUM_SENSORS];                             // last 50 ms (compare / stop)
+int c50[NUM_SENSORS];                             // last 50 ms (position / stop)
 
 bool armed = false;
 int clearSlices = 0;
-int centreRun = 0;
+int stopRun = 0;
 int lostSlices = 0;
 bool centreSeen = false;
+bool crossed = false;
+int lastSign = 0;
 
 int motorDir = 1;                                 // +1 clockwise, -1 anti-clockwise
 int motorPwm = 0;
@@ -203,6 +210,19 @@ int strongest(const int *c) {
   return b;
 }
 
+// Position of the message relative to D6: weighted mean of the sensor weights,
+// -1 .. +1, + = clockwise of D6. Counts below the threshold (noise) are ignored.
+float positionOf(const int *c, int thr) {
+  float sum = 0.0f, weighted = 0.0f;
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    if (c[i] >= thr) {
+      sum += c[i];
+      weighted += (float)SENSOR_WEIGHT[i] * c[i];
+    }
+  }
+  return (sum > 0.0f) ? weighted / sum : 0.0f;
+}
+
 // ---------- Output ----------
 void printLine(unsigned long now) {
   int b = strongest(c100);
@@ -292,37 +312,43 @@ void endStop() {
   startScan();
 }
 
-void startTurn() {
-  turnStartMs = millis();
-  lastPidMs = turnStartMs;
-  lostSlices = 0;
-  centreRun = 0;
-  centreSeen = false;
-  integral = 0.0f;
-  dFilt = 0.0f;
-  ePrev = 0.0f;
-  lastErr = 0.0f;
-  state = ST_TURN;
-  int b = strongest(c100);
-  Serial.print(F(">>> message on S"));
-  Serial.print(b + 1);
-  Serial.println(F(": comparing sensors, turning D6 toward the greatest <<<"));
-}
-
 int clampPwm(float u) {
   int p = (int)(u < 0 ? -u : u);
-  if (p < MIN_TRACK_PWM) p = MIN_TRACK_PWM;       // keep turning until D6 is the greatest
+  if (p < MIN_TRACK_PWM) p = MIN_TRACK_PWM;       // keep turning until the message is centred
   if (p > MAX_TRACK_PWM) p = MAX_TRACK_PWM;
   return p;
 }
 
-// ---------- Tracking: runs every 10 ms slice ----------
+void startTurn() {
+  turnStartMs = millis();
+  lastPidMs = turnStartMs;
+  lostSlices = 0;
+  stopRun = 0;
+  centreSeen = false;
+  crossed = false;
+  lastSign = 0;
+  integral = 0.0f;
+  dFilt = 0.0f;
+  state = ST_TURN;
+
+  float pos = positionOf(c100, DETECT_THRESHOLD);
+  ePrev = pos;
+  lastErr = pos;
+  int dir = (pos > 0.0f) ? 1 : (pos < 0.0f ? -1 : (SCAN_CLOCKWISE ? 1 : -1));
+  Serial.print(F(">>> message on S"));
+  Serial.print(strongest(c100) + 1);
+  Serial.print(F(": PID turn "));
+  Serial.print(dir > 0 ? F("clockwise") : F("anti-clockwise"));
+  Serial.println(F(" until D6 is centred <<<"));
+  driveMotor(dir, clampPwm(KP * (pos < 0 ? -pos : pos)));
+}
+
+// ---------- Turning + stopping: runs every 10 ms slice ----------
 void turnStep(unsigned long now) {
-  if (now - turnStartMs >= TRACK_TIMEOUT_MS) {
-    if (!centreSeen) {
-      Serial.println(F(">>> WARNING: D6 never received the message - check D6 wiring / aim <<<"));
-    }
-    Serial.println(F(">>> turn timeout - D6 not the greatest, back to scanning (no stop, no laser) <<<"));
+  unsigned long el = now - turnStartMs;
+
+  if (el >= TRACK_TIMEOUT_MS) {
+    Serial.println(F(">>> turn timeout - scanning again <<<"));
     armed = false;
     clearSlices = 0;
     startScan();
@@ -330,8 +356,7 @@ void turnStep(unsigned long now) {
   }
 
   int cb = c50[strongest(c50)];
-  int c6 = c50[CENTRE_SENSOR];
-  if (c6 >= TRACK_THRESHOLD) centreSeen = true;
+  if (c50[CENTRE_SENSOR] >= TRACK_THRESHOLD) centreSeen = true;
 
   if (cb < TRACK_THRESHOLD) {                     // nothing above the noise: keep going the same way
     if (++lostSlices >= LOST_SLICES) {
@@ -342,31 +367,41 @@ void turnStep(unsigned long now) {
   }
   lostSlices = 0;
 
-  // ---- compare: is D6 the greatest? (against the strongest OTHER sensor) ----
-  int side = -1;                                  // strongest sensor other than D6
-  int cOther = 0;
-  for (int i = 0; i < NUM_SENSORS; i++) {
-    if (i != CENTRE_SENSOR && (side < 0 || c50[i] > cOther)) {
-      side = i;
-      cOther = c50[i];
-    }
+  float pos = positionOf(c50, TRACK_THRESHOLD);
+
+  // ---- stop: centred (dead band that widens with time) or the message passed the centre ----
+  float dead = DEAD_START;
+  if (el < RELAX_MS) dead += (DEAD_END - DEAD_START) * (float)el / (float)RELAX_MS;
+  else dead = DEAD_END;
+
+  int sgn = (fabsf(pos) < SIGN_MIN) ? 0 : (pos > 0.0f ? 1 : -1);
+  if (sgn != 0) {
+    if (lastSign != 0 && sgn != lastSign) crossed = true;   // pos changed sign: passed the centre
+    lastSign = sgn;
   }
-  if (c6 >= TRACK_THRESHOLD && (long)(c6 + MIN_MARGIN) * 100L >= (long)cOther * CENTRE_PERCENT) {
-    if (motorPwm > MIN_TRACK_PWM) driveMotor(motorDir, MIN_TRACK_PWM);   // slow down while confirming
-    if (++centreRun >= CENTRE_SLICES) startStop(F("D6 is the greatest"));
+
+  bool centred = (fabsf(pos) <= dead) || crossed;
+  stopRun = centred ? stopRun + 1 : 0;
+
+  if (stopRun >= STOP_SLICES) {
+    startStop(F("D6 centred on the message"));
     return;
   }
-  centreRun = 0;
+  if (el >= FORCE_STOP_MS) {
+    if (!centreSeen) {
+      Serial.println(F(">>> WARNING: D6 never received the message - check D6 wiring / aim <<<"));
+    }
+    startStop(F("time limit, message on the sensors"));
+    return;
+  }
 
-  // ---- move D6 toward the greatest other sensor; PID sets the speed ----
-  float mag = (float)(cOther - c6) / (float)(cOther + c6 + 1);   // 0 .. 1: how much stronger that sensor is
-  if (mag < 0.05f) mag = 0.05f;                   // D6 leads but not clearly yet: creep toward the stronger side
-  float e = (float)SENSOR_WEIGHT[side] * mag;
+  // ---- PID: turn D6 toward the message ----
   float dt = (float)(now - lastPidMs) / 1000.0f;
   lastPidMs = now;
   if (dt < 0.001f) dt = 0.001f;
 
-  if ((e > 0.0f) != (ePrev > 0.0f)) integral = 0.0f;   // other side became the greatest: drop the history
+  float e = pos;                                  // setpoint 0 - (-pos)
+  if ((e > 0.0f) != (ePrev > 0.0f)) integral = 0.0f;   // error changed sign: drop the history
   integral += e * dt;
   if (integral > I_MAX) integral = I_MAX;
   if (integral < -I_MAX) integral = -I_MAX;
@@ -377,8 +412,9 @@ void turnStep(unsigned long now) {
   lastErr = e;
 
   float u = KP * e + KI * integral + KD * dFilt;
-  int dir = SENSOR_WEIGHT[side] > 0 ? 1 : -1;     // always toward the stronger side sensor
+  int dir = (u > 0.0f) ? 1 : (u < 0.0f ? -1 : motorDir);
   int pwm = clampPwm(u);
+  if (centred && pwm > MIN_TRACK_PWM) pwm = MIN_TRACK_PWM;   // about to stop: slow down while confirming
   if (dir != motorDir || pwm != motorPwm) driveMotor(dir, pwm);
 }
 
@@ -397,10 +433,10 @@ void setup() {
 
   for (int i = 0; i < NUM_SENSORS; i++) pinMode(SENSOR_PINS[i], INPUT_PULLUP);
 
-  Serial.println(F("=== Spin Detect Clock v0.2 (D4 left, D5 right, D6 centre + laser D10, MPU6050=A4/A5) ==="));
+  Serial.println(F("=== Spin Detect Clock v0.3 (D4 left, D5 right, D6 centre + laser D10, MPU6050=A4/A5) ==="));
   imuOk = imuInit();
   Serial.println(imuOk ? F("MPU6050 found at 0x68") : F("MPU6050 not found at 0x68 (IMU:OFF) - continuing"));
-  Serial.println(F("Auto-starting: scan, compare sensors, turn D6 to the greatest, stop 4 s with laser ON"));
+  Serial.println(F("Auto-starting: scan, PID-rotate until D6 is centred, fast stop, 4 s with laser ON"));
   delay(1000);
 
   startScan();
@@ -430,7 +466,7 @@ void loop() {
           armed = true;
         }
       } else if (det) {
-        startTurn();                              // the compare / stop logic takes over next slice
+        startTurn();                              // the PID / stop logic takes over next slice
       }
       break;
     }

@@ -129,16 +129,17 @@ pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one
 ```
 
-### spin_detect_clock (v0.2)
-Copy of `spin_detect` (which is unchanged) with a faster compare-and-stop.
-D6 is the centre sensor on the laser axis, D4/D5 the sides. The sensors are
-counted in 10 ms slices and compared 100 times per second (last 50 ms): if
-D6 is the greatest it stops within 30 ms and the laser is ON for 4 s; if a
-side sensor is greater, a PID turns D6 toward it (D4 anti-clockwise, D5
-clockwise) until D6 takes the lead. If D6 never becomes the greatest in 4 s
-it scans again without stopping or firing the laser, and warns if D6 never
-received the message. Details, PID and tuning:
-[spin_detect_clock.md](spin_detect_clock.md).
+### spin_detect_clock (v0.3)
+Copy of `spin_detect` (unchanged) with the "clock" rotation: D6 is the
+centre sensor on the laser axis, D4/D5 the sides. After a detection a PID
+on pos = (D5-D4)/(D4+D5+D6) turns the assembly toward the message. v0.3
+fixes the slow stop of v0.1: decisions every 10 ms, and the motor stops as
+soon as |pos| is inside a dead band that widens with time (0.15 -> 0.60
+over 1.2 s) or pos crosses zero, with a 1.8 s hard limit; then the laser is
+ON for 4 s, OFF, and scanning resumes. Two documents:
+[spin_detect_clock.md](spin_detect_clock.md) (code explanation) and
+[spin_detect_clock_process.md](spin_detect_clock_process.md) (process,
+problems, maths and flowchart per version).
 
 ```
 pio run -e spin_detect_clock -t upload
