@@ -57,24 +57,24 @@ The currently recorded component masses are:
 
 ### Total mass
 
-$$
+```math
 M = \sum m_i
-$$
+```
 
-$$
+```math
 M = 0.007 + 0.162 + 0.014 + 0.205 + 0.616 + 0.007 + 0.0009 + 0.073
-$$
+```
 
-$$
+```math
 \boxed{M = 1.0849\text{ kg}}
-$$
+```
 
 The flywheel is currently the dominant known mass:
 
-$$
+```math
 \frac{0.616}{1.0849}\times100
 = \boxed{56.78\%}
-$$
+```
 
 ---
 
@@ -82,24 +82,24 @@ $$
 
 The gravitational load from the currently known mass is:
 
-$$
+```math
 W = Mg
-$$
+```
 
-$$
+```math
 W = 1.0849\times9.81
-$$
+```
 
-$$
+```math
 \boxed{W = 10.643\text{ N}}
-$$
+```
 
 Equivalent kilogram-force:
 
-$$
+```math
 W_{kgf} = \frac{10.643}{9.81}
 = \boxed{1.0849\text{ kgf}}
-$$
+```
 
 This **10.643 N is a lower bound**, because PVC, laser, sensors, final printed structure, wiring and other final hardware are not all included in the recorded mass total.
 
@@ -107,42 +107,42 @@ This **10.643 N is a lower bound**, because PVC, laser, sensors, final printed s
 
 For `n` perfectly vertical supports sharing the load equally:
 
-$$
+```math
 T_{each} = \frac{W}{n}
-$$
+```
 
 Two supports:
 
-$$
+```math
 T_2 = \frac{10.643}{2}
 = \boxed{5.321\text{ N per support}}
-$$
+```
 
 Three supports:
 
-$$
+```math
 T_3 = \frac{10.643}{3}
 = \boxed{3.548\text{ N per support}}
-$$
+```
 
 Four supports:
 
-$$
+```math
 T_4 = \frac{10.643}{4}
 = \boxed{2.661\text{ N per support}}
-$$
+```
 
 ### Two-line suspension at an angle
 
 If two equal suspension lines are each at angle `θ` from vertical:
 
-$$
+```math
 2T\cos\theta = W
-$$
+```
 
-$$
+```math
 T = \frac{W}{2\cos\theta}
-$$
+```
 
 Using the current known load:
 
@@ -159,17 +159,17 @@ If a factor of safety is applied directly to the current static load:
 
 For `FoS = 2`:
 
-$$
+```math
 F_{design,2} = 2(10.643)
 = \boxed{21.286\text{ N}}
-$$
+```
 
 For `FoS = 3`:
 
-$$
+```math
 F_{design,3} = 3(10.643)
 = \boxed{31.929\text{ N}}
-$$
+```
 
 These are design-check values, not measured dynamic loads.
 
@@ -179,65 +179,65 @@ These are design-check values, not measured dynamic loads.
 
 For discrete components:
 
-$$
+```math
 x_{CG} = \frac{\sum m_i x_i}{\sum m_i}
-$$
+```
 
-$$
+```math
 y_{CG} = \frac{\sum m_i y_i}{\sum m_i}
-$$
+```
 
-$$
+```math
 z_{CG} = \frac{\sum m_i z_i}{\sum m_i}
-$$
+```
 
 Using the current known mass:
 
-$$
+```math
 x_{CG} =
 \frac{\sum m_i x_i}{1.0849}
-$$
+```
 
-$$
+```math
 y_{CG} =
 \frac{\sum m_i y_i}{1.0849}
-$$
+```
 
-$$
+```math
 z_{CG} =
 \frac{\sum m_i z_i}{1.0849}
-$$
+```
 
 ### Ideal centred-design result
 
 If every component centre is placed exactly on the intended rotation axis, then:
 
-$$
+```math
 x_i = 0,\quad y_i = 0
-$$
+```
 
 Therefore:
 
-$$
+```math
 x_{CG} = \frac{1.0849(0)}{1.0849}=\boxed{0\text{ mm}}
-$$
+```
 
-$$
+```math
 y_{CG} = \frac{1.0849(0)}{1.0849}=\boxed{0\text{ mm}}
-$$
+```
 
 The radial CG error is:
 
-$$
+```math
 r_{CG} = \sqrt{x_{CG}^2+y_{CG}^2}
-$$
+```
 
 Ideal case:
 
-$$
+```math
 r_{CG} = \sqrt{0^2+0^2}
 = \boxed{0\text{ mm}}
-$$
+```
 
 ### Actual CG still requires final CAD/measured coordinates
 
@@ -262,21 +262,21 @@ Use this table once the final CAD coordinates are measured:
 
 Rotational imbalance force:
 
-$$
+```math
 F_u = M r_{CG} \omega^2
-$$
+```
 
 A documented design-analysis speed used elsewhere in the project is `30 rpm = 180°/s`.
 
 Convert to radians per second:
 
-$$
+```math
 \omega
 =
 30\frac{2\pi}{60}
 =
 \boxed{3.1416\text{ rad/s}}
-$$
+```
 
 Using `M = 1.0849 kg`:
 
@@ -288,15 +288,15 @@ Using `M = 1.0849 kg`:
 
 The equation shows why balancing matters:
 
-$$
+```math
 F_u \propto r_{CG}
-$$
+```
 
 and
 
-$$
+```math
 F_u \propto \omega^2
-$$
+```
 
 Doubling rotation speed produces four times the imbalance force.
 
@@ -310,51 +310,51 @@ The baseline flywheel is a solid mild-steel disk.
 
 Radius:
 
-$$
+```math
 r = \frac{100\text{ mm}}{2}
 = 50\text{ mm}
 = 0.050\text{ m}
-$$
+```
 
 Thickness:
 
-$$
+```math
 h=10\text{ mm}=0.010\text{ m}
-$$
+```
 
 Disk volume:
 
-$$
+```math
 V=\pi r^2h
-$$
+```
 
-$$
+```math
 V=\pi(0.050)^2(0.010)
-$$
+```
 
-$$
+```math
 \boxed{V=0.00007854\text{ m}^3}
-$$
+```
 
 Mass:
 
-$$
+```math
 m=\rho V
-$$
+```
 
-$$
+```math
 m=7850(0.00007854)
-$$
+```
 
-$$
+```math
 \boxed{m=0.6165\text{ kg}}
-$$
+```
 
 The project mass table rounds this to:
 
-$$
+```math
 \boxed{m_w\approx0.616\text{ kg}}
-$$
+```
 
 ---
 
@@ -362,21 +362,21 @@ $$
 
 For a solid disk:
 
-$$
+```math
 I_w=\frac12mr^2
-$$
+```
 
 Using the project rounded mass:
 
-$$
+```math
 I_w
 =
 \frac12(0.616)(0.050)^2
-$$
+```
 
-$$
+```math
 \boxed{I_w=0.000770\text{ kg·m}^2}
-$$
+```
 
 ---
 
@@ -384,67 +384,67 @@ $$
 
 Motor output speed:
 
-$$
+```math
 N=251\text{ rpm}
-$$
+```
 
 Convert to rad/s:
 
-$$
+```math
 \omega
 =
 N\frac{2\pi}{60}
-$$
+```
 
-$$
+```math
 \omega
 =
 251\frac{2\pi}{60}
-$$
+```
 
-$$
+```math
 \boxed{\omega=26.2847\text{ rad/s}}
-$$
+```
 
 Convert to degrees per second:
 
-$$
+```math
 \omega_{deg/s}
 =
 251\frac{360}{60}
 =
 \boxed{1506\text{ °/s}}
-$$
+```
 
 ---
 
 ## 9. Flywheel Angular Momentum
 
-$$
+```math
 H=I\omega
-$$
+```
 
-$$
+```math
 H
 =
 (0.000770)(26.2847)
-$$
+```
 
-$$
+```math
 \boxed{H=0.02024\text{ N·m·s}}
-$$
+```
 
 For an ideal isolated reaction-wheel system:
 
-$$
+```math
 I_s\omega_s + I_w\omega_w = 0
-$$
+```
 
 Therefore:
 
-$$
+```math
 \boxed{\omega_s=-\frac{I_w}{I_s}\omega_w}
-$$
+```
 
 A final numerical chassis angular velocity cannot be calculated until the complete chassis moment of inertia `I_s` is measured/calculated from the finished geometry.
 
@@ -452,45 +452,45 @@ A final numerical chassis angular velocity cannot be calculated until the comple
 
 ## 10. Flywheel Rotational Kinetic Energy
 
-$$
+```math
 E_k=\frac12I\omega^2
-$$
+```
 
-$$
+```math
 E_k
 =
 \frac12(0.000770)(26.2847)^2
-$$
+```
 
-$$
+```math
 \boxed{E_k=0.2660\text{ J}}
-$$
+```
 
 If speed is halved:
 
-$$
+```math
 E_{half}
 =
 \frac12 I\left(\frac{\omega}{2}\right)^2
 =
 \frac14E_k
-$$
+```
 
-$$
+```math
 E_{half}
 =
 \frac{0.2660}{4}
 =
 \boxed{0.0665\text{ J}}
-$$
+```
 
 So halving speed reduces rotational energy by:
 
-$$
+```math
 0.2660-0.0665
 =
 \boxed{0.1995\text{ J}}
-$$
+```
 
 or **75%**.
 
@@ -500,41 +500,41 @@ or **75%**.
 
 Rim speed:
 
-$$
+```math
 v=\omega r
-$$
+```
 
-$$
+```math
 v=(26.2847)(0.050)
-$$
+```
 
-$$
+```math
 \boxed{v=1.3142\text{ m/s}}
-$$
+```
 
 Rim centripetal acceleration:
 
-$$
+```math
 a_c=\omega^2r
-$$
+```
 
-$$
+```math
 a_c=(26.2847)^2(0.050)
-$$
+```
 
-$$
+```math
 \boxed{a_c=34.544\text{ m/s}^2}
-$$
+```
 
 In multiples of gravity:
 
-$$
+```math
 \frac{a_c}{g}
 =
 \frac{34.544}{9.81}
 =
 \boxed{3.52g}
-$$
+```
 
 ---
 
@@ -544,55 +544,55 @@ $$
 
 Encoder:
 
-$$
+```math
 N_{CPR}=700\text{ counts/rev}
-$$
+```
 
 Radians per count:
 
-$$
+```math
 \theta_{count}
 =
 \frac{2\pi}{700}
 =
 \boxed{0.008976\text{ rad/count}}
-$$
+```
 
 Degrees per count:
 
-$$
+```math
 \theta_{count}
 =
 \frac{360}{700}
 =
 \boxed{0.5143\text{ °/count}}
-$$
+```
 
 At 251 rpm:
 
-$$
+```math
 f_{count}
 =
 \frac{251}{60}(700)
-$$
+```
 
-$$
+```math
 \boxed{f_{count}=2928.3\text{ counts/s}}
-$$
+```
 
 Time between counts:
 
-$$
+```math
 \Delta t
 =
 \frac{1}{2928.3}
 =
 0.000341491\text{ s}
-$$
+```
 
-$$
+```math
 \boxed{\Delta t=341.5\ \mu s}
-$$
+```
 
 ---
 
@@ -600,44 +600,44 @@ $$
 
 Angular position after `N` counts:
 
-$$
+```math
 \theta=N\left(\frac{2\pi}{700}\right)
-$$
+```
 
 Example: 100 counts:
 
-$$
+```math
 \theta
 =
 100(0.008976)
 =
 0.8976\text{ rad}
-$$
+```
 
-$$
+```math
 \boxed{\theta=51.43°}
-$$
+```
 
 Angular speed estimate:
 
-$$
+```math
 \omega
 \approx
 \frac{\Delta N}{\Delta t}
 \left(\frac{2\pi}{700}\right)
-$$
+```
 
 Example: 293 counts in 0.1 s:
 
-$$
+```math
 \omega
 \approx
 \frac{293}{0.1}(0.008976)
-$$
+```
 
-$$
+```math
 \boxed{\omega\approx26.300\text{ rad/s}}
-$$
+```
 
 which is approximately the 251 rpm no-load speed.
 
@@ -647,39 +647,39 @@ which is approximately the 251 rpm no-load speed.
 
 Maximum published/recorded stall torque:
 
-$$
+```math
 \tau_{stall}=1.77\text{ N·m}
-$$
+```
 
 Equivalent tangential force at the 50 mm flywheel radius:
 
-$$
+```math
 F=\frac{\tau}{r}
-$$
+```
 
-$$
+```math
 F=\frac{1.77}{0.050}
-$$
+```
 
-$$
+```math
 \boxed{F=35.4\text{ N}}
-$$
+```
 
 The documented motor bottom envelope diameter is approximately 39 mm:
 
-$$
+```math
 r=\frac{39}{2}=19.5\text{ mm}=0.0195\text{ m}
-$$
+```
 
 Equivalent force at that radius:
 
-$$
+```math
 F=\frac{1.77}{0.0195}
-$$
+```
 
-$$
+```math
 \boxed{F=90.77\text{ N}}
-$$
+```
 
 This is an equivalent torque-reaction force, **not automatically the force on one screw**. Actual fastener load depends on the real mount geometry.
 
@@ -691,17 +691,17 @@ This is an equivalent torque-reaction force, **not automatically the force on on
 
 Using the approximate stall figures:
 
-$$
+```math
 K_t\approx\frac{\tau_{stall}}{I_{stall}}
-$$
+```
 
-$$
+```math
 K_t\approx\frac{1.77}{7}
-$$
+```
 
-$$
+```math
 \boxed{K_t\approx0.2529\text{ N·m/A}}
-$$
+```
 
 This is an estimate, not a measured motor constant.
 
@@ -711,21 +711,21 @@ This is an estimate, not a measured motor constant.
 
 Using the project's approximate:
 
-$$
+```math
 K_e=0.456\text{ V·s/rad}
-$$
+```
 
-$$
+```math
 E=K_e\omega
-$$
+```
 
-$$
+```math
 E=(0.456)(26.2847)
-$$
+```
 
-$$
+```math
 \boxed{E\approx11.986\text{ V}}
-$$
+```
 
 This being close to 12 V is consistent with the motor approaching its no-load speed.
 
@@ -735,35 +735,35 @@ This being close to 12 V is consistent with the motor approaching its no-load sp
 
 Using the simplified dynamic-braking model:
 
-$$
+```math
 I_b\approx\frac{K_e\omega}{R}
-$$
+```
 
-$$
+```math
 I_b
 =
 \frac{0.456(26.2847)}{1.71}
-$$
+```
 
-$$
+```math
 \boxed{I_b\approx7.009\text{ A}}
-$$
+```
 
 Approximate braking torque:
 
-$$
+```math
 \tau_b\approx K_tI_b
-$$
+```
 
-$$
+```math
 \tau_b
 =
 (0.2529)(7.009)
-$$
+```
 
-$$
+```math
 \boxed{\tau_b\approx1.772\text{ N·m}}
-$$
+```
 
 This simplified result is based on estimated motor constants and does not include driver current limiting, winding inductance, gearbox losses or the changing motor speed.
 
@@ -773,55 +773,55 @@ This simplified result is based on estimated motor constants and does not includ
 
 The project's reverse-braking estimate uses:
 
-$$
+```math
 I_{reverse}
 \approx
 \frac{V+K_e\omega}{R}
-$$
+```
 
 Substitution:
 
-$$
+```math
 I_{reverse}
 =
 \frac{12+0.456(26.2847)}{1.71}
-$$
+```
 
-$$
+```math
 I_{reverse}
 =
 \frac{12+11.986}{1.71}
-$$
+```
 
-$$
+```math
 \boxed{I_{reverse}\approx14.03\text{ A}}
-$$
+```
 
 Approximate reverse torque:
 
-$$
+```math
 \tau_{reverse}
 \approx
 K_tI_{reverse}
-$$
+```
 
-$$
+```math
 \tau_{reverse}
 =
 (0.2529)(14.03)
-$$
+```
 
-$$
+```math
 \boxed{\tau_{reverse}\approx3.55\text{ N·m}}
-$$
+```
 
 Comparison with approximate motor stall current:
 
-$$
+```math
 \frac{14.03}{7}
 =
 \boxed{2.00\times}
-$$
+```
 
 So the simplified direct-reverse calculation predicts roughly **2.00 times the stated stall current**, supporting the decision not to use immediate full reverse braking.
 
@@ -831,15 +831,15 @@ So the simplified direct-reverse calculation predicts roughly **2.00 times the s
 
 Current code:
 
-$$
+```math
 t_{decel}=1000\text{ ms}=1.0\text{ s}
-$$
+```
 
 The PWM command is reduced linearly:
 
-$$
+```math
 PWM(t)=PWM_0\left(1-\frac{t}{1.0}\right)
-$$
+```
 
 ### If braking starts at PWM = 200
 
@@ -871,71 +871,71 @@ The software makes PWM linear with time. **Motor angular speed is not guaranteed
 
 The documented approximate loop time is:
 
-$$
+```math
 t_{loop}
 \approx
 3(4.5\ \mu s)+100\ \mu s+3\ \mu s
-$$
+```
 
-$$
+```math
 t_{loop}
 \approx
 \boxed{117\ \mu s}
-$$
+```
 
 Approximate samples per sensor in 100 ms:
 
-$$
+```math
 N_{100}
 =
 \frac{100000\ \mu s}{117\ \mu s}
-$$
+```
 
-$$
+```math
 \boxed{N_{100}\approx854.7\approx855}
-$$
+```
 
 For threshold `K = 5`:
 
-$$
+```math
 Duty_{threshold}
 =
 \frac{5}{854.7}\times100
-$$
+```
 
-$$
+```math
 \boxed{Duty_{threshold}\approx0.585\%}
-$$
+```
 
 Approximate LOW time represented by 5 loop samples:
 
-$$
+```math
 t_{LOW}
 =
 5(117\ \mu s)
 =
 \boxed{585\ \mu s=0.585\text{ ms}}
-$$
+```
 
 ### 50 ms tracking window
 
-$$
+```math
 N_{50}
 =
 \frac{50000}{117}
 =
 \boxed{427.4\text{ samples}}
-$$
+```
 
 For threshold 3:
 
-$$
+```math
 Duty_{track}
 =
 \frac{3}{427.4}\times100
 =
 \boxed{0.702\%}
-$$
+```
 
 ---
 
@@ -943,17 +943,17 @@ $$
 
 Current centroid equation:
 
-$$
+```math
 pos
 =
 \frac{D5-D4}{D4+D5+D6}
-$$
+```
 
 Range:
 
-$$
+```math
 -1\le pos\le+1
-$$
+```
 
 Example from the documented output style:
 
@@ -961,21 +961,21 @@ Example from the documented output style:
 - `D5 = 40`
 - `D6 = 60`
 
-$$
+```math
 pos
 =
 \frac{40-5}{5+40+60}
-$$
+```
 
-$$
+```math
 pos
 =
 \frac{35}{105}
-$$
+```
 
-$$
+```math
 \boxed{pos=+0.333}
-$$
+```
 
 Positive means the target is on the clockwise side of the centre sensor.
 
@@ -985,13 +985,13 @@ Perfect balance example:
 - `D5 = 12`
 - `D6 = 25`
 
-$$
+```math
 pos
 =
 \frac{12-12}{12+12+25}
 =
 \boxed{0}
-$$
+```
 
 ---
 
@@ -999,11 +999,11 @@ $$
 
 The documented Poisson-style approximation is:
 
-$$
+```math
 \sigma_{pos}
 \approx
 \frac{\sqrt{D4+D5}}{D4+D5+D6}
-$$
+```
 
 For:
 
@@ -1011,25 +1011,25 @@ For:
 - `D5 = 12`
 - `D6 = 25`
 
-$$
+```math
 \sigma_{pos}
 \approx
 \frac{\sqrt{12+12}}{12+12+25}
-$$
+```
 
-$$
+```math
 =
 \frac{\sqrt{24}}{49}
-$$
+```
 
-$$
+```math
 =
 \frac{4.899}{49}
-$$
+```
 
-$$
+```math
 \boxed{\sigma_{pos}\approx0.1000\approx0.10}
-$$
+```
 
 ---
 
@@ -1037,67 +1037,67 @@ $$
 
 Current gains:
 
-$$
+```math
 K_p=140,\qquad K_i=40,\qquad K_d=6
-$$
+```
 
 Controller:
 
-$$
+```math
 u=K_pe+K_iI+K_dD
-$$
+```
 
 Integral:
 
-$$
+```math
 I_{new}
 =
 clamp(I_{old}+e\Delta t,\pm1)
-$$
+```
 
 Derivative filter:
 
-$$
+```math
 D_{new}
 =
 0.8D_{old}
 +
 0.2\left(\frac{e-e_{prev}}{\Delta t}\right)
-$$
+```
 
 PWM:
 
-$$
+```math
 PWM=clamp(|u|,110,200)
-$$
+```
 
 ### Numerical proportional example
 
 For:
 
-$$
+```math
 e=0.40,\quad I=0,\quad D=0
-$$
+```
 
-$$
+```math
 u
 =
 140(0.40)+40(0)+6(0)
-$$
+```
 
-$$
+```math
 u=56
-$$
+```
 
 The raw controller output is 56, but the code enforces:
 
-$$
+```math
 PWM=clamp(56,110,200)
-$$
+```
 
-$$
+```math
 \boxed{PWM=110}
-$$
+```
 
 So even a moderate error can command the minimum mechanically useful tracking PWM.
 
@@ -1107,13 +1107,13 @@ So even a moderate error can command the minimum mechanically useful tracking PW
 
 Current code:
 
-$$
+```math
 dead(t)
 =
 0.15
 +
 0.45\min\left(1,\frac{t}{1.2}\right)
-$$
+```
 
 Calculated values:
 
@@ -1128,13 +1128,13 @@ Calculated values:
 
 At `t = 1.2 s`:
 
-$$
+```math
 dead
 =
 0.15+0.45
 =
 \boxed{0.60}
-$$
+```
 
 ---
 
@@ -1142,29 +1142,29 @@ $$
 
 The decision loop runs every:
 
-$$
+```math
 \Delta t=10\text{ ms}=0.010\text{ s}
-$$
+```
 
 At the documented low-end assumed tracking speed of `64°/s`:
 
-$$
+```math
 \Delta\theta
 =
 64(0.010)
 =
 \boxed{0.64°}
-$$
+```
 
 At `180°/s`:
 
-$$
+```math
 \Delta\theta
 =
 180(0.010)
 =
 \boxed{1.80°}
-$$
+```
 
 Therefore a sign change in `pos` locates the centre to roughly one 10 ms motion step, approximately **0.64–1.80°** for those assumed speeds.
 
@@ -1180,15 +1180,15 @@ Components used by the current logic:
 
 Simple total timing budget:
 
-$$
+```math
 t_{decision}
 \approx
 10+30+50
-$$
+```
 
-$$
+```math
 \boxed{t_{decision}\approx90\text{ ms}}
-$$
+```
 
 The windows overlap, so this is a conservative accounting value rather than a guaranteed independent 90 ms delay.
 
@@ -1200,73 +1200,73 @@ The windows overlap, so this is a conservative accounting value rather than a gu
 
 For the archived/reference 3-sensor layout:
 
-$$
+```math
 s=\frac{360°}{3}
-$$
+```
 
-$$
+```math
 \boxed{s=120°}
-$$
+```
 
 Assumed sensor field of view:
 
-$$
+```math
 \beta=90°
-$$
+```
 
 Static three-sensor coverage:
 
-$$
+```math
 C=3\beta
-$$
+```
 
-$$
+```math
 C=3(90°)
-$$
+```
 
-$$
+```math
 \boxed{C=270°}
-$$
+```
 
 Gap between adjacent sensor beams:
 
-$$
+```math
 g=s-\beta
-$$
+```
 
-$$
+```math
 g=120°-90°
-$$
+```
 
-$$
+```math
 \boxed{g=30°}
-$$
+```
 
 Maximum rotation to bring a target into a beam:
 
-$$
+```math
 \boxed{30°}
-$$
+```
 
 At `180°/s`:
 
-$$
+```math
 t
 =
 \frac{30°}{180°/s}
 =
 \boxed{0.1667\text{ s}}
-$$
+```
 
 At `60°/s`:
 
-$$
+```math
 t
 =
 \frac{30°}{60°/s}
 =
 \boxed{0.500\text{ s}}
-$$
+```
 
 ---
 
@@ -1274,11 +1274,11 @@ $$
 
 The documented projection equation is:
 
-$$
+```math
 \alpha_C
 =
 atan2(D\sin\alpha,\ R+D\cos\alpha)
-$$
+```
 
 Using:
 
@@ -1287,163 +1287,418 @@ Using:
 
 ### Target at 1 m
 
-$$
+```math
 \alpha_C
 =
 atan2(1.0\sin45°,\ 0.050+1.0\cos45°)
-$$
+```
 
-$$
+```math
 \boxed{\alpha_C\approx43.04°}
-$$
+```
 
 Parallax error:
 
-$$
+```math
 45°-43.04°
 =
 \boxed{1.96°}
-$$
+```
 
 ### Target at 0.5 m
 
-$$
+```math
 \alpha_C
 =
 atan2(0.5\sin45°,\ 0.050+0.5\cos45°)
-$$
+```
 
-$$
+```math
 \boxed{\alpha_C\approx41.22°}
-$$
+```
 
 Parallax error:
 
-$$
+```math
 45°-41.22°
 =
 \boxed{3.78°}
-$$
+```
 
 ---
 
 # Gyroscope Mathematics
 
-## 29. MPU6050 Scale
+
+## 29. Measured MPU6050 XYZ Values from Bench Output
+
+The following calculations use the 19 visible IMU samples from the supplied serial-monitor screenshot.
+
+### Measured mean acceleration
+
+The accelerometer outputs are in units of `g`.
+
+```math
+\bar{A}_x = \frac{\sum A_x}{n}
+```
+
+```math
+\bar{A}_x = \frac{-1.49}{19}
+= \boxed{-0.0784\,g}
+```
+
+```math
+\bar{A}_y = \frac{\sum A_y}{n}
+```
+
+```math
+\bar{A}_y = \frac{13.89}{19}
+= \boxed{+0.7311\,g}
+```
+
+```math
+\bar{A}_z = \frac{\sum A_z}{n}
+```
+
+```math
+\bar{A}_z = \frac{-13.15}{19}
+= \boxed{-0.6921\,g}
+```
+
+Therefore the measured gravity/acceleration vector in the MPU6050 sensor frame is approximately:
+
+```math
+\boxed{\vec A = (-0.0784,\;0.7311,\;-0.6921)\,g}
+```
+
+### Resultant acceleration magnitude
+
+```math
+|\vec A|
+=
+\sqrt{A_x^2+A_y^2+A_z^2}
+```
+
+```math
+|\vec A|
+=
+\sqrt{(-0.0784)^2+(0.7311)^2+(-0.6921)^2}
+```
+
+```math
+|\vec A|
+=
+\sqrt{0.00615+0.5344+0.4790}
+```
+
+```math
+|\vec A|
+=
+\sqrt{1.0196}
+```
+
+```math
+\boxed{|\vec A|=1.0098\,g}
+```
+
+Convert to SI acceleration:
+
+```math
+a = 1.0098(9.81)
+```
+
+```math
+\boxed{a=9.906\text{ m/s}^2}
+```
+
+This is close to the expected gravitational acceleration of \(1g\), which is consistent with the accelerometer behaving plausibly during the captured period.
+
+### Accelerometer sample variation
+
+Sample standard deviations from the 19 visible readings:
+
+```math
+\boxed{\sigma_{A_x}\approx0.0201\,g}
+```
+
+```math
+\boxed{\sigma_{A_y}\approx0.0115\,g}
+```
+
+```math
+\boxed{\sigma_{A_z}\approx0.0187\,g}
+```
+
+The mean resultant magnitude across the visible samples is approximately:
+
+```math
+\boxed{\bar{|A|}\approx1.0101\,g}
+```
+
+with a sample-to-sample standard deviation of approximately:
+
+```math
+\boxed{\sigma_{|A|}\approx0.0132\,g}
+```
+
+### Sensor-frame tilt from gravity vector
+
+The angle between the measured acceleration vector and the positive \(Y\) axis is:
+
+```math
+\theta_Y
+=
+\cos^{-1}\left(\frac{A_y}{|\vec A|}\right)
+```
+
+```math
+\theta_Y
+=
+\cos^{-1}\left(\frac{0.7311}{1.0098}\right)
+```
+
+```math
+\boxed{\theta_Y\approx43.61^\circ}
+```
+
+The angle between the measured gravity vector and the negative \(Z\) axis is:
+
+```math
+\theta_{-Z}
+=
+\cos^{-1}\left(\frac{-A_z}{|\vec A|}\right)
+```
+
+```math
+\theta_{-Z}
+=
+\cos^{-1}\left(\frac{0.6921}{1.0098}\right)
+```
+
+```math
+\boxed{\theta_{-Z}\approx46.73^\circ}
+```
+
+The small \(X\)-axis component corresponds to:
+
+```math
+\theta_X^\prime
+=
+\tan^{-1}
+\left(
+\frac{|A_x|}
+{\sqrt{A_y^2+A_z^2}}
+\right)
+```
+
+```math
+\theta_X^\prime
+=
+\tan^{-1}
+\left(
+\frac{0.0784}
+{\sqrt{0.7311^2+0.6921^2}}
+\right)
+```
+
+```math
+\boxed{\theta_X^\prime\approx4.45^\circ}
+```
+
+So the captured MPU6050 orientation has gravity mainly split between \(+Y\) and \(-Z\), with only a small \(X\)-axis component.
+
+### Measured mean gyroscope values
+
+The 19 visible samples give:
+
+```math
+\bar{\omega}_x
+=
+\frac{-34.3}{19}
+=
+\boxed{-1.805\text{ °/s}}
+```
+
+```math
+\bar{\omega}_y
+=
+\frac{65.1}{19}
+=
+\boxed{+3.426\text{ °/s}}
+```
+
+```math
+\bar{\omega}_z
+=
+\frac{2.5}{19}
+=
+\boxed{+0.132\text{ °/s}}
+```
+
+The magnitude of the mean angular-rate vector is:
+
+```math
+|\bar{\omega}|
+=
+\sqrt{(-1.805)^2+(3.426)^2+(0.132)^2}
+```
+
+```math
+\boxed{|\bar{\omega}|\approx3.875\text{ °/s}}
+```
+
+Sample standard deviations are approximately:
+
+```math
+\boxed{\sigma_{\omega_x}\approx3.54\text{ °/s}}
+```
+
+```math
+\boxed{\sigma_{\omega_y}\approx4.17\text{ °/s}}
+```
+
+```math
+\boxed{\sigma_{\omega_z}\approx3.88\text{ °/s}}
+```
+
+These raw gyroscope values include sensor bias/noise because the current output code prints the measured gyro values without a completed bias-removal calibration.
+
+### Important distinction: IMU XYZ is not the centre-of-mass XYZ
+
+The values above are:
+
+- accelerometer readings \(A_x,A_y,A_z\), in `g`;
+- gyroscope readings \(\omega_x,\omega_y,\omega_z\), in degrees per second.
+
+They are **not physical component coordinates** such as \(x_i,y_i,z_i\) in millimetres from the satellite centre. Therefore they cannot be substituted into:
+
+```math
+x_{CG}=\frac{\sum m_ix_i}{\sum m_i},
+\quad
+y_{CG}=\frac{\sum m_iy_i}{\sum m_i},
+\quad
+z_{CG}=\frac{\sum m_iz_i}{\sum m_i}
+```
+
+To calculate the actual centre of gravity numerically, the final CAD or measured position of each component is still required.
+
+---
+
+## 30. MPU6050 Scale
 
 Current configuration:
 
-$$
+```math
 LSB=32.8\text{ counts/(°/s)}
-$$
+```
 
 Angular-rate resolution per raw count:
 
-$$
+```math
 \Delta\omega
 =
 \frac{1}{32.8}
-$$
+```
 
-$$
+```math
 \boxed{\Delta\omega=0.03049\text{ °/s per count}}
-$$
+```
 
 Maximum configured rate:
 
-$$
+```math
 \omega_{max}=1000°/s
-$$
+```
 
 Convert to rpm:
 
-$$
+```math
 N
 =
 1000\frac{60}{360}
-$$
+```
 
-$$
+```math
 \boxed{N=166.67\text{ rpm}}
-$$
+```
 
 Gyro integration:
 
-$$
+```math
 \theta_{gyro}
 \leftarrow
 \theta_{gyro}+\omega\Delta t
-$$
+```
 
 At `100 Hz`:
 
-$$
+```math
 \Delta t=\frac1{100}=\boxed{0.010\text{ s}}
-$$
+```
 
 If residual bias is `0.05°/s` over 5 s:
 
-$$
+```math
 \theta_{drift}
 =
 0.05(5)
 =
 \boxed{0.25°}
-$$
+```
 
 A documented rectangular-integration braking error estimate at `180°/s` is:
 
-$$
+```math
 e
 \lesssim
 \frac12\omega\Delta t
-$$
+```
 
-$$
+```math
 e
 \lesssim
 \frac12(180)(0.010)
-$$
+```
 
-$$
+```math
 \boxed{e\lesssim0.90°}
-$$
+```
 
 ---
 
 # Laser Timing Mathematics
 
-## 30. Laser Hold Margin
+## 31. Laser Hold Margin
 
 Current code holds the laser for:
 
-$$
+```math
 t_{laser}=4000\text{ ms}=4.0\text{ s}
-$$
+```
 
 Project minimum requirement:
 
-$$
+```math
 t_{required}=2.0\text{ s}
-$$
+```
 
 Timing margin:
 
-$$
+```math
 Margin
 =
 4.0-2.0
 =
 \boxed{2.0\text{ s}}
-$$
+```
 
 Ratio:
 
-$$
+```math
 \frac{4.0}{2.0}
 =
 \boxed{2.0}
-$$
+```
 
 So the programmed laser hold is **200% of the minimum required duration**.
 
@@ -1451,95 +1706,95 @@ So the programmed laser hold is **200% of the minimum required duration**.
 
 # Structural / Load-Bearing Checks
 
-## 31. Torque Reaction at the Motor Mount
+## 32. Torque Reaction at the Motor Mount
 
 The motor mount must react the motor torque:
 
-$$
+```math
 \tau = Fr
-$$
+```
 
 Therefore:
 
-$$
+```math
 F=\frac{\tau}{r}
-$$
+```
 
 Using stall torque as an extreme upper-bound torque:
 
-$$
+```math
 \tau=1.77\text{ N·m}
-$$
+```
 
 Using the documented 39 mm bottom motor envelope:
 
-$$
+```math
 r=19.5\text{ mm}=0.0195\text{ m}
-$$
+```
 
-$$
+```math
 F
 =
 \frac{1.77}{0.0195}
 =
 \boxed{90.77\text{ N}}
-$$
+```
 
 Using the 35 mm gearbox body diameter:
 
-$$
+```math
 r=17.5\text{ mm}=0.0175\text{ m}
-$$
+```
 
-$$
+```math
 F
 =
 \frac{1.77}{0.0175}
 =
 \boxed{101.14\text{ N}}
-$$
+```
 
 These are **equivalent tangential reaction forces** at those radii. They are useful for comparing the torque scale with the static weight of only `10.643 N`.
 
 Torque-equivalent force / static known weight:
 
-$$
+```math
 \frac{90.77}{10.643}
 =
 \boxed{8.53\times}
-$$
+```
 
 So the extreme stall-torque reaction scale can be several times larger than the satellite's current static gravitational load.
 
 ---
 
-## 32. Bending Stress Formula for the 3D-Printed Mount
+## 33. Bending Stress Formula for the 3D-Printed Mount
 
 For a cantilever-style rectangular bracket:
 
-$$
+```math
 M_b=FL
-$$
+```
 
-$$
+```math
 I=\frac{bh^3}{12}
-$$
+```
 
-$$
+```math
 \sigma_b=\frac{Mc}{I}
-$$
+```
 
 with:
 
-$$
+```math
 c=\frac{h}{2}
-$$
+```
 
 Therefore:
 
-$$
+```math
 \boxed{\sigma_b=\frac{6FL}{bh^2}}
-$$
+```
 
 A final numerical bending stress **cannot be calculated from the current project files** because final bracket:
 
@@ -1554,45 +1809,45 @@ Do not invent these values for the report. Measure them from the final CAD and s
 
 ---
 
-## 33. Bracket Deflection Formula
+## 34. Bracket Deflection Formula
 
 For a cantilever:
 
-$$
+```math
 \boxed{\delta=\frac{FL^3}{3EI}}
-$$
+```
 
 For a rectangular section:
 
-$$
+```math
 I=\frac{bh^3}{12}
-$$
+```
 
 Final deflection cannot be evaluated without the final bracket dimensions and an appropriate effective elastic modulus for the actual printed material/orientation.
 
 ---
 
-## 34. Laser Pointing Error from Bracket Deflection
+## 35. Laser Pointing Error from Bracket Deflection
 
 If the laser mount deflects laterally by `δ` over support length `L`:
 
-$$
+```math
 \theta_{flex}
 =
 \tan^{-1}\left(\frac{\delta}{L}\right)
-$$
+```
 
 For small angles:
 
-$$
+```math
 \theta_{flex}\approx\frac{\delta}{L}
-$$
+```
 
 At target distance `D`:
 
-$$
+```math
 x_{target}\approx D\theta_{flex}
-$$
+```
 
 The final numerical value requires the measured/calculated mount deflection.
 
