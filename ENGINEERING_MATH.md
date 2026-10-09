@@ -1329,7 +1329,262 @@ $$
 
 # Gyroscope Mathematics
 
-## 29. MPU6050 Scale
+
+## 29. Measured MPU6050 XYZ Values from Bench Output
+
+The following calculations use the 19 visible IMU samples from the supplied serial-monitor screenshot.
+
+### Measured mean acceleration
+
+The accelerometer outputs are in units of `g`.
+
+\[
+\bar{A}_x = \frac{\sum A_x}{n}
+\]
+
+\[
+\bar{A}_x = \frac{-1.49}{19}
+= \boxed{-0.0784\,g}
+\]
+
+\[
+\bar{A}_y = \frac{\sum A_y}{n}
+\]
+
+\[
+\bar{A}_y = \frac{13.89}{19}
+= \boxed{+0.7311\,g}
+\]
+
+\[
+\bar{A}_z = \frac{\sum A_z}{n}
+\]
+
+\[
+\bar{A}_z = \frac{-13.15}{19}
+= \boxed{-0.6921\,g}
+\]
+
+Therefore the measured gravity/acceleration vector in the MPU6050 sensor frame is approximately:
+
+\[
+\boxed{\vec A = (-0.0784,\;0.7311,\;-0.6921)\,g}
+\]
+
+### Resultant acceleration magnitude
+
+\[
+|\vec A|
+=
+\sqrt{A_x^2+A_y^2+A_z^2}
+\]
+
+\[
+|\vec A|
+=
+\sqrt{(-0.0784)^2+(0.7311)^2+(-0.6921)^2}
+\]
+
+\[
+|\vec A|
+=
+\sqrt{0.00615+0.5344+0.4790}
+\]
+
+\[
+|\vec A|
+=
+\sqrt{1.0196}
+\]
+
+\[
+\boxed{|\vec A|=1.0098\,g}
+\]
+
+Convert to SI acceleration:
+
+\[
+a = 1.0098(9.81)
+\]
+
+\[
+\boxed{a=9.906\text{ m/s}^2}
+\]
+
+This is close to the expected gravitational acceleration of \(1g\), which is consistent with the accelerometer behaving plausibly during the captured period.
+
+### Accelerometer sample variation
+
+Sample standard deviations from the 19 visible readings:
+
+\[
+\boxed{\sigma_{A_x}\approx0.0201\,g}
+\]
+
+\[
+\boxed{\sigma_{A_y}\approx0.0115\,g}
+\]
+
+\[
+\boxed{\sigma_{A_z}\approx0.0187\,g}
+\]
+
+The mean resultant magnitude across the visible samples is approximately:
+
+\[
+\boxed{\bar{|A|}\approx1.0101\,g}
+\]
+
+with a sample-to-sample standard deviation of approximately:
+
+\[
+\boxed{\sigma_{|A|}\approx0.0132\,g}
+\]
+
+### Sensor-frame tilt from gravity vector
+
+The angle between the measured acceleration vector and the positive \(Y\) axis is:
+
+\[
+\theta_Y
+=
+\cos^{-1}\left(\frac{A_y}{|\vec A|}\right)
+\]
+
+\[
+\theta_Y
+=
+\cos^{-1}\left(\frac{0.7311}{1.0098}\right)
+\]
+
+\[
+\boxed{\theta_Y\approx43.61^\circ}
+\]
+
+The angle between the measured gravity vector and the negative \(Z\) axis is:
+
+\[
+\theta_{-Z}
+=
+\cos^{-1}\left(\frac{-A_z}{|\vec A|}\right)
+\]
+
+\[
+\theta_{-Z}
+=
+\cos^{-1}\left(\frac{0.6921}{1.0098}\right)
+\]
+
+\[
+\boxed{\theta_{-Z}\approx46.73^\circ}
+\]
+
+The small \(X\)-axis component corresponds to:
+
+\[
+\theta_X^\prime
+=
+\tan^{-1}
+\left(
+\frac{|A_x|}
+{\sqrt{A_y^2+A_z^2}}
+\right)
+\]
+
+\[
+\theta_X^\prime
+=
+\tan^{-1}
+\left(
+\frac{0.0784}
+{\sqrt{0.7311^2+0.6921^2}}
+\right)
+\]
+
+\[
+\boxed{\theta_X^\prime\approx4.45^\circ}
+\]
+
+So the captured MPU6050 orientation has gravity mainly split between \(+Y\) and \(-Z\), with only a small \(X\)-axis component.
+
+### Measured mean gyroscope values
+
+The 19 visible samples give:
+
+\[
+\bar{\omega}_x
+=
+\frac{-34.3}{19}
+=
+\boxed{-1.805\text{ °/s}}
+\]
+
+\[
+\bar{\omega}_y
+=
+\frac{65.1}{19}
+=
+\boxed{+3.426\text{ °/s}}
+\]
+
+\[
+\bar{\omega}_z
+=
+\frac{2.5}{19}
+=
+\boxed{+0.132\text{ °/s}}
+\]
+
+The magnitude of the mean angular-rate vector is:
+
+\[
+|\bar{\omega}|
+=
+\sqrt{(-1.805)^2+(3.426)^2+(0.132)^2}
+\]
+
+\[
+\boxed{|\bar{\omega}|\approx3.875\text{ °/s}}
+\]
+
+Sample standard deviations are approximately:
+
+\[
+\boxed{\sigma_{\omega_x}\approx3.54\text{ °/s}}
+\]
+
+\[
+\boxed{\sigma_{\omega_y}\approx4.17\text{ °/s}}
+\]
+
+\[
+\boxed{\sigma_{\omega_z}\approx3.88\text{ °/s}}
+\]
+
+These raw gyroscope values include sensor bias/noise because the current output code prints the measured gyro values without a completed bias-removal calibration.
+
+### Important distinction: IMU XYZ is not the centre-of-mass XYZ
+
+The values above are:
+
+- accelerometer readings \(A_x,A_y,A_z\), in `g`;
+- gyroscope readings \(\omega_x,\omega_y,\omega_z\), in degrees per second.
+
+They are **not physical component coordinates** such as \(x_i,y_i,z_i\) in millimetres from the satellite centre. Therefore they cannot be substituted into:
+
+\[
+x_{CG}=\frac{\sum m_ix_i}{\sum m_i},
+\quad
+y_{CG}=\frac{\sum m_iy_i}{\sum m_i},
+\quad
+z_{CG}=\frac{\sum m_iz_i}{\sum m_i}
+\]
+
+To calculate the actual centre of gravity numerically, the final CAD or measured position of each component is still required.
+
+---
+
+## 35. MPU6050 Scale
 
 Current configuration:
 
@@ -1413,7 +1668,7 @@ $$
 
 # Laser Timing Mathematics
 
-## 30. Laser Hold Margin
+## 35. Laser Hold Margin
 
 Current code holds the laser for:
 
@@ -1451,7 +1706,7 @@ So the programmed laser hold is **200% of the minimum required duration**.
 
 # Structural / Load-Bearing Checks
 
-## 31. Torque Reaction at the Motor Mount
+## 35. Torque Reaction at the Motor Mount
 
 The motor mount must react the motor torque:
 
@@ -1513,7 +1768,7 @@ So the extreme stall-torque reaction scale can be several times larger than the 
 
 ---
 
-## 32. Bending Stress Formula for the 3D-Printed Mount
+## 35. Bending Stress Formula for the 3D-Printed Mount
 
 For a cantilever-style rectangular bracket:
 
@@ -1554,7 +1809,7 @@ Do not invent these values for the report. Measure them from the final CAD and s
 
 ---
 
-## 33. Bracket Deflection Formula
+## 35. Bracket Deflection Formula
 
 For a cantilever:
 
@@ -1572,7 +1827,7 @@ Final deflection cannot be evaluated without the final bracket dimensions and an
 
 ---
 
-## 34. Laser Pointing Error from Bracket Deflection
+## 35. Laser Pointing Error from Bracket Deflection
 
 If the laser mount deflects laterally by `δ` over support length `L`:
 
