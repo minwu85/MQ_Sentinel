@@ -1,5 +1,5 @@
 // ============================================================
-// SPIN DETECT (v1.0) - simple rewrite of spin_until_ir - Nano V3
+// SPIN DETECT (v1.1) - simple rewrite of spin_until_ir, SLOW speed, laser ON = motor OFF - Nano V3
 // Build/upload with: pio run -e spin_detect -t upload
 // Then:              pio device monitor -e spin_detect     (115200 baud)
 //
@@ -10,7 +10,9 @@
 //     (depending on WHICH sensor saw it) until S1 - the sensor on the
 //     laser axis - sees it too, then it stops
 //   * every stop is STOP_MS (4 s) long and the laser is ON for all of it
-//   * laser is OFF while the motor is spinning or turning
+//   * LASER RULE: laser ON whenever the motor is OFF (power-up and every stop),
+//     laser OFF whenever the motor is spinning or turning
+//   * slow speed: SPIN_SPEED 130, TRACK_SPEED 110 (was 200 / 150)
 //
 //   SCAN (CW, laser OFF) -> detected -> [S1 strongest: STOP]
 //                           else TURN toward the strongest sensor
@@ -41,8 +43,8 @@ const int SENSOR_TURN[NUM_SENSORS] = {0, +1, -1};
 const int CENTRE_SENSOR = 0;                      // index of the sensor on the laser axis
 
 // ---------- Motor ----------
-const int SPIN_SPEED = 200;                       // scanning PWM (spin_until_ir value)
-const int TRACK_SPEED = 150;                      // PWM while turning toward the target
+const int SPIN_SPEED = 130;                       // scanning PWM - SLOW (was 200); raise if the motor stalls
+const int TRACK_SPEED = 110;                      // PWM while turning toward the target - SLOW (was 150)
 const bool SCAN_CLOCKWISE = true;
 const unsigned long REVERSE_PAUSE_MS = 100;       // pause before the motor changes direction
 
@@ -93,6 +95,7 @@ void driveMotor(int dir, int speed) {
     delay(REVERSE_PAUSE_MS);
   }
   digitalWrite(MOTOR_DIR_PIN, dir > 0 ? HIGH : LOW);
+  laserSet(false);                                // motor runs -> laser OFF (before the motor starts)
   analogWrite(MOTOR_PWM_PIN, speed);
   motorDir = dir;
   motorPwm = speed;
@@ -101,6 +104,7 @@ void driveMotor(int dir, int speed) {
 void stopMotor() {
   analogWrite(MOTOR_PWM_PIN, 0);
   motorPwm = 0;
+  laserSet(true);                                 // motor OFF -> laser ON (after the motor has stopped)
 }
 
 // ---------- MPU6050 ----------
@@ -251,7 +255,7 @@ void startTurn(int sensor) {
 
 void setup() {
   pinMode(LASER_PIN, OUTPUT);
-  laserSet(false);                                // laser explicitly OFF first
+  laserSet(true);                                 // the motor is off at power-up -> laser ON (rule: laser ON = motor OFF)
 
   Serial.begin(115200);
   delay(500);
@@ -264,7 +268,7 @@ void setup() {
 
   for (int i = 0; i < NUM_SENSORS; i++) pinMode(SENSOR_PINS[i], INPUT_PULLUP);
 
-  Serial.println(F("=== Spin Detect v1.0 (S1=D4 S2=D5 S3=D6, laser=D10, MPU6050=A4/A5) ==="));
+  Serial.println(F("=== Spin Detect v1.1 (S1=D4 S2=D5 S3=D6, laser=D10, MPU6050=A4/A5) ==="));
   imuOk = imuInit();
   Serial.println(imuOk ? F("MPU6050 found at 0x68") : F("MPU6050 not found at 0x68 (IMU:OFF) - continuing"));
   Serial.println(F("Auto-starting: scan, detect, turn toward the sensor, stop 4 s with laser ON"));

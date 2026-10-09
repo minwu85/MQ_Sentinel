@@ -65,4 +65,4 @@ S1(D6): 0  -- | Acc(g) X:0.04 Y:-0.19 Z:0.97 | Gyro(dps) X:-1.5 Y:0.4 Z:-1.4 | S
 4. The same target must not retrigger until D6 has been clear for 200 ms.
 
 ## 7. Difference from spin_detect
-One sensor instead of three, no turn state and no `SENSOR_TURN` table; everything else (window, K, re-arm, 4 s stop, laser rule, output, IMU, 115200 baud) is identical. The earlier encoder/gyro/bearing version of `spin_detect_one` is archived with its maths in [spin_detect_advanced.md](spin_detect_advanced.md).
+One sensor instead of three, no turn state and no `SENSOR_TURN` table; everything else (window, K, re-arm, 4 s stop, laser rule, output, IMU, 115200 baud) is identical. The earlier encoder/gyro/bearing version of `spin_detect_one` is archived with its maths in [spin_detect.md, Part 3](spin_detect.md#part-3).

@@ -98,7 +98,7 @@ pio run -e spin_until_ir -t upload
 pio device monitor -e spin_until_ir
 ```
 
-### spin_detect (v1.0, simple)
+### spin_detect (v1.1, simple, slow)
 Rewrite based on `spin_until_ir`. The motor spins clockwise with the laser
 OFF and reads three sensors (S1 D4, S2 D5, S3 D6) in 100 ms windows. When
 one sees the signal, the motor turns clockwise or anti-clockwise depending
@@ -110,12 +110,15 @@ goes OFF and scanning resumes. Output (115200 baud) per window:
 MPU6050 (display only): VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68).
 Maths and bench procedure: [spin_detect.md](spin_detect.md). The earlier
 encoder/gyro/bearing design is archived in
-[spin_detect_advanced.md](spin_detect_advanced.md).
+[spin_detect.md, Part 3](spin_detect.md#part-3).
 
 ```
 pio run -e spin_detect -t upload
 pio device monitor -e spin_detect
 ```
+
+v1.1: slow speed (scan 130, turn 110) and the laser rule *laser ON = motor OFF*
+(ON at power-up and for every 4 s stop, OFF while the motor runs).
 
 ### spin_detect_one (v1.0)
 `spin_detect` with a single sensor (D6, on the laser axis): the motor spins
@@ -129,22 +132,24 @@ pio run -e spin_detect_one -t upload
 pio device monitor -e spin_detect_one
 ```
 
-### spin_detect_clock (v0.3)
+### spin_detect_clock (v0.5)
 Copy of `spin_detect` (unchanged) with the "clock" rotation: D6 is the
 centre sensor on the laser axis, D4/D5 the sides. After a detection a PID
-on pos = (D5-D4)/(D4+D5+D6) turns the assembly toward the message. v0.3
-fixes the slow stop of v0.1: decisions every 10 ms, and the motor stops as
-soon as |pos| is inside a dead band that widens with time (0.15 -> 0.60
-over 1.2 s) or pos crosses zero, with a 1.8 s hard limit; then the laser is
-ON for 4 s, OFF, and scanning resumes. Two documents:
-[spin_detect_clock.md](spin_detect_clock.md) (code explanation) and
-[spin_detect_clock_process.md](spin_detect_clock_process.md) (process,
-problems, maths and flowchart per version).
+on pos = (D5-D4)/(D4+D5+D6) turns the assembly toward the message. v0.4
+fixes "never stops": the detection is armed from power-up (v0.3 needed
+200 ms without signal, which three sensors 120 deg apart never give at
+scan speed), every turn ends in a stop within 1.5 s, and the laser comes ON
+for the 4 s stop (300 ms laser self-test at power-up). Everything (process,
+problems, maths, flowcharts per version and the code explanation) is in one
+file: [spin_detect_clock.md](spin_detect_clock.md).
 
 ```
 pio run -e spin_detect_clock -t upload
 pio device monitor -e spin_detect_clock
 ```
+
+v0.5: slow speed (scan 130, turn 100-140 PWM) and the laser rule *laser ON =
+motor OFF* (ON at power-up and in every stop, OFF while the motor runs).
 
 ### reactive_ir
 Motor spins by default; stops the moment the IR receiver detects a

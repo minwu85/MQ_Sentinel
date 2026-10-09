@@ -1,5 +1,5 @@
 // ============================================================
-// SPIN DETECT CLOCK (v0.3) - clock rotation (centroid PID) + fast, robust stop - Nano V3
+// SPIN DETECT CLOCK (v0.5) - clock rotation (centroid PID), guaranteed stop, SLOW speed, laser ON = motor OFF - Nano V3
 // Build/upload with: pio run -e spin_detect_clock -t upload
 // Then:              pio device monitor -e spin_detect_clock     (115200 baud)
 //
@@ -9,28 +9,36 @@
 //   * D6 is the CENTRE sensor on the laser axis. D4 = anti-clockwise side,
 //     D5 = clockwise side.
 //   * position   pos = (D5 - D4) / (D4 + D5 + D6)       -1 .. +1, + = message clockwise of D6
-//     setpoint 0 (message centred on D6), error e = pos
-//     u = Kp*e + Ki*integral(e) + Kd*de/dt   (u > 0 clockwise, u < 0 anti-clockwise,
-//     PWM = |u| limited to MIN_TRACK_PWM .. MAX_TRACK_PWM)
+//     setpoint 0, error e = pos, u = Kp*e + Ki*integral(e) + Kd*de/dt
+//     (PWM = |u| limited to MIN_TRACK_PWM .. MAX_TRACK_PWM, direction = sign of pos)
 //
-// What is new in v0.3 is the STOP. v0.1 needed five conditions at once
-// (D6 strong, not weaker than the sides, balanced, at its peak, not rising)
-// and, with noisy bursty counts, they rarely held together - it ran into
-// the timeout and needed seconds to stop. Now:
-//   * decisions are made every 10 ms (rolling 50 ms of counts), not every 50 ms
-//   * STOP as soon as the message is centred: |pos| <= a dead band that
-//     widens with time (0.15 -> 0.60 over 1.2 s), OR pos has crossed zero
-//     (the message passed the centre), for 3 slices (30 ms)
-//   * the dead band does not need D6 to be strong, so it also works if D6
-//     receives only a little
-//   * hard limit: FORCE_STOP_MS after the turn started, the motor stops
-//     anyway while the message is on the sensors
+// Why v0.3 never stopped (found by analysis): the detection had to be
+// "armed", and arming needed 200 ms with NO signal. With three sensors
+// 120 deg apart, spinning at 200 PWM (about 180 deg/s), the gap between the
+// beams lasts only about 170-190 ms, so the system never armed, never
+// detected, never stopped and never switched the laser on.
+//
+// v0.4 fixes:
+//   * armed from power-up; after a stop it re-arms after 100 ms without
+//     signal OR after REARM_DELAY_MS (700 ms of scanning) - whichever first
+//   * every detection ENDS IN A STOP: the turn has a hard time limit
+//     (FORCE_STOP_MS) that does not depend on the sensors; a message that
+//     flickers or sits in a gap between beams no longer aborts the turn
+//   * stop as soon as the message is centred: |pos| inside a dead band that
+//     widens with time (0.15 -> 0.60 over 1.2 s), or pos crossed zero, for
+//     3 slices (30 ms), decided every 10 ms
+//   * direction follows the sign of pos with hysteresis (no chatter);
+//     the PID only sets the speed
+//
+// v0.5: SLOW speed (scan 130, turn 100..140 PWM, was 200 / 110..200) and the LASER RULE
+//   laser ON whenever the motor is OFF (power-up and every stop), OFF whenever it runs.
+//   Slower turning needs longer limits: FORCE_STOP_MS 3000, RELAX_MS 2400, REARM_DELAY_MS 1500.
 //
 // Output (every 100 ms; counts are the last 100 ms):
 //   S1(D4): 5  S2(D5): 40  S3(D6): 60  DETECTED | Acc(g) X:.. | Gyro(dps) X:.. | TURN CW pwm130 e:+0.40
 //
 // MPU6050 (display only): VCC 5V, GND common, SDA A4, SCL A5, AD0 GND (0x68).
-// Maths, flowchart, version history: spin_detect_clock.md (code) and spin_detect_clock_process.md (overview)
+// Maths, flowcharts, version history, code explanation: spin_detect_clock.md
 // ============================================================
 #include <Arduino.h>
 #include <Wire.h>
@@ -51,7 +59,7 @@ const int SENSOR_WEIGHT[NUM_SENSORS] = {-1, +1, 0};
 const int CENTRE_SENSOR = 2;                      // D6
 
 // ---------- Motor ----------
-const int SPIN_SPEED = 200;                       // scanning PWM (spin_until_ir value)
+const int SPIN_SPEED = 130;                       // scanning PWM - SLOW (was 200); raise if the motor stalls
 const bool SCAN_CLOCKWISE = true;
 const unsigned long REVERSE_PAUSE_MS = 30;        // pause before the motor changes direction
 
@@ -61,25 +69,27 @@ const int RING = 10;                              // 10 slices = 100 ms
 const int FAST_SLICES = 5;                        // 5 slices = 50 ms: used while turning / stopping
 const int DETECT_THRESHOLD = 5;                   // LOW reads per 100 ms = signal (spin_until_ir value)
 const int TRACK_THRESHOLD = 3;                    // LOW reads per 50 ms (same duty)
-const int CLEAR_SLICES_TO_REARM = 20;             // 200 ms without signal before the next detection
+
+// ---------- Re-arming after a stop ----------
+const int CLEAR_SLICES_TO_REARM = 10;             // 100 ms without signal ...
+const unsigned long REARM_DELAY_MS = 1500;        // ... or this long after the stop (about 130 deg of slow scanning)
 
 // ---------- PID rotation (v0.1 clock rotation) ----------
 const float KP = 140.0f;                          // PWM per unit of error
 const float KI = 40.0f;                           // PWM per (unit of error x second)
 const float KD = 6.0f;                            // PWM per (unit of error / second)
 const float I_MAX = 1.0f;                         // integral limit (anti-windup)
-const int MIN_TRACK_PWM = 110;                    // smallest PWM that still turns the assembly
-const int MAX_TRACK_PWM = 200;
+const int MIN_TRACK_PWM = 100;                    // smallest PWM that still turns the assembly (was 110)
+const int MAX_TRACK_PWM = 140;                    // SLOW (was 200)
+const float DIR_HYST = 0.10f;                     // |pos| below this keeps the current direction
 
 // ---------- Stop ----------
 const float DEAD_START = 0.15f;                   // |pos| <= this = centred (at the start of the turn) ...
 const float DEAD_END = 0.60f;                     // ... widening to this
-const unsigned long RELAX_MS = 1200;              // ... over this time
+const unsigned long RELAX_MS = 2400;              // ... over this time (was 1200: slower turn needs longer)
 const float SIGN_MIN = 0.05f;                     // |pos| above this counts as a side (for zero-crossing)
 const int STOP_SLICES = 3;                        // condition true for 3 slices (30 ms) -> stop
-const unsigned long FORCE_STOP_MS = 1800;         // hard limit: stop here while the message is on the sensors
-const unsigned long TRACK_TIMEOUT_MS = 2500;      // safety net (message flickering for too long) -> scan again
-const int LOST_SLICES = 50;                       // no signal for 0.5 s -> back to scanning
+const unsigned long FORCE_STOP_MS = 3000;         // HARD LIMIT: every turn ends in a stop after this long (was 1500)
 const unsigned long STOP_MS = 4000;               // stop time, laser ON for all of it
 
 // ---------- Output / MPU6050 (display only) ----------
@@ -97,10 +107,10 @@ int ringHead = 0;
 int c100[NUM_SENSORS];                            // last 100 ms (printed, scan detection)
 int c50[NUM_SENSORS];                             // last 50 ms (position / stop)
 
-bool armed = false;
+bool armed = true;                                // armed from power-up
 int clearSlices = 0;
+unsigned long rearmAtMs = 0;
 int stopRun = 0;
-int lostSlices = 0;
 bool centreSeen = false;
 bool crossed = false;
 int lastSign = 0;
@@ -131,6 +141,7 @@ void driveMotor(int dir, int speed) {
     delay(REVERSE_PAUSE_MS);
   }
   digitalWrite(MOTOR_DIR_PIN, dir > 0 ? HIGH : LOW);
+  laserSet(false);                                // motor runs -> laser OFF (before the motor starts)
   analogWrite(MOTOR_PWM_PIN, speed);
   motorDir = dir;
   motorPwm = speed;
@@ -139,6 +150,7 @@ void driveMotor(int dir, int speed) {
 void stopMotor() {
   analogWrite(MOTOR_PWM_PIN, 0);
   motorPwm = 0;
+  laserSet(true);                                 // motor OFF -> laser ON (after the motor has stopped)
 }
 
 // ---------- MPU6050 ----------
@@ -265,7 +277,7 @@ void printLine(unsigned long now) {
     case ST_SCAN:
       Serial.print(F("SCAN "));
       Serial.print(motorDir > 0 ? F("CW") : F("CCW"));
-      if (!armed) Serial.print(F(" arming"));
+      if (!armed) Serial.print(F(" rearming"));
       break;
     case ST_TURN:
       Serial.print(F("TURN "));
@@ -306,8 +318,9 @@ void startStop(const __FlashStringHelper *why) {
 
 void endStop() {
   laserSet(false);                                // laser OFF, then spin again
-  armed = false;                                  // the signal must clear before the next detection
+  armed = false;                                  // re-arm: 100 ms without signal or REARM_DELAY_MS
   clearSlices = 0;
+  rearmAtMs = millis() + REARM_DELAY_MS;
   Serial.println(F(">>> STOP finished - laser OFF, scanning <<<"));
   startScan();
 }
@@ -322,7 +335,6 @@ int clampPwm(float u) {
 void startTurn() {
   turnStartMs = millis();
   lastPidMs = turnStartMs;
-  lostSlices = 0;
   stopRun = 0;
   centreSeen = false;
   crossed = false;
@@ -343,36 +355,31 @@ void startTurn() {
   driveMotor(dir, clampPwm(KP * (pos < 0 ? -pos : pos)));
 }
 
-// ---------- Turning + stopping: runs every 10 ms slice ----------
+// ---------- Turning + stopping: runs every 10 ms slice; ALWAYS ends in a stop ----------
 void turnStep(unsigned long now) {
   unsigned long el = now - turnStartMs;
 
-  if (el >= TRACK_TIMEOUT_MS) {
-    Serial.println(F(">>> turn timeout - scanning again <<<"));
-    armed = false;
-    clearSlices = 0;
-    startScan();
-    return;
-  }
-
-  int cb = c50[strongest(c50)];
   if (c50[CENTRE_SENSOR] >= TRACK_THRESHOLD) centreSeen = true;
 
-  if (cb < TRACK_THRESHOLD) {                     // nothing above the noise: keep going the same way
-    if (++lostSlices >= LOST_SLICES) {
-      Serial.println(F(">>> message lost - scanning <<<"));
-      startScan();
+  // hard limit: independent of the sensors, so the motor always stops (and the laser always comes on)
+  if (el >= FORCE_STOP_MS) {
+    if (!centreSeen) {
+      Serial.println(F(">>> WARNING: D6 never received the message - check D6 wiring / aim <<<"));
     }
+    startStop(F("time limit"));
     return;
   }
-  lostSlices = 0;
+
+  if (c50[strongest(c50)] < TRACK_THRESHOLD) {    // message not on the sensors right now (burst gap, gap between beams)
+    stopRun = 0;                                  // keep turning the same way; the hard limit still applies
+    return;
+  }
 
   float pos = positionOf(c50, TRACK_THRESHOLD);
 
   // ---- stop: centred (dead band that widens with time) or the message passed the centre ----
-  float dead = DEAD_START;
-  if (el < RELAX_MS) dead += (DEAD_END - DEAD_START) * (float)el / (float)RELAX_MS;
-  else dead = DEAD_END;
+  float dead = DEAD_END;
+  if (el < RELAX_MS) dead = DEAD_START + (DEAD_END - DEAD_START) * (float)el / (float)RELAX_MS;
 
   int sgn = (fabsf(pos) < SIGN_MIN) ? 0 : (pos > 0.0f ? 1 : -1);
   if (sgn != 0) {
@@ -385,13 +392,6 @@ void turnStep(unsigned long now) {
 
   if (stopRun >= STOP_SLICES) {
     startStop(F("D6 centred on the message"));
-    return;
-  }
-  if (el >= FORCE_STOP_MS) {
-    if (!centreSeen) {
-      Serial.println(F(">>> WARNING: D6 never received the message - check D6 wiring / aim <<<"));
-    }
-    startStop(F("time limit, message on the sensors"));
     return;
   }
 
@@ -412,15 +412,16 @@ void turnStep(unsigned long now) {
   lastErr = e;
 
   float u = KP * e + KI * integral + KD * dFilt;
-  int dir = (u > 0.0f) ? 1 : (u < 0.0f ? -1 : motorDir);
-  int pwm = clampPwm(u);
+  int dir = motorDir;                             // direction from the sign of pos, with hysteresis
+  if (fabsf(pos) >= DIR_HYST) dir = (pos > 0.0f) ? 1 : -1;
+  int pwm = clampPwm(u);                          // the PID sets the speed only
   if (centred && pwm > MIN_TRACK_PWM) pwm = MIN_TRACK_PWM;   // about to stop: slow down while confirming
   if (dir != motorDir || pwm != motorPwm) driveMotor(dir, pwm);
 }
 
 void setup() {
   pinMode(LASER_PIN, OUTPUT);
-  laserSet(false);                                // laser explicitly OFF first
+  laserSet(true);                                 // the motor is off at power-up -> laser ON (rule: laser ON = motor OFF)
 
   Serial.begin(115200);
   delay(500);
@@ -433,10 +434,13 @@ void setup() {
 
   for (int i = 0; i < NUM_SENSORS; i++) pinMode(SENSOR_PINS[i], INPUT_PULLUP);
 
-  Serial.println(F("=== Spin Detect Clock v0.3 (D4 left, D5 right, D6 centre + laser D10, MPU6050=A4/A5) ==="));
+  Serial.println(F("=== Spin Detect Clock v0.5 (D4 left, D5 right, D6 centre + laser D10, MPU6050=A4/A5) ==="));
   imuOk = imuInit();
   Serial.println(imuOk ? F("MPU6050 found at 0x68") : F("MPU6050 not found at 0x68 (IMU:OFF) - continuing"));
-  Serial.println(F("Auto-starting: scan, PID-rotate until D6 is centred, fast stop, 4 s with laser ON"));
+
+  Serial.println(F("Laser is ON now (motor off); it goes OFF when the motor starts"));
+
+  Serial.println(F("Auto-starting: scan, PID-rotate until D6 is centred, always stop, 4 s with laser ON"));
   delay(1000);
 
   startScan();
@@ -460,11 +464,9 @@ void loop() {
     case ST_SCAN: {
       bool det = c100[strongest(c100)] >= DETECT_THRESHOLD;
       if (!armed) {
-        if (det) {
-          clearSlices = 0;
-        } else if (++clearSlices >= CLEAR_SLICES_TO_REARM) {
-          armed = true;
-        }
+        if (det) clearSlices = 0;
+        else if (++clearSlices >= CLEAR_SLICES_TO_REARM) armed = true;
+        if ((long)(now - rearmAtMs) >= 0) armed = true;   // never wait for a clear gap longer than REARM_DELAY_MS
       } else if (det) {
         startTurn();                              // the PID / stop logic takes over next slice
       }
