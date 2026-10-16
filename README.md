@@ -151,6 +151,18 @@ pio device monitor -e spin_detect_clock
 v0.5: slow speed (scan 130, turn 100-140 PWM) and the laser rule *laser ON =
 motor OFF* (ON at power-up and in every stop, OFF while the motor runs).
 
+### sensor_d4_test
+Checks that ONE sensor (TSOP4138 OUT on D4) works. Sensor only: no motor,
+no laser, no driver (the program never touches those pins). Prints the D4 level, LOW reads per 100 ms, edges and DETECTED,
+lights the onboard LED while D4 is LOW, and gives a verdict every 5 s:
+WORKING / NO SIGNAL (stays HIGH) / STUCK LOW. Point the IR beacon at the
+sensor while it runs.
+
+```
+pio run -e sensor_d4_test -t upload
+pio device monitor -e sensor_d4_test
+```
+
 ### reactive_ir
 Motor spins by default; stops the moment the IR receiver detects a
 signal, resumes automatically when the signal clears.
