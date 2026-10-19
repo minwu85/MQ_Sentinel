@@ -84,6 +84,15 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v18 - frame back to v16, inserts resized to the tube
+- Request: `encoder_housing.step` back to v16 (not changed). Restored from the v16 commit, with `encoder_housing.py` and `motor_ref.py`. The v17 frame (open deck hole, separate tube, no thread, no pockets) is dropped. `motor_tube.step` from v17 is no longer used.
+- Request: only change `insert_minus1.step` / `insert_minus2.step`. New script `inserts.py`. The yokes are sized to the v16 sleeve (tube OD 44, z51-95, 44 tall): top at z100 (5 mm taller than the tube) and a 45 mm opening (0.5 mm clearance each side). Yoke -1: 49 tall; yoke -2: 47 tall (its plate is 2 mm higher).
+- Yoke parts: ring plate around the tube base, two curved side walls (R66-69, 54 deg), top bar. The bars are off-centre and cross with a half-lap.
+- Checks: both yokes valid solids; 0 mm3 interference with the v16 frame and with each other.
+- Open: the v16 sleeve is fused to the deck, so the yokes do not lift the tube; they surround it. A removable tube would need a frame change.
+- Open: "within 175 mm" in the request: the limit in the brief is 170 mm; the frame is 133 mm, the yokes top out at z100.
+
+
 ### v17 - yoke cage with hanging motor tube, ring flat
 - Request: nothing more on the sensor ring. The ring thread is removed; the ring inside is flat. The cap/lid is dropped (`lid.py` and `lid.step` are left as they were and no longer match; not updated).
 - Request: rebuild platform -1/-2 like images 1-3: a base plate, curved side walls and a top bar. Each yoke is now: plate (circle with 10 mm hole + two 60 deg arms) + two curved walls (R66-69, 54 deg wide, up to z95) + a bar between the walls at the top. Yoke -1 is along 0/180 deg, yoke -2 along 90/270 deg. The bars sit off-centre (Y +28 and X -28) so the tube centre stays open, and cross with a half-lap notch.

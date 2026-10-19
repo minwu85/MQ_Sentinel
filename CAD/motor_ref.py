@@ -2,7 +2,7 @@
 Run: python motor_ref.py -> motor_ref.step. Z positions are in the housing frame. Dimensions from the datasheet drawing."""
 import cadquery as cq
 
-Z_BASE = 57.0                          # motor bottom sits on the tube floor (tube z54, 3 mm floor)
+Z_BASE = 54.0                          # motor bottom sits on the tube floor (tube z51, 3 mm floor)
 ENC_D, ENC_H = 36.0, 12.0              # encoder cap (measured 3.6 cm)
 GREY_D, GREY_H = 35.0, 57.0            # grey body (measured 3.5 cm); encoder + grey = 69 mm body length
 BOSS_D, BOSS_H = 12.0, 6.0             # first step at 75 mm from the base
