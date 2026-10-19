@@ -4,27 +4,29 @@ import cadquery as cq
 
 D = 150.0            # overall diameter
 H = 135.0            # overall height
-P1_T, GAP1, P2_T, P3_T = 5.0, 70.0, 5.0, 6.0
+P1_T, P2_T, P3_T = 3.0, 5.0, 6.0   # platform 1 now 3 mm
 P1_Z0 = 0.0
-P2_Z0 = P1_T + GAP1          # 75
-P2_Z1 = P2_Z0 + P2_T         # 85
-P3_Z0 = H - P3_T             # 130
-POST_D, POST_R = 14.0, 67.5   # posts sit outside the lid thread (r<=60)
+P2_Z0 = 75.0                 # platform 2 underside stays at z=75
+GAP1 = P2_Z0 - P1_T
+P2_Z1 = P2_Z0 + P2_T         # 80
+P3_Z0 = H - P3_T             # 129
+POST_W, POST_RAD, POST_R = 10.0, 14.0, 67.5   # rectangular posts: 1 cm wide, 14 mm radial, outside the lid thread (r<=60)
 RING_ID = 120.0
 BORE_D = 40.0                # semicircle radius 2 cm
-CLAMP_Z0, CLAMP_H = 80.0, 45.0     # 4.5 cm box on platform 2, top z=125 (under ring at 129)
+CLAMP_Z0, CLAMP_H = 80.0, 30.0     # 3 cm box on platform 2, top z=110 (flywheel bottom at 113)
 CLAMP_W, CLAMP_L = 60.0, 30.0       # 6 x 3 cm box
-INSET_H, INSET = 25.0, 1.0          # top 2.5 cm stepped in 1 mm
-BORE_PLAIN_H, GROOVE_H, GROOVE_IN = 30.0, 15.0, 1.0   # plain R20 for 3 cm, then 2 cm groove 1 mm wider in the wall
-HOLE_D, HOLE_DEPTH = 3.0, 45.0      # vertical holes in the top face of both arms
+INSET_H, INSET = 15.0, 1.0          # top 1.5 cm stepped in 1 mm
+BORE_PLAIN_H, GROOVE_H, GROOVE_IN = 15.0, 15.0, 1.0   # plain R20 for 3 cm, then 2 cm groove 1 mm wider in the wall
+HOLE_D, HOLE_DEPTH = 3.0, 30.0      # vertical holes in the top face of both arms
 HOLE_X, HOLE_Y = 24.5, (8.0, 22.0)  # 2 per arm
 ARM_W, WIN_R = 40.0, 56.0           # platform 2 cross: equal 40 mm arms, larger corner windows
-SENS_L, SENS_W, N_SENS = 8.0, 7.0, 6   # sensor notch 8 (tangential) x 7 (radial) x ring thickness
+SENS_L, SENS_W, N_SENS = 8.0, 7.0, 3   # sensor notch 8 (tangential) x 7 (radial) x ring thickness
 # lid thread (internal ridge on the ring, external ridge on lid/lid.py)
 T_PITCH, T_RING_R0, T_RING_R1, T_W0, T_W1 = 4.0, 60.1, 58.5, 2.0, 0.6
 SKIRT_D, SKIRT_T = 160.0, 1.0   # thin 1 mm layer (R80 limit)
 CENTRE_HOLE_D = 10.0         # centre hole in platform 1
-SLOT_W, SLOT_L = 20.0, 10.0  # 2 x 1 cm slot in platform 2
+WIRE_W, WIRE_L = 20.0, 30.0  # wire key slot in platform 2, runs from the motor hole out the open front
+PAD_W, PAD_IN = 6.0, 2.0    # 3 centring pads in the bore (30/90/150 deg), 2 mm in -> bore r18 vs motor r17.5
 
 def disc(d, z0, t):
     return cq.Workplane("XY").workplane(offset=z0).circle(d / 2).extrude(t)
@@ -37,9 +39,12 @@ def ridge(r0, r1, pitch, height, z0):
     return prof.sweep(path, isFrenet=True).translate((0, 0, z0))
 
 def posts(n, z0, h, start_deg):
-    pts = [(POST_R * math.cos(math.radians(start_deg + i * 360 / n)),
-            POST_R * math.sin(math.radians(start_deg + i * 360 / n))) for i in range(n)]
-    return cq.Workplane("XY").workplane(offset=z0).pushPoints(pts).circle(POST_D / 2).extrude(h)
+    out = None
+    for i in range(n):
+        p = (cq.Workplane("XY").workplane(offset=z0).center(POST_R, 0).rect(POST_RAD, POST_W).extrude(h)
+             .rotate((0, 0, 0), (0, 0, 1), start_deg + i * 360 / n))
+        out = p if out is None else out.union(p)
+    return out
 
 p1 = disc(D, P1_Z0, P1_T)
 p2 = disc(D, P2_Z0, P2_T)
@@ -65,6 +70,12 @@ for r, h, dz in ((BORE_D / 2, BORE_PLAIN_H, 0.0),
                  (BORE_D / 2, CLAMP_H - BORE_PLAIN_H - GROOVE_H, BORE_PLAIN_H + GROOVE_H)):
     if h > 0:
         model = model.cut(cq.Workplane("XY").workplane(offset=z0 + dz).circle(r).extrude(h))
+for a in (30, 90, 150):
+    pad = (cq.Workplane("XY").workplane(offset=CLAMP_Z0).center(BORE_D / 2 - PAD_IN + 1.5, 0)
+           .rect(3.0, PAD_W).extrude(BORE_PLAIN_H).rotate((0, 0, 0), (0, 0, 1), a))
+    model = model.union(pad)
+model = model.cut(cq.Workplane("XY").workplane(offset=P2_Z0).circle(BORE_D / 2).extrude(P2_T))   # motor pass-through
+model = model.cut(cq.Workplane("XY").workplane(offset=P2_Z0).center(0, -WIRE_L / 2).rect(WIRE_W, WIRE_L).extrude(P2_T))
 for sx in (-1, 1):
     for y in HOLE_Y:
         model = model.cut(cq.Workplane("XY").workplane(offset=CLAMP_Z0 + CLAMP_H - HOLE_DEPTH)
@@ -82,7 +93,6 @@ holes = (cq.Workplane("XY").workplane(offset=P3_Z0)
 model = model.cut(holes)
 model = model.union(disc(SKIRT_D, 0, SKIRT_T))
 model = model.cut(cq.Workplane("XY").circle(CENTRE_HOLE_D / 2).extrude(P1_T))
-model = model.cut(cq.Workplane("XY").workplane(offset=P2_Z0).center(0, -25).rect(SLOT_W, SLOT_L).extrude(P2_T))
 
 bb = model.val().BoundingBox()
 print(f"bbox: {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm")
