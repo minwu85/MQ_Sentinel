@@ -84,6 +84,14 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v21 - inserts: bars removed, two block holes each
+- `encoder_housing.step` not changed.
+- Request: remove the green area (the top bars with their end stubs) from both yokes. Each yoke is now a round plate with two curved walls (up to z165).
+- Request: two holes per module for blocks that make it stable. Each yoke has one 2 x 1 cm hole (20 wide x 10 tall) in each of its two walls: yoke -1 at z150-160, yoke -2 at z135-145. They are at different heights (5 mm apart) and above the ring top (z133), so they do not overlap.
+- Checks: both yokes valid solids; 0 mm3 interference with the frame, with each other and with the motor reference; holes confirmed open and the wall solid just above them.
+- Open: with the bars gone, the two yokes are only joined by their stacked plates.
+
+
 ### v20 - platform 0 at 5 mm, v17 inserts with 165 mm side walls
 - Request: keep `encoder_housing.step` as v16 and only make platform 0 5 mm thick (was 8). Platform 1 now sits at z5-10 and the lower posts start 1 mm lower (z9). Nothing else in the frame changed. Frame is still one valid solid, 160 x 160 x 133.
 - Request: back to the v17 inserts; only make the green side parts (the curved walls) higher, 165 mm. The wall top is now z165 (32 mm above the ring top, so they work as handles). Plates sit on the new platform 1 top (z10-12 and z12-14); plate sizes (dia 50 / 60), the 10 mm hole and the bars (z90-95, off-centre) are as in v17.
