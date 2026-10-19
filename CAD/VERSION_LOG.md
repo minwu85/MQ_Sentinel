@@ -34,13 +34,13 @@ Use these names when asking for a change.
 
 | Name | What it is |
 |---|---|
-| Platform 1 (base) | Bottom disc, 150 mm OD, 5 mm thick; centre circle and two 60 deg wedges recessed 2 mm; centre hole 10 mm |
+| Platform 1 (base) | Bottom disc, 150 mm OD, 5 mm thick; flat top; the underside has a centre circle and two 60 deg wedges recessed 2 mm; centre hole 10 mm |
 | Bottom thin layer | 160 mm OD, 1 mm thick disc under platform 1 (the only part wider than 150) |
 | Lower posts | 4 rectangular posts (10 mm wide) joining platform 1 to platform 2 |
 | Platform 2 (middle deck) | 150 mm OD, 5 mm thick. X cross (arms on the diagonals), motor sleeve through the centre |
 | Upper posts | 4 rectangular posts (10 mm wide) joining platform 2 to platform 3 |
-| Platform 3 (top sensor ring) | 150 mm OD, 120 mm ID, 6 mm thick, always a full ring; plus cross inside, 3 sensor notches |
-| Motor sleeve | Full tube through the middle of platform 2 (bore 38, OD 44) holding the grey motor body half above and half below platform 2; closed bottom |
+| Platform 3 (top sensor ring) | 150 mm OD, 120 mm ID, 6 mm thick, always a full ring, open top, 3 sensor notches |
+| Motor sleeve | Full tube through the middle of platform 2 (bore 38, OD 44, z36-80) holding the encoder and motor can; closed bottom |
 | Wire window | 10 x 20 mm opening at the side of the motor sleeve, at the encoder |
 | Screw holes | 4 holes, 3 mm, at radius 67.5 on platform 3 and on the lid |
 | (lid parts below: not updated since v9, no ring thread) | |
@@ -50,6 +50,13 @@ Use these names when asking for a change.
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
 ## Version history
+
+### v13 - flat base, open top, shorter motor tube
+- Issue: the pattern was on the top of the base. It now goes into the underside of the bottom layer (2 mm deep, inside the 150 mm body; the 160 mm edge stays whole). The base top is flat with only the 10 mm centre hole.
+- Issue: the top plus cross covered the motor. It is removed. Platform 3 is the ring only (sensor ring kept, with notches and screw holes), so the motor and flywheel drop in from above. Check: no housing material above z80 inside r50.
+- Issue: the motor tube was too tall (70 mm). It is now 44 mm (z36-80), top flush with platform 2: it holds the encoder (12) and the motor can (29); the 37 mm gearbox sits above it.
+- Check: bore 38 vs motor 37 (datasheet) and 36 (measured cap) - fits. 0 mm3 interference with the motor/flywheel reference.
+- Open: the real encoder cap diameter. The datasheet drawing gives 33 for the can and 37 for the gearbox; the earlier measured values were 35-36.
 
 ### v12 - platform numbering corrected, sensor ring restored
 - Correction from the user: the earlier platform numbers were counted the other way round. Platform 1 = base (bottom), platform 2 = middle deck, platform 3 = top sensor ring.
