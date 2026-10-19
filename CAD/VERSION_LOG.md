@@ -49,27 +49,29 @@ Use these names when asking for a change.
 | Lid skirt | 10 mm tall threaded tube under the lid disc |
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
-## Dimensions by module (current version, v16)
+## Dimensions by module (current version, v17)
 
 | Module | Diameter / size (mm) | Thickness / height (mm) | Z range |
 |---|---|---|---|
 | Platform 0 | 160 dia | 8 | 0 - 8 |
 | Platform 1 | 150 dia | 5 | 8 - 13 |
-| Platform -1 insert | 50 dia circle + 60 deg wedges at 0/180 | 2 | 0 - 2 |
-| Platform -2 insert | 60 dia circle + 60 deg wedges at 90/270 | 2 | 2 - 4 |
 | Lower posts (4) | 10 x 14 rectangle, radius 67.5 | 73 | 12 - 85 |
-| Platform 2 (middle deck) | 150 dia, X arms 36 wide, rim 4 | 5 | 85 - 90 |
+| Platform 2 (middle deck) | 150 dia, X arms 36 wide, rim 4, centre hole 46 | 5 | 85 - 90 |
 | Upper posts (4) | 10 x 14 rectangle, radius 67.5 | 37 | 90 - 127 |
-| Platform 3 (sensor ring) | 150 OD / 120 ID | 6 | 127 - 133 |
-| Motor sleeve | 38 bore / 44 OD | 44 | 51 - 95 |
-| Cap | 150 dia, shell wall 3, skirt 116 OD / 110 ID | 47 total | 123 - 170 |
-| Motor (reference) | 36 encoder, 35 body, 6 shaft | 91 | 54 - 145 |
-| Flywheel (reference) | 100 dia | 10 | 129 - 139 |
+| Platform 3 (sensor ring) | 150 OD / 120 ID, inside flat | 6 | 127 - 133 |
+| Yoke -1 plate | 50 dia circle + 60 deg arms to R69 | 2 | 13 - 15 |
+| Yoke -2 plate | 60 dia circle + 60 deg arms to R69 | 2 | 15 - 17 |
+| Yoke walls (4) | R66-69, 54 deg wide | 82 / 80 | 13 / 15 - 95 |
+| Yoke bars (2) | 10 wide, at Y +28 and X -28 | 5 | 90 - 95 |
+| Motor tube | 38 bore / 44 OD, flange 56 | 44 | 54 - 98 |
+| Motor (reference) | 36 encoder, 35 body, 6 shaft | 91 | 57 - 148 |
+| Flywheel (reference) | 100 dia | 10 | 132 - 142 |
 
 ## Dimension history
 
 | Version | Platform 0 (dia x t) | Platform 1 (dia x t) | Platform 2 (dia x t) | Platform 3 (OD/ID x t) | Overall height |
 |---|---|---|---|---|---|
+| v17 | 160 x 8 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 (no cap) |
 | v16 | 160 x 8 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 housing, 170 with cap |
 | v15 | 160 x 10 | 150 x 5 | 150 x 5 | 150/120 x 6 | 145 |
 | v14 | 160 x 5 | 150 x 5 | 150 x 5 | 150/120 x 6 | 135 |
@@ -81,6 +83,18 @@ Use these names when asking for a change.
 Add a new row here and update the module table whenever a new version is exported.
 
 ## Version history
+
+### v17 - yoke cage with hanging motor tube, ring flat
+- Request: nothing more on the sensor ring. The ring thread is removed; the ring inside is flat. The cap/lid is dropped (`lid.py` and `lid.step` are left as they were and no longer match; not updated).
+- Request: rebuild platform -1/-2 like images 1-3: a base plate, curved side walls and a top bar. Each yoke is now: plate (circle with 10 mm hole + two 60 deg arms) + two curved walls (R66-69, 54 deg wide, up to z95) + a bar between the walls at the top. Yoke -1 is along 0/180 deg, yoke -2 along 90/270 deg. The bars sit off-centre (Y +28 and X -28) so the tube centre stays open, and cross with a half-lap notch.
+- The motor tube is now a separate part: 38 bore / 44 OD, 44 tall, closed bottom, with a 56 mm flange on top. It hangs from the two bars by the flange. The deck has a 46 mm centre hole so the tube passes through.
+- Lifting the yokes by the curved walls lifts the tube with them; the walls pass through the deck axis windows (R71).
+- The pockets in platform 0/1 are gone (the yokes sit on flat platform 1).
+- The motor reference moved to z57 (tube floor top); flywheel z132-142 (above the ring plane, inside the 120 mm ring opening).
+- Checks: every pair of frame, yokes, tube and motor has 0 mm3 interference.
+- Open: the bars hold the tube by two off-centre contact points; the real assembly may need a third support.
+- Open: the yokes and the tube are untested for printing (the 82 mm walls need orientation checked).
+
 
 ### v16 - 8 mm platform 0, taller body with four-section cap, stronger rim
 - Request: make the platform 0 160 x 8 mm and keep everything else unchanged. Platform 1 now sits at z8-13; the lower posts are 2 mm longer so the deck stays at z85-90.
