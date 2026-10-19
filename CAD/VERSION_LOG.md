@@ -102,6 +102,12 @@ Add a new row here and update the module table whenever a new version is exporte
 - Open: the v16 sleeve is fused to the deck, so the yokes do not lift the tube; they surround it. A removable tube would need a frame change.
 - Open: "within 175 mm" in the request: the limit in the brief is 170 mm; the frame is 133 mm, the yokes top out at z100.
 
+main:
+<img width="853" height="877" alt="image" src="https://github.com/user-attachments/assets/4b4c322d-08a8-45ac-be26-93414ea89486" />
+
+side1: <img width="1111" height="815" alt="image" src="https://github.com/user-attachments/assets/b0ea044e-e8a0-431d-84b9-742b856ccd87" />
+side2: <img width="1160" height="893" alt="image" src="https://github.com/user-attachments/assets/dc8b51e3-4adf-4709-8331-835ce575bd0e" />
+
 
 ### v17 - yoke cage with hanging motor tube, ring flat
 - Request: nothing more on the sensor ring. The ring thread is removed; the ring inside is flat. The cap/lid is dropped (`lid.py` and `lid.step` are left as they were and no longer match; not updated).
