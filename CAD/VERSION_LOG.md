@@ -92,6 +92,11 @@ Add a new row here and update the module table whenever a new version is exporte
 - Open: the platform -1/-2 inserts still have no walls or hanging tube (the earlier request was cut off).
 - Open: the quarter-turn thread is untested in a print; the 10 mm skirt only engages the 6 mm ring.
 
+<img width="768" height="765" alt="image" src="https://github.com/user-attachments/assets/8ca8e64b-5dda-4d83-b53b-b8393e2811bb" />
+
+<img width="1119" height="634" alt="image" src="https://github.com/user-attachments/assets/025bda5e-38b5-460e-8d17-59bbfb8c53f4" />
+
+
 ### v15 - platform 0 / 1 split, insert plates -1 and -2
 - Request (user clarified): platform 0 is 160 mm x 10 mm thick; platform 1 is 150 mm x 5 mm (same width as platform 2) on top of it. Everything above moved up 10 mm. Overall height 145.
 - Platform -1 and -2 as separate insert plates (2 mm, 10 mm centre hole) fitted into underside pockets of platform 0: -1 = 5 cm circle + wedges at 0/180 deg; -2 = 6 cm circle + wedges at 90/270 deg. Exported as `insert_minus1.step` and `insert_minus2.step`; 0 mm3 overlap with the housing and with each other.
