@@ -91,6 +91,11 @@ Add a new row here and update the module table whenever a new version is exporte
 - Checks: both yokes valid solids; 0 mm3 interference with the frame, with each other and with the motor reference.
 - Open: the v16 sleeve is fused to the deck, so the yokes surround the tube and do not lift it.
 
+Main: <img width="715" height="790" alt="image" src="https://github.com/user-attachments/assets/9f2d5833-526e-4397-8f85-6338d5f9fae4" />
+
+Side1:<img width="761" height="1039" alt="image" src="https://github.com/user-attachments/assets/d911497f-5401-4ea4-8346-417335394206" />
+Side2: <img width="1128" height="1072" alt="image" src="https://github.com/user-attachments/assets/2dbacff1-7b16-4442-a1ee-3aa55d27ed08" />
+
 
 ### v19 - inserts back to the v17 yoke form, taller than the tube, larger circle plates
 - `encoder_housing.step` not changed (v16).
