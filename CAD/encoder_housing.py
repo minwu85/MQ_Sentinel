@@ -10,19 +10,18 @@ P2_Z0 = 75.0                 # platform 2 underside
 P2_Z1 = P2_Z0 + P2_T         # 80
 P3_Z0 = H - P3_T             # 129
 POST_W, POST_RAD, POST_R = 10.0, 14.0, 67.5   # rectangular posts, 1 cm wide, under the ring
-ARM2_W, WIN_R = 36.0, 72.0                    # platform 2 X-cross arm width; wedges run out to a 3 mm rim
+ARM2_W, WIN_R = 36.0, 73.5                    # platform 2 X-cross arm width; wedges run out to a thinner 1.5 mm rim
 RING_ID = 120.0
 SENS_L, SENS_W, N_SENS = 8.0, 7.0, 3          # sensor notch 8 (tangential) x 7 (radial) x ring thickness
-SKIRT_D, SKIRT_T = 160.0, 1.0                 # thin bottom layer (R80 limit)
+SKIRT_D, SKIRT_T = 160.0, 5.0                 # bottom layer 0: 160 mm (R80 limit), now 5 mm thick
 CENTRE_HOLE_D = 10.0                          # centre hole in platform 1
 P1_HUB_D, P1_REC, P1_WEDGE = 50.0, 2.0, 30.0  # platform 1: 5 cm circle + two 60 deg wedges recessed 2 mm
 
 # motor sleeve: full-round tube, grey body half below / half above platform 2, closed bottom
 MOTOR_D, BORE_D, WALL = 37.0, 38.0, 3.0
 ENC_H, GREY_H = 12.0, 53.0                    # encoder 12; grey = 29 can + 24 gearbox (datasheet)
-GREY_Z0 = (P2_Z0 + P2_T / 2) - GREY_H / 2     # grey centred on platform 2 mid-plane -> 51 to 104
-SLEEVE_Z0 = GREY_Z0 - ENC_H - WALL            # 36, covered bottom
-SLEEVE_Z1 = P2_Z1                             # 80: tube top flush with platform 2 top (holds encoder + motor can only)
+SLEEVE_Z0 = 41.0                              # tube shifted up 5 mm (same size); covered bottom
+SLEEVE_Z1 = SLEEVE_Z0 + 44.0                             # 85: tube top 5 mm above platform 2 (holds encoder + motor can only)
 WIN_W, WIN_H = 10.0, 20.0                     # wire window 1 x 2 cm, front (-Y), at the encoder
 
 def disc(d, z0, t):
@@ -51,7 +50,6 @@ recess = disc(P1_HUB_D, 0, P1_REC)
 for a in (90, 270):
     recess = recess.union(cq.Workplane("XY").polyline([(0, 0), (200, -200 * t), (200, 200 * t)]).close()
                           .extrude(P1_REC).rotate((0, 0, 0), (0, 0, 1), a))
-recess = recess.intersect(disc(D, 0, P1_REC))   # pattern stays inside the 150 mm body; the 160 mm edge ring stays whole
 p1 = disc(D, 0, P1_T)
 
 # platform 2 (middle deck): X cross; the four axis wedges are cut away, 3 mm rim kept

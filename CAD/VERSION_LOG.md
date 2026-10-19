@@ -35,7 +35,7 @@ Use these names when asking for a change.
 | Name | What it is |
 |---|---|
 | Platform 1 (base) | Bottom disc, 150 mm OD, 5 mm thick; flat top; the underside has a centre circle and two 60 deg wedges recessed 2 mm; centre hole 10 mm |
-| Bottom thin layer | 160 mm OD, 1 mm thick disc under platform 1 (the only part wider than 150) |
+| Bottom layer 0 | 160 mm OD, 5 mm thick, under platform 1; carries the underside pattern (the only part wider than 150) |
 | Lower posts | 4 rectangular posts (10 mm wide) joining platform 1 to platform 2 |
 | Platform 2 (middle deck) | 150 mm OD, 5 mm thick. X cross (arms on the diagonals), motor sleeve through the centre |
 | Upper posts | 4 rectangular posts (10 mm wide) joining platform 2 to platform 3 |
@@ -50,6 +50,14 @@ Use these names when asking for a change.
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
 ## Version history
+
+### v14 - thick layer 0, shifted motor tube, thinner deck rim
+- Issue: the leftover thin 160 mm ring outside the pattern was the unwanted part. Layer 0 (160 mm) is now 5 mm thick, so it is the base itself, and the underside pattern (2 mm deep) runs out to the 160 mm edge.
+- Request: move the motor tube up 0.5 cm, same size. The tube is z41-85 (44 tall), 5 mm above platform 2. The wire window moves with it (z44-64).
+- Motor reference updated to the measured values: encoder cap 36, grey body 35, 69 mm body, first step 75, overall 91. Motor sits on the tube floor at z44; flywheel z119-129 (under the ring bottom at 129).
+- Request: thinner ring on platform 2. The rim at the edge of the middle deck is 1.5 mm wide (was 3 mm).
+- Checks: one valid solid, 160 x 160 x 135; 0 mm3 interference with the motor/flywheel reference.
+- Open: the shaft tip is now flush with the ring top (z135). The flywheel is now higher than in v13, because the motor moved up.
 
 ### v13 - flat base, open top, shorter motor tube
 - Issue: the pattern was on the top of the base. It now goes into the underside of the bottom layer (2 mm deep, inside the 150 mm body; the 160 mm edge stays whole). The base top is flat with only the 10 mm centre hole.
