@@ -34,21 +34,15 @@ Use these names when asking for a change.
 
 | Name | What it is |
 |---|---|
-| Platform 1 (base) | Bottom disc, 150 mm OD, 4 mm thick, centre hole 10 mm |
+| Platform 1 (base) | Bottom disc, 150 mm OD, 5 mm thick; centre circle and two 60 deg wedges recessed 2 mm; centre hole 10 mm |
 | Bottom thin layer | 160 mm OD, 1 mm thick disc under platform 1 (the only part wider than 150) |
-| Lower posts | 3 rectangular posts (10 mm wide) joining platform 1 to platform 2 |
-| Platform 2 (middle deck) | 150 mm OD, 5 mm thick. Cross shape with 4 corner windows, motor pass-through, wire slot |
-| Motor pass-through | 40 mm full-circle hole in platform 2 |
-| Motor sleeve | Full-round tube under platform 2 (OD 46, 47 mm tall) holding the black encoder and 32 mm of the grey body |
-| Wire window | 20 x 10 mm opening at the bottom front of the motor sleeve |
+| Lower posts | 4 rectangular posts (10 mm wide) joining platform 1 to platform 2 |
+| Platform 2 (middle deck) | 150 mm OD, 5 mm thick. X cross (arms on the diagonals), motor sleeve through the centre |
 | Upper posts | 4 rectangular posts (10 mm wide) joining platform 2 to platform 3 |
-| Platform 3 (top ring / sensor ring) | 150 mm OD, 120 mm ID, 6 mm thick |
-| Sensor notches | 3 notches, 8 x 7 mm, 120 deg apart, on the outer edge of platform 3 |
+| Platform 3 (top sensor ring) | 150 mm OD, 120 mm ID, 6 mm thick, always a full ring; plus cross inside, 3 sensor notches |
+| Motor sleeve | Full tube through the middle of platform 2 (bore 38, OD 44) holding the grey motor body half above and half below platform 2; closed bottom |
+| Wire window | 10 x 20 mm opening at the side of the motor sleeve, at the encoder |
 | Screw holes | 4 holes, 3 mm, at radius 67.5 on platform 3 and on the lid |
-| Motor clamp | 60 x 30 mm box with a half-round bore, standing on platform 2 |
-| Bore / groove | 40 mm half-round bore; the upper 15 mm has a 1 mm deeper groove |
-| Centring pads | 3 small pads in the lower bore (30, 90, 150 deg) that hold the motor on the housing axis |
-| Arm holes | 4 vertical 3 mm holes in the top faces of the clamp arms |
 | (lid parts below: not updated since v9, no ring thread) | |
 | Lid disc | Flat 150 mm disc, 4 mm thick, with the 4 screw holes |
 | Handle | Arched handle on the lid, with a 10 x 6 mm slot at the apex |
@@ -56,6 +50,30 @@ Use these names when asking for a change.
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
 ## Version history
+
+### v12 - platform numbering corrected, sensor ring restored
+- Correction from the user: the earlier platform numbers were counted the other way round. Platform 1 = base (bottom), platform 2 = middle deck, platform 3 = top sensor ring.
+- The patterns from the v11 request are now on the right platforms: the top ring (3) gets the plus cross (sketch 2) and the middle deck (2) gets the X cross (sketch 3).
+- Platform 3: the sensor ring is complete again and must never be removed. A 30 mm wide plus cross sits inside it with a 12 mm shaft hole. The 3 sensor notches are back (0, 120, 240 deg).
+- Platform 2: X cross with 36 mm arms; the four axis wedges are cut away to R72, leaving a 3 mm rim. The landing pads are gone.
+- Platform 1: now matches the SketchUp images. The centre circle and two opposite 60 deg wedges (90 / 270 deg) are recessed 2 mm; the two 120 deg sectors stay full height (6 divisions of 60 deg). Lower posts start at Z 3 so they sit on the recessed floor.
+- Posts: 4 rectangular posts above platform 2 (between platforms 2 and 3). The lower posts are now also 4, on the X arms at 45 / 135 / 225 / 315 deg (they were 3 on the axes, which no longer carry material).
+- Checks: one valid solid, 160 x 160 x 135; 0 mm3 interference with the motor/flywheel reference.
+- Open: the lid is still not updated and does not match this housing.
+
+### v11 - motor tube, new platform layouts, recessed base
+- Request: replace the half-round clamp and pads with a full cylinder.
+  Result: clamp, pads, groove and arm holes removed. A full-round sleeve (bore 38, OD 44, Z 36-106) goes through the middle of platform 2. It has a closed 3 mm bottom and a 10 x 20 mm wire window at the side, at the encoder.
+- The grey body (can + gearbox, 53 mm from the datasheet drawing) is centred on platform 2: 26.5 mm below and 26.5 mm above. The encoder is 12 mm under that.
+- Flywheel reference is now at Z 110-120, on the shaft above the boss.
+- Platform 2: windows now run out to a 3 mm rim, with a landing pad kept under each of the 7 posts.
+- Platform 3: now the opposite pattern (X cross). Only the ring segments on the 45/135 deg diagonals remain.
+- Platform 1: 5 mm thick. A 50 mm centre circle stays full height; the 90 and 270 deg sectors are recessed 2 mm. The lower posts start at Z 3 so they sit on the recessed floor.
+- Issue: the 3 sensor notches (0, 120, 240 deg) fall in the cut-away areas of platform 3 and are gone.
+  Open: tell me where the 3 sensors should go.
+- Issue: the motor drawing gives a 12 mm encoder and 29 + 24 mm grey, not the earlier 15 mm / 32 mm. v11 uses the drawing.
+- Open: the lid does not match this housing (no ring, no thread). It is not updated.
+- Checks: one valid solid, 160 x 160 x 135; 0 mm3 interference with the motor/flywheel reference.
 
 ### v10 - full motor sleeve, thread removed, thicker base
 - Issue: the motor was held only by a half-round clamp and a hole in platform 2.
