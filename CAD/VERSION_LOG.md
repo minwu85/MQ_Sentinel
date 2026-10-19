@@ -49,7 +49,48 @@ Use these names when asking for a change.
 | Lid skirt | 10 mm tall threaded tube under the lid disc |
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
+## Dimensions by module (current version, v16)
+
+| Module | Diameter / size (mm) | Thickness / height (mm) | Z range |
+|---|---|---|---|
+| Platform 0 | 160 dia | 8 | 0 - 8 |
+| Platform 1 | 150 dia | 5 | 8 - 13 |
+| Platform -1 insert | 50 dia circle + 60 deg wedges at 0/180 | 2 | 0 - 2 |
+| Platform -2 insert | 60 dia circle + 60 deg wedges at 90/270 | 2 | 2 - 4 |
+| Lower posts (4) | 10 x 14 rectangle, radius 67.5 | 73 | 12 - 85 |
+| Platform 2 (middle deck) | 150 dia, X arms 36 wide, rim 4 | 5 | 85 - 90 |
+| Upper posts (4) | 10 x 14 rectangle, radius 67.5 | 37 | 90 - 127 |
+| Platform 3 (sensor ring) | 150 OD / 120 ID | 6 | 127 - 133 |
+| Motor sleeve | 38 bore / 44 OD | 44 | 51 - 95 |
+| Cap | 150 dia, shell wall 3, skirt 116 OD / 110 ID | 47 total | 123 - 170 |
+| Motor (reference) | 36 encoder, 35 body, 6 shaft | 91 | 54 - 145 |
+| Flywheel (reference) | 100 dia | 10 | 129 - 139 |
+
+## Dimension history
+
+| Version | Platform 0 (dia x t) | Platform 1 (dia x t) | Platform 2 (dia x t) | Platform 3 (OD/ID x t) | Overall height |
+|---|---|---|---|---|---|
+| v16 | 160 x 8 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 housing, 170 with cap |
+| v15 | 160 x 10 | 150 x 5 | 150 x 5 | 150/120 x 6 | 145 |
+| v14 | 160 x 5 | 150 x 5 | 150 x 5 | 150/120 x 6 | 135 |
+| v13 | 160 x 1 | 150 x 5 | 150 x 5 | 150/120 x 6 | 135 |
+| v12 | 160 x 1 | 150 x 5 | 150 x 5 | 150/120 x 6 | 135 |
+| v11 | 160 x 1 | 150 x 5 | 150 x 5 | 150/120 x 6 | 135 |
+| v10 | 160 x 1 | 150 x 4 | 150 x 5 | 150/120 x 6 | 135 |
+
+Add a new row here and update the module table whenever a new version is exported.
+
 ## Version history
+
+### v16 - 8 mm platform 0, taller body with four-section cap, stronger rim
+- Request: make the platform 0 160 x 8 mm and keep everything else unchanged. Platform 1 now sits at z8-13; the lower posts are 2 mm longer so the deck stays at z85-90.
+- Request: the four rim arcs on the middle deck were too thin. The rim is now 4 mm wide (R71 to R75).
+- Request: raise the side height to meet the 170 mm pipe. Overall height is now 170 mm, using a cap. Appendix 1 puts the sensor ring 40 mm below the top, so the ring moved down to z127-133 (centreline z130). Upper posts are 37 mm tall.
+- Request: a bottle-lid style way to screw it together. The cap is a four-section quarter-turn screw cap: 4 thread sections on the ring (gaps at 0/90/180/270 deg) and 4 matching sections on the cap skirt. Drop it in with the sections on the axes, then turn 45 deg. Cap height z123-170 (37 mm above the ring). The raised handle is removed (170 mm limit) and replaced with a 20 x 8 mm finger slot.
+- Not done: item 2 of the request ("Based on the document information provided I want to make") was cut off. The project brief is noted: 170 mm x 150 mm pipe, sensor ring and laser pointer heights, modular parts that come out in under 10 minutes. No laser mount has been modelled yet.
+- Checks: housing and cap are valid solids; 0 mm3 interference between housing, cap (seated and drop-in orientation), inserts and the motor reference.
+- Open: the platform -1/-2 inserts still have no walls or hanging tube (the earlier request was cut off).
+- Open: the quarter-turn thread is untested in a print; the 10 mm skirt only engages the 6 mm ring.
 
 ### v15 - platform 0 / 1 split, insert plates -1 and -2
 - Request (user clarified): platform 0 is 160 mm x 10 mm thick; platform 1 is 150 mm x 5 mm (same width as platform 2) on top of it. Everything above moved up 10 mm. Overall height 145.

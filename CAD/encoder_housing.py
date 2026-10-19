@@ -4,15 +4,18 @@ import math
 import cadquery as cq
 
 D = 150.0            # overall diameter
-H = 145.0            # overall height (everything above the base moved up 10 mm for the thicker platform 0)
-P0_T, P1_T, P2_T, P3_T = 10.0, 5.0, 5.0, 6.0   # platform 0 (160 mm) 1 cm, platform 1 (150 mm) 5 mm on top of it
-BASE_TOP = P0_T + P1_T                        # 15
+H = 133.0            # housing height = ring top. Sensor ring centreline z130 = 40 mm below the 170 mm top (Appendix 1); the cap adds 37 mm
+P0_T, P1_T, P2_T, P3_T = 8.0, 5.0, 5.0, 6.0    # platform 0 (160 mm) 8 mm, platform 1 (150 mm) 5 mm on top of it
+BASE_TOP = P0_T + P1_T                        # 13
 P2_Z0 = 85.0                 # platform 2 underside
 P2_Z1 = P2_Z0 + P2_T         # 80
-P3_Z0 = H - P3_T             # 129
+P3_Z0 = H - P3_T             # 127
 POST_W, POST_RAD, POST_R = 10.0, 14.0, 67.5   # rectangular posts, 1 cm wide, under the ring
-ARM2_W, WIN_R = 36.0, 73.5                    # platform 2 X-cross arm width; wedges run out to a thinner 1.5 mm rim
+ARM2_W, WIN_R = 36.0, 71.0                    # platform 2 X-cross arm width; wedges run out to a stronger 4 mm rim
 RING_ID = 120.0
+# interrupted (quarter-turn) thread for the cap: 4 internal ridge sections centred on 45/135/225/315 deg
+T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 60.1, 58.5, 2.0, 0.6
+T_SECT = 35.0                                 # half-angle of each ring thread section (gaps at 0/90/180/270 deg)
 SENS_L, SENS_W, N_SENS = 8.0, 7.0, 3          # sensor notch 8 (tangential) x 7 (radial) x ring thickness
 SKIRT_D = 160.0                               # platform 0: 160 mm (R80 limit)
 CENTRE_HOLE_D = 10.0                          # centre hole in platform 1
@@ -72,6 +75,20 @@ p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(67.5, 45, 360,
 for i in range(N_SENS):
     p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).center(D / 2 - SENS_W / 2, 0).rect(SENS_W, SENS_L)
                 .extrude(P3_T).rotate((0, 0, 0), (0, 0, 1), 360.0 / N_SENS * i))
+
+def ridge(r0, r1, pitch, height, z0):
+    helix = cq.Wire.makeHelix(pitch, height, r0)
+    prof = cq.Workplane("XZ").polyline([(r0, -T_W0 / 2), (r1, -T_W1 / 2), (r1, T_W1 / 2), (r0, T_W0 / 2)]).close()
+    return prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True).translate((0, 0, z0))
+
+def sectors(centres, half, z0, h):
+    tt = math.tan(math.radians(half))
+    return union_all([cq.Workplane("XY").workplane(offset=z0).polyline([(0, 0), (200, -200 * tt), (200, 200 * tt)])
+                      .close().extrude(h).rotate((0, 0, 0), (0, 0, 1), a) for a in centres])
+
+thread = (ridge(T_R0, T_R1, T_PITCH, 3 * T_PITCH, P3_Z0 - T_PITCH)
+          .intersect(disc(T_R0 * 2 + 2, P3_Z0, P3_T)).intersect(sectors((45, 135, 225, 315), T_SECT, P3_Z0, P3_T)))
+p3 = p3.union(thread)
 
 # motor sleeve: full tube through platform 2, covered bottom, 1 x 2 cm wire window at the side
 sleeve = disc(BORE_D + 2 * WALL, SLEEVE_Z0, SLEEVE_Z1 - SLEEVE_Z0)
