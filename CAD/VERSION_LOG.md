@@ -104,6 +104,19 @@ Add a new row here and update the module table whenever a new version is exporte
 - Open: the bars hold the tube by two off-centre contact points; the real assembly may need a third support.
 - Open: the yokes and the tube are untested for printing (the 82 mm walls need orientation checked).
 
+main:
+<img width="691" height="805" alt="image" src="https://github.com/user-attachments/assets/44c60368-ad25-4295-878a-f53b5c9b5595" />
+
+
+en: 
+<img width="734" height="703" alt="image" src="https://github.com/user-attachments/assets/947d9319-7de5-4d56-bca2-5bf05bcc65ea" />
+
+side1:
+<img width="1019" height="698" alt="image" src="https://github.com/user-attachments/assets/70db13ab-d9ac-48ab-960b-7424dcf13818" />
+
+side2:
+<img width="854" height="610" alt="image" src="https://github.com/user-attachments/assets/9630fbf5-5342-43d4-91c9-1dd87583acae" />
+
 
 ### v16 - 8 mm platform 0, taller body with four-section cap, stronger rim
 - Request: make the platform 0 160 x 8 mm and keep everything else unchanged. Platform 1 now sits at z8-13; the lower posts are 2 mm longer so the deck stays at z85-90.
