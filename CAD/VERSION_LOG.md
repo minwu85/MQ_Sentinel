@@ -84,6 +84,16 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v19 - inserts back to the v17 yoke form, taller than the tube, larger circle plates
+- `encoder_housing.step` not changed (v16).
+- Request: back to the v17 insert design (round plate on platform 1, two curved walls, a top bar), with the two inserts taller than the tube. The yoke top is z100, 5 mm above the tube top (z95). Plates sit on platform 1 (z13-15 and z15-17), as in v17.
+- Request: "172 mm long section of 160 mm". Taken as the envelope: the yokes are 138 wide (limit 160) and top out at z100 (limit 172).
+- Request: more circle parts so the modules join and balance. The plates are now big concentric circles (dia 100 for platform -1, dia 110 for -2, up from 50 / 60). They stack on each other, stay inside the posts (r60.5), and widen the footprint. Both keep the 10 mm centre hole.
+- Checks: both yokes valid solids; 0 mm3 interference with the v16 frame and with each other.
+- Open: the v16 sleeve is fused to the deck, so the yokes surround the tube and do not lift it.
+- Open: the meaning of "three modules" is a guess (frame + the two yokes).
+
+
 ### v18 - frame back to v16, inserts resized to the tube
 - Request: `encoder_housing.step` back to v16 (not changed). Restored from the v16 commit, with `encoder_housing.py` and `motor_ref.py`. The v17 frame (open deck hole, separate tube, no thread, no pockets) is dropped. `motor_tube.step` from v17 is no longer used.
 - Request: only change `insert_minus1.step` / `insert_minus2.step`. New script `inserts.py`. The yokes are sized to the v16 sleeve (tube OD 44, z51-95, 44 tall): top at z100 (5 mm taller than the tube) and a 45 mm opening (0.5 mm clearance each side). Yoke -1: 49 tall; yoke -2: 47 tall (its plate is 2 mm higher).
