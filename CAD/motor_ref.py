@@ -2,11 +2,11 @@
 Run: python motor_ref.py -> motor_ref.step. Z positions are in the housing frame."""
 import cadquery as cq
 
-MOTOR_Z0 = 33.0                       # bottom of black encoder; 91 mm overall -> shaft tip z=124
+MOTOR_Z0 = 28.0                       # bottom of black encoder; 15 black + 32 grey under platform 2; shaft tip z=119
 ENC_D, ENC_H = 36.0, 15.0             # black encoder cap
 BODY_D, BODY_H = 35.0, 54.0           # grey gearbox/motor body (half = 27 mm sits under platform 2)
 SHAFT_D, HUB_D = 6.0, 12.0
-FLY_D, FLY_T, FLY_Z0 = 100.0, 10.0, 113.0   # flywheel top 123, clear of the lid skirt (125)
+FLY_D, FLY_T, FLY_Z0 = 100.0, 10.0, 108.0   # flywheel top 118
 
 def cyl(d, z0, h):
     return cq.Workplane("XY").workplane(offset=z0).circle(d / 2).extrude(h)

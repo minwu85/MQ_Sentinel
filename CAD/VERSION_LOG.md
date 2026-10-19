@@ -34,27 +34,42 @@ Use these names when asking for a change.
 
 | Name | What it is |
 |---|---|
-| Platform 1 (base) | Bottom disc, 150 mm OD, 3 mm thick, centre hole 10 mm |
+| Platform 1 (base) | Bottom disc, 150 mm OD, 4 mm thick, centre hole 10 mm |
 | Bottom thin layer | 160 mm OD, 1 mm thick disc under platform 1 (the only part wider than 150) |
 | Lower posts | 3 rectangular posts (10 mm wide) joining platform 1 to platform 2 |
 | Platform 2 (middle deck) | 150 mm OD, 5 mm thick. Cross shape with 4 corner windows, motor pass-through, wire slot |
-| Motor pass-through | 40 mm hole in platform 2 so the motor sinks below it |
-| Wire slot | 20 mm wide key slot running from the motor pass-through out the open front, for the motor wires |
+| Motor pass-through | 40 mm full-circle hole in platform 2 |
+| Motor sleeve | Full-round tube under platform 2 (OD 46, 47 mm tall) holding the black encoder and 32 mm of the grey body |
+| Wire window | 20 x 10 mm opening at the bottom front of the motor sleeve |
 | Upper posts | 4 rectangular posts (10 mm wide) joining platform 2 to platform 3 |
 | Platform 3 (top ring / sensor ring) | 150 mm OD, 120 mm ID, 6 mm thick |
-| Ring thread | Internal helical ridge on platform 3, pitch 4 mm, mates the lid skirt |
 | Sensor notches | 3 notches, 8 x 7 mm, 120 deg apart, on the outer edge of platform 3 |
 | Screw holes | 4 holes, 3 mm, at radius 67.5 on platform 3 and on the lid |
 | Motor clamp | 60 x 30 mm box with a half-round bore, standing on platform 2 |
 | Bore / groove | 40 mm half-round bore; the upper 15 mm has a 1 mm deeper groove |
 | Centring pads | 3 small pads in the lower bore (30, 90, 150 deg) that hold the motor on the housing axis |
 | Arm holes | 4 vertical 3 mm holes in the top faces of the clamp arms |
+| (lid parts below: not updated since v9, no ring thread) | |
 | Lid disc | Flat 150 mm disc, 4 mm thick, with the 4 screw holes |
 | Handle | Arched handle on the lid, with a 10 x 6 mm slot at the apex |
 | Lid skirt | 10 mm tall threaded tube under the lid disc |
 | Flywheel (reference) | 100 mm x 10 mm mild steel, z113-123 |
 
 ## Version history
+
+### v10 - full motor sleeve, thread removed, thicker base
+- Issue: the motor was held only by a half-round clamp and a hole in platform 2.
+  Fix: a full-round sleeve (OD 46, bore 40, 47 mm tall) under platform 2 now holds the black encoder (15 mm) and 32 mm of the grey body. The motor bottom is at z28.
+- Issue: the motor wires need a way out.
+  Fix: a 20 x 10 mm wire window at the bottom front of the sleeve. The wire slot in platform 2 is gone.
+- Issue: with the motor 5 mm lower, the 30 mm clamp would hit the flywheel (now z108-118).
+  Fix: clamp 25 mm tall (z80-105). Plain bore 10 mm, groove 15 mm, top step 10 mm, arm holes 25 mm deep.
+- Request: remove the thread inside the sensor ring.
+  Result: ring thread removed. `lid.py` is no longer updated and does not match the ring. The lid files are left as they were in v9.
+- Issue: the base was too thin to stand on.
+  Fix: platform 1 is now 4 mm (the lower posts start at z4).
+- Checks: one valid solid, 160 x 160 x 135. 0 mm3 interference with the motor/flywheel reference.
+- Open: the upper grey part (22 mm) is held only by the clamp pads and the half-round; no front clip yet.
 
 ### v9 - sunk motor, rectangular posts, 3 sensors, thin base
 Requested: lower the flywheel; sink the motor under platform 2; rectangular posts; 3 sensors; centre the motor; 3 mm base.
