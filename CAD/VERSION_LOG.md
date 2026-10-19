@@ -84,6 +84,14 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v20 - platform 0 at 5 mm, v17 inserts with 165 mm side walls
+- Request: keep `encoder_housing.step` as v16 and only make platform 0 5 mm thick (was 8). Platform 1 now sits at z5-10 and the lower posts start 1 mm lower (z9). Nothing else in the frame changed. Frame is still one valid solid, 160 x 160 x 133.
+- Request: back to the v17 inserts; only make the green side parts (the curved walls) higher, 165 mm. The wall top is now z165 (32 mm above the ring top, so they work as handles). Plates sit on the new platform 1 top (z10-12 and z12-14); plate sizes (dia 50 / 60), the 10 mm hole and the bars (z90-95, off-centre) are as in v17.
+- Why the walls moved: at 165 mm the v17 walls (R66-69) would run through the complete sensor ring (R60-75). They are now R54-57, inside the ring bore, and 44 deg wide (v17 was 54 deg) so they clear the deck X arms. The bar ends turn in to meet the walls.
+- Checks: both yokes valid solids; 0 mm3 interference with the frame, with each other and with the motor reference.
+- Open: the v16 sleeve is fused to the deck, so the yokes surround the tube and do not lift it.
+
+
 ### v19 - inserts back to the v17 yoke form, taller than the tube, larger circle plates
 - `encoder_housing.step` not changed (v16).
 - Request: back to the v17 insert design (round plate on platform 1, two curved walls, a top bar), with the two inserts taller than the tube. The yoke top is z100, 5 mm above the tube top (z95). Plates sit on platform 1 (z13-15 and z15-17), as in v17.

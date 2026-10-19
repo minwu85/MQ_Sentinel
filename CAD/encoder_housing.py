@@ -5,8 +5,8 @@ import cadquery as cq
 
 D = 150.0            # overall diameter
 H = 133.0            # housing height = ring top. Sensor ring centreline z130 = 40 mm below the 170 mm top (Appendix 1); the cap adds 37 mm
-P0_T, P1_T, P2_T, P3_T = 8.0, 5.0, 5.0, 6.0    # platform 0 (160 mm) 8 mm, platform 1 (150 mm) 5 mm on top of it
-BASE_TOP = P0_T + P1_T                        # 13
+P0_T, P1_T, P2_T, P3_T = 5.0, 5.0, 5.0, 6.0    # platform 0 (160 mm) now 5 mm, platform 1 (150 mm) 5 mm on top of it
+BASE_TOP = P0_T + P1_T                        # 10
 P2_Z0 = 85.0                 # platform 2 underside
 P2_Z1 = P2_Z0 + P2_T         # 80
 P3_Z0 = H - P3_T             # 127
