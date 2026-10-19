@@ -65,6 +65,7 @@ Use these names when asking for a change.
 - Request: thinner ring on platform 2. The rim at the edge of the middle deck is 1.5 mm wide (was 3 mm).
 - Checks: one valid solid, 160 x 160 x 135; 0 mm3 interference with the motor/flywheel reference.
 - Open: the shaft tip is now flush with the ring top (z135). The flywheel is now higher than in v13, because the motor moved up.
+<img width="1057" height="949" alt="image" src="https://github.com/user-attachments/assets/7d1c9c0f-b9c4-417c-bfc7-14cd6ad6519c" />
 
 ### v13 - flat base, open top, shorter motor tube
 - Issue: the pattern was on the top of the base. It now goes into the underside of the bottom layer (2 mm deep, inside the 150 mm body; the 160 mm edge stays whole). The base top is flat with only the 10 mm centre hole.
