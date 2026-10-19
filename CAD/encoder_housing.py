@@ -4,23 +4,24 @@ import math
 import cadquery as cq
 
 D = 150.0            # overall diameter
-H = 135.0            # overall height
-P1_T, P2_T, P3_T = 5.0, 5.0, 6.0
-P2_Z0 = 75.0                 # platform 2 underside
+H = 145.0            # overall height (everything above the base moved up 10 mm for the thicker platform 0)
+P0_T, P1_T, P2_T, P3_T = 10.0, 5.0, 5.0, 6.0   # platform 0 (160 mm) 1 cm, platform 1 (150 mm) 5 mm on top of it
+BASE_TOP = P0_T + P1_T                        # 15
+P2_Z0 = 85.0                 # platform 2 underside
 P2_Z1 = P2_Z0 + P2_T         # 80
 P3_Z0 = H - P3_T             # 129
 POST_W, POST_RAD, POST_R = 10.0, 14.0, 67.5   # rectangular posts, 1 cm wide, under the ring
 ARM2_W, WIN_R = 36.0, 73.5                    # platform 2 X-cross arm width; wedges run out to a thinner 1.5 mm rim
 RING_ID = 120.0
 SENS_L, SENS_W, N_SENS = 8.0, 7.0, 3          # sensor notch 8 (tangential) x 7 (radial) x ring thickness
-SKIRT_D, SKIRT_T = 160.0, 5.0                 # bottom layer 0: 160 mm (R80 limit), now 5 mm thick
+SKIRT_D = 160.0                               # platform 0: 160 mm (R80 limit)
 CENTRE_HOLE_D = 10.0                          # centre hole in platform 1
-P1_HUB_D, P1_REC, P1_WEDGE = 50.0, 2.0, 30.0  # platform 1: 5 cm circle + two 60 deg wedges recessed 2 mm
+INS1_D, INS2_D, P1_WEDGE = 50.0, 60.0, 30.0   # insert plates: 5 cm / 6 cm centre circles, wedges 60 deg wide (half-angle 30)
 
 # motor sleeve: full-round tube, grey body half below / half above platform 2, closed bottom
 MOTOR_D, BORE_D, WALL = 37.0, 38.0, 3.0
 ENC_H, GREY_H = 12.0, 53.0                    # encoder 12; grey = 29 can + 24 gearbox (datasheet)
-SLEEVE_Z0 = 41.0                              # tube shifted up 5 mm (same size); covered bottom
+SLEEVE_Z0 = 51.0                              # tube shifted up 5 mm (same size); covered bottom
 SLEEVE_Z1 = SLEEVE_Z0 + 44.0                             # 85: tube top 5 mm above platform 2 (holds encoder + motor can only)
 WIN_W, WIN_H = 10.0, 20.0                     # wire window 1 x 2 cm, front (-Y), at the encoder
 
@@ -38,19 +39,27 @@ def union_all(parts):
     return out
 
 POST_ANG = (45, 135, 225, 315)                # 4 posts below and 4 above platform 2, on the X arms
-P1_STAND = P1_T - 1.0                         # lower posts start 1 mm inside the base
+P1_STAND = BASE_TOP - 1.0                     # lower posts start 1 mm inside platform 1
 lower = union_all([rect_at(a, POST_R, POST_RAD, POST_W, P1_STAND, P2_Z0 - P1_STAND) for a in POST_ANG])
 upper = union_all([rect_at(a, POST_R, POST_RAD, POST_W, P2_Z1, P3_Z0 - P2_Z1) for a in POST_ANG])
 
-# platform 1: flat on top (only the 10 mm centre hole). The pattern is cut into the UNDERSIDE of the bottom layer:
-# centre circle + two opposite 60 deg wedges (90/270 deg) go 2 mm in; the two 120 deg sectors (0/180 deg) stay
-# full height -> 6 equal 60 deg divisions
+# platform 0 (160 x 10) + platform 1 (150 x 5 on top). Platform 1 top is flat, only the 10 mm centre hole.
+# Underside pockets for the two insert plates (insert_minus1 / insert_minus2, 2 mm plates):
+#   platform -1 plate: 5 cm centre circle + 2 opposite 60 deg wedges at 0/180 deg      -> pocket z 0 to 2
+#   platform -2 plate: 6 cm centre circle + 2 opposite 60 deg wedges at 90/270 deg     -> pocket z 2 to 4
+# (the z 0 to 2 pocket also opens the -2 shape so the -2 plate can be fitted from below first)
 t = math.tan(math.radians(P1_WEDGE))
-recess = disc(P1_HUB_D, 0, P1_REC)
-for a in (90, 270):
-    recess = recess.union(cq.Workplane("XY").polyline([(0, 0), (200, -200 * t), (200, 200 * t)]).close()
-                          .extrude(P1_REC).rotate((0, 0, 0), (0, 0, 1), a))
-p1 = disc(D, 0, P1_T)
+def wedges(angles, z0, h):
+    out = None
+    for a in angles:
+        w = (cq.Workplane("XY").workplane(offset=z0).polyline([(0, 0), (200, -200 * t), (200, 200 * t)]).close()
+             .extrude(h).rotate((0, 0, 0), (0, 0, 1), a))
+        out = w if out is None else out.union(w)
+    return out
+shape_a = lambda z0, h: disc(INS1_D, z0, h).union(wedges((0, 180), z0, h))
+shape_b = lambda z0, h: disc(INS2_D, z0, h).union(wedges((90, 270), z0, h))
+recess = shape_a(0, 2.0).union(shape_b(0, 2.0)).union(shape_b(2.0, 2.0))
+p1 = disc(SKIRT_D, 0, P0_T).union(disc(D, P0_T, P1_T))
 
 # platform 2 (middle deck): X cross; the four axis wedges are cut away, 3 mm rim kept
 x2 = union_all([cq.Workplane("XY").workplane(offset=P2_Z0).rect(300, ARM2_W).extrude(P2_T)
@@ -71,11 +80,15 @@ model = union_all([p1, lower, p2, upper, p3, sleeve])
 model = model.cut(disc(BORE_D, SLEEVE_Z0 + WALL, SLEEVE_Z1 - SLEEVE_Z0 - WALL))
 model = model.cut(cq.Workplane("XY").workplane(offset=SLEEVE_Z0 + WALL).center(0, -(BORE_D / 2 + WALL / 2))
                   .rect(WIN_W, WALL + 2).extrude(WIN_H))
-model = model.union(disc(SKIRT_D, 0, SKIRT_T))
 model = model.cut(recess)
-model = model.cut(cq.Workplane("XY").circle(CENTRE_HOLE_D / 2).extrude(P1_T))
+model = model.cut(cq.Workplane("XY").circle(CENTRE_HOLE_D / 2).extrude(BASE_TOP))
 
 bb = model.val().BoundingBox()
 print(f"bbox: {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm, solids {len(model.val().Solids())}")
 cq.exporters.export(model, "encoder_housing.step")
 cq.exporters.export(model, "encoder_housing.stl")
+
+# separate insert plates (2 mm) with the 10 mm hole, in their assembled position
+for name, shape, z0 in (("insert_minus1", shape_a(0, 2.0), 0.0), ("insert_minus2", shape_b(2.0, 2.0), 2.0)):
+    plate = shape.intersect(disc(SKIRT_D, z0, 2.0)).cut(disc(CENTRE_HOLE_D, z0, 2.0))
+    cq.exporters.export(plate, name + ".step")

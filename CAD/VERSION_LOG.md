@@ -51,6 +51,13 @@ Use these names when asking for a change.
 
 ## Version history
 
+### v15 - platform 0 / 1 split, insert plates -1 and -2
+- Request (user clarified): platform 0 is 160 mm x 10 mm thick; platform 1 is 150 mm x 5 mm (same width as platform 2) on top of it. Everything above moved up 10 mm. Overall height 145.
+- Platform -1 and -2 as separate insert plates (2 mm, 10 mm centre hole) fitted into underside pockets of platform 0: -1 = 5 cm circle + wedges at 0/180 deg; -2 = 6 cm circle + wedges at 90/270 deg. Exported as `insert_minus1.step` and `insert_minus2.step`; 0 mm3 overlap with the housing and with each other.
+- Not done: the curved walls and top tab from the user's image 1, and hanging the motor tube from the inserts. The request text was cut off ("the tube is"), so the tube is still held by platform 2.
+- Motor tube, wire window and motor reference moved up 10 mm with the rest. 0 mm3 interference with the motor reference.
+- The old 2 mm underside pattern (v13/v14) is replaced by the insert pockets.
+
 ### v14 - thick layer 0, shifted motor tube, thinner deck rim
 - Issue: the leftover thin 160 mm ring outside the pattern was the unwanted part. Layer 0 (160 mm) is now 5 mm thick, so it is the base itself, and the underside pattern (2 mm deep) runs out to the 160 mm edge.
 - Request: move the motor tube up 0.5 cm, same size. The tube is z41-85 (44 tall), 5 mm above platform 2. The wire window moves with it (z44-64).
