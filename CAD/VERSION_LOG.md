@@ -91,6 +91,9 @@ Add a new row here and update the module table whenever a new version is exporte
 - Checks: both yokes valid solids; 0 mm3 interference with the frame, with each other and with the motor reference; holes confirmed open and the wall solid just above them.
 - Open: with the bars gone, the two yokes are only joined by their stacked plates.
 
+side1: <img width="693" height="993" alt="image" src="https://github.com/user-attachments/assets/175e3ecc-16a5-4ad3-815c-a4674ae4ea22" />
+side2: <img width="734" height="1036" alt="image" src="https://github.com/user-attachments/assets/b7f9fa6f-b470-4bff-9704-8b4ce08674e8" />
+
 
 ### v20 - platform 0 at 5 mm, v17 inserts with 165 mm side walls
 - Request: keep `encoder_housing.step` as v16 and only make platform 0 5 mm thick (was 8). Platform 1 now sits at z5-10 and the lower posts start 1 mm lower (z9). Nothing else in the frame changed. Frame is still one valid solid, 160 x 160 x 133.
