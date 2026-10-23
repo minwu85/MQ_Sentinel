@@ -1,19 +1,31 @@
 """Cap (lid) for the top ring, 4-section quarter-turn thread like a bottle lid (mm).
 Run from CAD/: python lid.py -> lid.step/.stl. Shown seated on the housing (flange on the ring top, z=133).
-Overall housing + cap height = 170 mm (Appendix 1)."""
+v22: only the cap height (top z177, flush with the top of the 172 mm pipe sitting on platform 0) and a keyhole hanger changed.
+Added: keyhole hanger with a thick boss + ribs in the centre, 8 screw holes for the insert walls (their tops end at the lid underside)."""
 import math
 import cadquery as cq
 
-D, Z_RING_TOP, Z_TOP = 150.0, 133.0, 170.0
+D, Z_RING_TOP, Z_TOP = 150.0, 133.0, 177.0
 FLANGE_T, TOP_T, SHELL_WALL = 3.0, 4.0, 3.0              # flange on the ring, top disc, shell wall
 SKIRT_IN, SKIRT_OUT, SKIRT_H = 55.0, 58.0, 10.0          # 1 cm threaded skirt, goes into the ring bore
 T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 57.9, 59.7, 2.0, 0.6   # external ridge, mates the ring's 60.1 -> 58.5
 LID_SECT = 8.0                                           # half-angle of each lid section (passes the ring gaps)
 HOLE_R, HOLE_D = 67.5, 3.0                               # same 4 holes as the ring
-SLOT_L, SLOT_W = 20.0, 8.0                               # finger slot in the top (no raised handle: 170 mm limit)
+WALL_HOLE_R, WALL_HOLE_ANG = 49.5, 12.0                   # insert-wall screw holes: R49.5, +-12 deg either side of 0/90/180/270
+WALL_HOLE_D, WALL_CBORE_D, WALL_CBORE_H = 3.4, 6.5, 2.0   # M3 clearance + counterbore
+KEY_ENTRY_D, KEY_SLOT_W, KEY_C = 10.0, 5.5, 7.0           # keyhole: entry dia 10 at y-7, slot 5.5 wide to y+7 (hang by sliding up)
+KEY_POCKET_W, KEY_POCKET_H = 10.4, 4.5                    # head pocket behind the 4 mm face (head dia <= 9.5)
+BOSS_W, BOSS_L, BOSS_H = 30.0, 60.0, 12.0                 # thick boss under the top disc around the keyhole
+RIB_T, RIB_H, RIB_R = 4.0, 10.0, 58.0                     # 4 ribs on the diagonals, boss to R58 (clear of the R67.5 screw holes)
 
 def disc(d, z0, t):
     return cq.Workplane("XY").workplane(offset=z0).circle(d / 2).extrude(t)
+
+def union_all(parts):
+    out = parts[0]
+    for p in parts[1:]:
+        out = out.union(p)
+    return out
 
 def sectors(centres, half, z0, h):
     tt = math.tan(math.radians(half))
@@ -38,10 +50,24 @@ thread = (prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True)
           .intersect(disc(2 * T_R1 + 2, z_skirt, SKIRT_H))
           .intersect(sectors((45, 135, 225, 315), LID_SECT, z_skirt, SKIRT_H)))
 
-model = top.union(shell).union(flange).union(skirt).union(thread)
+boss = (cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T - BOSS_H + TOP_T).slot2D(BOSS_L, BOSS_W, 90).extrude(BOSS_H - TOP_T))
+ribs = union_all([cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T - RIB_H).center(RIB_R / 2, 0).rect(RIB_R, RIB_T)
+                  .extrude(RIB_H).rotate((0, 0, 0), (0, 0, 1), a) for a in (45, 135, 225, 315)])
+model = top.union(shell).union(flange).union(skirt).union(thread).union(boss).union(ribs)
 model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).polarArray(HOLE_R, 45, 360, 4).circle(HOLE_D / 2).extrude(TOP_T))
 model = model.cut(cq.Workplane("XY").workplane(offset=Z_RING_TOP).polarArray(HOLE_R, 45, 360, 4).circle(HOLE_D / 2).extrude(FLANGE_T))
-model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).rect(SLOT_L, SLOT_W).extrude(TOP_T))
+# keyhole (through the 4 mm face) + head pocket behind it in the boss
+def key_shape(z0, h, entry_d, slot_w):
+    entry = cq.Workplane("XY").workplane(offset=z0).center(0, -KEY_C).circle(entry_d / 2).extrude(h)
+    slot = cq.Workplane("XY").workplane(offset=z0).slot2D(2 * KEY_C + slot_w, slot_w, 90).extrude(h)
+    return entry.union(slot)
+model = model.cut(key_shape(Z_TOP - TOP_T, TOP_T, KEY_ENTRY_D, KEY_SLOT_W))
+model = model.cut(key_shape(Z_TOP - TOP_T - KEY_POCKET_H, KEY_POCKET_H, KEY_ENTRY_D, KEY_POCKET_W))
+for base in (0, 90, 180, 270):
+    for off in (-WALL_HOLE_ANG, WALL_HOLE_ANG):
+        pt = (WALL_HOLE_R * math.cos(math.radians(base + off)), WALL_HOLE_R * math.sin(math.radians(base + off)))
+        model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).center(*pt).circle(WALL_HOLE_D / 2).extrude(TOP_T))
+        model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - WALL_CBORE_H).center(*pt).circle(WALL_CBORE_D / 2).extrude(WALL_CBORE_H))
 
 bb = model.val().BoundingBox()
 print(f"cap bbox: {bb.xlen:.1f} x {bb.ylen:.1f} x z {bb.zmin:.1f}..{bb.zmax:.1f}, solids {len(model.val().Solids())}")

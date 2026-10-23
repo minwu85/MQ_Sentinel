@@ -55,3 +55,14 @@ INSERTS (inserts.py): YOKE PLATFORM -1 (insert_minus1.step) and PLATFORM -2 (ins
     Platform -1: Z 150.0 to 160.0 (centre 155.0), in the walls at 0 / 180 deg
     Platform -2: Z 135.0 to 145.0 (centre 140.0), in the walls at 90 / 270 deg; holes of the two yokes are 5.0 apart in height
   Interference with the frame, each other and the motor reference: 0.0 mm3
+
+REVISION 22 (2026-10-24) CHANGES - these override the lines above where they differ
+  Posts: 4 lower + 4 upper, 20 x 20 (R55-75, last 5 mm under the ring R60-75); deck rim 15 wide (R60-75) + flange R69-75 z80-85
+  Platform 0/1 centre hole 21.0; arc slots R44-55 +-20 deg at 0/90/180/270 (insert walls)
+  Motor sleeve: bore 38 z54-85, collar bore 36 z85-97 (top 97, was 95)
+  CAP: top z177 (shell z136-173, disc z173-177); keyhole entry dia 10 / slot 5.5 / head pocket 10.4 x 4.5; boss 30 x 60 x 12; 4 ribs 4 x 10;
+       8 x dia 3.4 holes (cbore 6.5) at R49.5, +-12 deg from 0/90/180/270; finger slot removed
+  INSERTS: plates z0-2 (-1, both shapes) and z2-4 (-2), arms to R80 (160 wide), hole 21; walls R44.5-54.5 +-19 deg, top z173 (R50.5-54.5 at z127-141);
+       belts R34.5-44.5 at z14-34, 100-120, 147-167; 20 x 10 holes (z150-160 / z135-145); 2 pilot holes dia 2.6 in each wall top
+  LASER STRAW: A hollow bolt (flange 34 z10-13, tube OD 18/20 thread, bore 10, z-14 to 10); B nut dia 34 z-10 to 0, pitch 2.5
+  Interference (all 0.0 mm3): every pair of housing, cap, inserts, straw parts, motor/flywheel reference

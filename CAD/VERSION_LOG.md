@@ -71,6 +71,7 @@ Use these names when asking for a change.
 
 | Version | Platform 0 (dia x t) | Platform 1 (dia x t) | Platform 2 (dia x t) | Platform 3 (OD/ID x t) | Overall height |
 |---|---|---|---|---|---|
+| v22 | 160 x 5 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 housing, 177 with cap |
 | v17 | 160 x 8 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 (no cap) |
 | v16 | 160 x 8 | 150 x 5 | 150 x 5 | 150/120 x 6 | 133 housing, 170 with cap |
 | v15 | 160 x 10 | 150 x 5 | 150 x 5 | 150/120 x 6 | 145 |
@@ -83,6 +84,49 @@ Use these names when asking for a change.
 Add a new row here and update the module table whenever a new version is exported.
 
 ## Version history
+
+### v22 - 2026-10-24 - stronger frame, taller lid with keyhole, 10 mm insert walls, laser straw
+Not committed or pushed (local CAD folder only). Re-import all `.step` files into Onshape.
+
+**1 Frame (`encoder_housing.step`, `encoder_housing.py`)**
+- 1.1 Deck rim (the "ring for platform 4", red circles in image 7 = platform 2 rim): was 4 mm wide, now 15 mm (R60-75, window radius 71 -> 60). Plus a 5 x 6 mm flange under the rim (z80-85, R69-75) so the rim does not flex between the posts.
+- 1.3 Posts: 10 x 14 -> 20 x 20 mm (R55-75 on the 45/135/225/315 deg arms, trimmed to the 150 mm body). The last 5 mm under the sensor ring only reach R60, because the lid skirt (R55-58, from z123) sits there.
+- 1.2 + 1.4 Motor centring: the sleeve bore is 38 from the base up to the deck (z54-85, unchanged: it holds the 36 mm encoder). From the deck up (z85-97) there is now a collar with a 36 mm bore (radius 1 mm smaller), and the collar is 2 mm taller (top z95 -> 97). The 35 mm grey body is now held 0.5 mm per side and on the axis (bore centre = housing centre, measured 0.000, 0.000).
+- Needed for the inserts (not asked directly): 4 arc slots R44-55, +-20 deg, through platforms 0/1 at 0/90/180/270 deg so the walls pass; centre hole 10 -> 21 for the laser straw.
+
+**2 Lid (`lid.step`, `lid.py`)** - only the height and the hanger changed
+- Top z170 -> 177 (shell 7 mm longer). Reason: tube is 172 mm and sits on platform 0 (z5-177); the lid now ends flush with its top. Sensor ring not touched.
+- Keyhole hanger at the centre: entry hole dia 10, slot 5.5 wide (sliding 14 mm), head pocket behind the 4 mm face, thick boss 30 x 60 x 12 under the disc + 4 diagonal ribs 4 x 10 mm. Replaces the 20 x 8 finger slot (same place).
+- 8 countersunk M3 holes (R49.5, +-12 deg either side of each wall) to screw the four insert walls to the lid.
+
+**3 Inserts (`insert_minus1.step`, `insert_minus2.step`, `inserts.py`)**
+- 3.1/3.2 Plates fill the underside pockets of platform 0 exactly. Plate -1 (z0-2) now fills the whole 0-2 pocket (both shapes), plate -2 is z2-4. Arms reach R80 = 160 mm wide. Bottom face is 100% flush (checked); only the 21 mm centre hole is open.
+- 3.3 Walls: 3 -> 10 mm thick (R44.5-54.5, +-19 deg), top z173 = lid underside, height 173 (>= 172). Thinned to 4 mm (R50.5-54.5) only for z127-141 where the 100 mm flywheel passes.
+- Purple supports: 3 belts per wall (20 mm tall, 10 mm extra inward, z14-34, z100-120, z147-167) placed clear of the deck (z85-90), wire window (z54-74) and flywheel band.
+- 2 x 1 cm hole in each wall kept (yoke -1 z150-160, yoke -2 z135-145), plus 2 M3 pilot holes (dia 2.6, 15 deep) in each wall top for the lid screws.
+- Fit from below: yoke -2 first, then yoke -1, then the lid.
+
+**5 Laser straw (new, `laser_straw.py` -> `laser_straw_a.step`, `laser_straw_b.step`)**
+- Part A: hollow bolt, flange dia 34 on platform 1 (z10-13), tube OD 18 + ridge to OD 20, bore 10 for the laser, z-14 to 10, goes through platforms 0/1 and both plates.
+- Part B: nut dia 34, z-10 to 0, screws on from below. Tightening clamps module + plates -1/-2 together (joins insert to module). Same ridge method as the lid thread, pitch 2.5.
+
+**6** Lid and sides now meet at z173/177 (wall tops touch the lid underside; the 8 screws tie them).
+
+**4 Checks (all run in CadQuery on the exported STEP files)**
+- All 7 parts valid single solids. Interference between every pair (housing, lid, both inserts, both straw parts, motor + flywheel reference): 0.0 mm3. Also 0.0 with the lid turned to the drop-in orientation. Detection sanity-checked (bolt/nut in phase = 90 mm3).
+- Bottom pocket fill: 100% at z0 except the 21 mm hole; 0.5% slot clearance at z2-4.
+- Wall clearances: flywheel 0.5 mm, deck X arm 1.5 mm, lid flange/skirt 0.5 mm, ring thread tip 4 mm.
+- Bad versions rechecked: v16 deck rim 1.5/4 mm and 10 x 14 posts (weak) fixed; v21 plates sitting on platform 1 did not carry the module (now under it); v21 walls 3 mm (now 10); v19/v20 "sleeve fused so yokes do not lift the tube" is still true, see open points.
+
+**Open / assumptions (please check)**
+- Wall is 10 mm except 4 mm at z127-141. A full 10 mm there would hit the flywheel (R50) or the lid skirt (R55).
+- The sensor ring is 47 mm below the lid top now (brief: 40 mm below the top of the body). The ring was not touched, as asked; it would need to move up ~7 mm.
+- Assumed the pipe sits on platform 0 (top at z177 for a 172 mm pipe). If it sits at z0, lid top could be 172.
+- Collar bore 36 around a 35 mm grey body: 0.5 mm clearance, tight for a print. The encoder (36 dia) stays in the 38 bore. "Radius 1 mm smaller" was applied to the collar only.
+- Keyhole slot is not raised above the face (that would break the lid = side height); it has a boss behind it instead. Check the screw head: head dia <= 9.5, shank <= 5.
+- The laser module is assumed to fit the 10 mm bore (Duinotech XC4490 size not confirmed).
+- The sleeve is still fused to the deck. The inserts hang the module through the lid screws and the straw clamp, not by lifting the tube.
+- Threads (straw, lid, ring) untested in a print.
 
 ### v21 - inserts: bars removed, two block holes each
 - `encoder_housing.step` not changed.
