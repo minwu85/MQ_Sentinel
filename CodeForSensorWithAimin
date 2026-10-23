@@ -1,0 +1,389 @@
+// ============================================================
+// MQ SENTINEL - BASIC AUTONOMOUS AIMING
+//
+// IR:
+//   D5 = LEFT
+//   D6 = CENTRE
+//   D4 = RIGHT
+//
+// MOTOR:
+//   D7 = SLEEP
+//   D8 = DIRECTION
+//   D9 = PWM / SPEED
+//
+// LASER:
+//   D10
+//
+// IR receivers are ACTIVE LOW:
+//   LOW  = IR detected
+//   HIGH = no IR
+// ============================================================
+
+
+// ---------------- PINS ----------------
+
+const int IR_LEFT   = 5;
+const int IR_CENTRE = 6;
+const int IR_RIGHT  = 4;
+
+const int MOTOR_SLEEP = 7;
+const int MOTOR_DIR   = 8;
+const int MOTOR_PWM   = 9;
+
+const int LASER_PIN = 10;
+
+
+// ---------------- MOTOR SETTINGS ----------------
+
+// Adjust these after physical testing
+const int SEARCH_SPEED = 130;
+const int AIM_SPEED    = 80;
+const int FINE_SPEED   = 55;
+
+// Change these two if the satellite turns the wrong way.
+const bool TURN_LEFT_DIR  = LOW;
+const bool TURN_RIGHT_DIR = HIGH;
+
+
+// ---------------- TIMING ----------------
+
+// Centre must remain clean/stable this long before firing.
+const unsigned long CENTRE_STABLE_TIME = 400;
+
+// Project requirement eventually = 2000 ms on target.
+const unsigned long LASER_TIME = 2000;
+
+// Temporary return movement after firing.
+// CALIBRATE THIS PHYSICALLY.
+const unsigned long RETURN_TIME = 800;
+
+
+// ---------------- STATES ----------------
+
+enum State {
+  SEARCHING,
+  AIMING_LEFT,
+  AIMING_RIGHT,
+  CHECKING_CENTRE,
+  FIRING,
+  RETURNING
+};
+
+State state = SEARCHING;
+
+unsigned long stateStart = 0;
+unsigned long centreStart = 0;
+
+
+// ============================================================
+// SENSOR FUNCTIONS
+// ============================================================
+
+bool leftDetected() {
+  return digitalRead(IR_LEFT) == LOW;
+}
+
+bool centreDetected() {
+  return digitalRead(IR_CENTRE) == LOW;
+}
+
+bool rightDetected() {
+  return digitalRead(IR_RIGHT) == LOW;
+}
+
+
+// ============================================================
+// MOTOR FUNCTIONS
+// ============================================================
+
+void motorStop() {
+  analogWrite(MOTOR_PWM, 0);
+}
+
+void turnLeft(int speedValue) {
+  digitalWrite(MOTOR_DIR, TURN_LEFT_DIR);
+  analogWrite(MOTOR_PWM, speedValue);
+}
+
+void turnRight(int speedValue) {
+  digitalWrite(MOTOR_DIR, TURN_RIGHT_DIR);
+  analogWrite(MOTOR_PWM, speedValue);
+}
+
+
+// ============================================================
+// SETUP
+// ============================================================
+
+void setup() {
+
+  Serial.begin(9600);
+
+  // IR sensors
+  pinMode(IR_LEFT, INPUT_PULLUP);
+  pinMode(IR_CENTRE, INPUT_PULLUP);
+  pinMode(IR_RIGHT, INPUT_PULLUP);
+
+  // Motor
+  pinMode(MOTOR_SLEEP, OUTPUT);
+  pinMode(MOTOR_DIR, OUTPUT);
+  pinMode(MOTOR_PWM, OUTPUT);
+
+  // Laser
+  pinMode(LASER_PIN, OUTPUT);
+
+  // Start safely
+  motorStop();
+  digitalWrite(LASER_PIN, LOW);
+
+  // Wake motor driver
+  digitalWrite(MOTOR_SLEEP, HIGH);
+
+  Serial.println("MQ Sentinel ready");
+}
+
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
+
+void loop() {
+
+  bool L = leftDetected();
+  bool C = centreDetected();
+  bool R = rightDetected();
+
+
+  // =========================================================
+  // SEARCH
+  // =========================================================
+
+  if (state == SEARCHING) {
+
+    // Normal scanning direction
+    turnRight(SEARCH_SPEED);
+
+    // Centre sees target immediately
+    if (C) {
+      Serial.println("CENTRE detected -> checking alignment");
+
+      motorStop();
+
+      centreStart = millis();
+      state = CHECKING_CENTRE;
+    }
+
+    // Target detected on left
+    else if (L) {
+      Serial.println("LEFT detected -> aiming left");
+
+      turnLeft(AIM_SPEED);
+      state = AIMING_LEFT;
+    }
+
+    // Target detected on right
+    else if (R) {
+      Serial.println("RIGHT detected -> aiming right");
+
+      turnRight(AIM_SPEED);
+      state = AIMING_RIGHT;
+    }
+  }
+
+
+  // =========================================================
+  // TARGET STARTED ON LEFT
+  // =========================================================
+
+  else if (state == AIMING_LEFT) {
+
+    // Move slowly toward centre sensor
+    turnLeft(AIM_SPEED);
+
+    if (C) {
+
+      Serial.println("CENTRE reached from LEFT");
+
+      motorStop();
+
+      centreStart = millis();
+      state = CHECKING_CENTRE;
+    }
+
+    // We've moved too far and target appears on right.
+    else if (R && !L) {
+
+      Serial.println("Overshot -> correcting RIGHT");
+
+      turnRight(FINE_SPEED);
+      state = AIMING_RIGHT;
+    }
+  }
+
+
+  // =========================================================
+  // TARGET STARTED ON RIGHT
+  // =========================================================
+
+  else if (state == AIMING_RIGHT) {
+
+    turnRight(AIM_SPEED);
+
+    if (C) {
+
+      Serial.println("CENTRE reached from RIGHT");
+
+      motorStop();
+
+      centreStart = millis();
+      state = CHECKING_CENTRE;
+    }
+
+    // Target crossed to left side -> overshoot.
+    else if (L && !R) {
+
+      Serial.println("Overshot -> correcting LEFT");
+
+      turnLeft(FINE_SPEED);
+      state = AIMING_LEFT;
+    }
+  }
+
+
+  // =========================================================
+  // CHECK WHETHER WE ARE ACTUALLY CENTRED
+  // =========================================================
+
+  else if (state == CHECKING_CENTRE) {
+
+    motorStop();
+
+    // Best condition:
+    // centre sensor only sees the target
+    if (C && !L && !R) {
+
+      if (millis() - centreStart >= CENTRE_STABLE_TIME) {
+
+        Serial.println("TARGET CENTRED");
+        Serial.println("LASER ON");
+
+        digitalWrite(LASER_PIN, HIGH);
+
+        stateStart = millis();
+        state = FIRING;
+      }
+    }
+
+    // Target is centre + left.
+    // We're slightly too far right, move left.
+    else if (C && L && !R) {
+
+      Serial.println("Centre + LEFT -> fine correction LEFT");
+
+      turnLeft(FINE_SPEED);
+
+      state = AIMING_LEFT;
+    }
+
+    // Target is centre + right.
+    // We're slightly too far left, move right.
+    else if (C && R && !L) {
+
+      Serial.println("Centre + RIGHT -> fine correction RIGHT");
+
+      turnRight(FINE_SPEED);
+
+      state = AIMING_RIGHT;
+    }
+
+    // Lost centre and now target is left
+    else if (!C && L) {
+
+      Serial.println("Target moved LEFT");
+
+      turnLeft(FINE_SPEED);
+
+      state = AIMING_LEFT;
+    }
+
+    // Lost centre and now target is right
+    else if (!C && R) {
+
+      Serial.println("Target moved RIGHT");
+
+      turnRight(FINE_SPEED);
+
+      state = AIMING_RIGHT;
+    }
+
+    // Completely lost target
+    else if (!L && !C && !R) {
+
+      Serial.println("Target lost -> searching");
+
+      state = SEARCHING;
+    }
+
+    // If multiple sensors overlap weirdly,
+    // don't fire.
+    else {
+
+      motorStop();
+      centreStart = millis();
+    }
+  }
+
+
+  // =========================================================
+  // LASER
+  // =========================================================
+
+  else if (state == FIRING) {
+
+    motorStop();
+
+    // If centre is lost during firing, abort.
+    if (!C) {
+
+      Serial.println("Target lost during laser -> abort");
+
+      digitalWrite(LASER_PIN, LOW);
+
+      state = SEARCHING;
+    }
+
+    else if (millis() - stateStart >= LASER_TIME) {
+
+      digitalWrite(LASER_PIN, LOW);
+
+      Serial.println("LASER OFF");
+      Serial.println("Turning back");
+
+      stateStart = millis();
+
+      // Turn away from target
+      turnLeft(AIM_SPEED);
+
+      state = RETURNING;
+    }
+  }
+
+
+  // =========================================================
+  // RETURN / RESUME SEARCH
+  // =========================================================
+
+  else if (state == RETURNING) {
+
+    turnLeft(AIM_SPEED);
+
+    if (millis() - stateStart >= RETURN_TIME) {
+
+      motorStop();
+
+      Serial.println("Return complete -> SEARCH");
+
+      state = SEARCHING;
+    }
+  }
+}
