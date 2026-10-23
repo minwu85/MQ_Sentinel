@@ -163,6 +163,25 @@ pio run -e sensor_d4_test -t upload
 pio device monitor -e sensor_d4_test
 ```
 
+### nano_selftest
+Confirms that the Nano V3 itself works. No other hardware is needed. It
+prints PASS / FAIL / INFO for: chip signature and serial link, free RAM,
+supply voltage (ADC vs the 1.1 V reference), onboard LED, EEPROM
+write/read-back, Timer1 interrupts (1 kHz), pull-ups and outputs on the
+free pins D11 D12 A0-A3, ADC on A0-A3, PWM on D11 at 25/50/75 %, the I2C
+bus on A4/A5 with a scan for the MPU6050 (0x68), an optional D11-D12 jumper
+loop-back, the project pins D2-D6 (read only) and a 5-tick clock check
+against a stopwatch. The motor-driver pins (D7-D9), the laser pin (D10)
+and the serial pins are never driven, so the motor cannot move. Optional
+flags at the top of the file: `TEST_LASER_PULSE` (pulse the laser) and
+`TEST_MOTOR` (the motor WILL turn; reads the encoder). Send `r` to run again.
+The LED blinks slowly when everything passed and fast when something failed.
+
+```
+pio run -e nano_selftest -t upload
+pio device monitor -e nano_selftest
+```
+
 ### reactive_ir
 Motor spins by default; stops the moment the IR receiver detects a
 signal, resumes automatically when the signal clears.
