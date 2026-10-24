@@ -1,4 +1,4 @@
-"""Encoder/motor housing v24 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
+"""Encoder/motor housing v25 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
 Platform numbering (bottom to top): 1 = base, 2 = middle deck, 3 = top sensor ring."""
 import math
 import cadquery as cq
@@ -76,8 +76,8 @@ rim_flange = disc(D, P2_Z0 - RIM_FLANGE_H, RIM_FLANGE_H).cut(disc(2 * RIM_FLANGE
 
 # platform 3 (top sensor ring, never removed): ring only, open top so the motor can be dropped in from above
 p3 = disc(D, P3_Z0, P3_T).cut(disc(RING_ID, P3_Z0, P3_T))
-p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(67.5, 45, 360, 4).circle(1.5).extrude(P3_T))
-p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(63.5, 0, 360, 4).circle(1.7).extrude(P3_T))   # v24: 4 lid-fixing holes at 0/90/180/270
+RING_HOLE_R, RING_HOLE_D, RING_HOLES = 67.5, 5.5, 3   # v25: 3 equal M5 holes at 60/180/300 deg, 60 deg from the sensors (0/120/240), clear of the thread ridge (R60.1)
+p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(RING_HOLE_R, 60, 360, RING_HOLES).circle(RING_HOLE_D / 2).extrude(P3_T))
 for i in range(N_SENS):
     p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).center(D / 2 - SENS_W / 2, 0).rect(SENS_W, SENS_L)
                 .extrude(P3_T).rotate((0, 0, 0), (0, 0, 1), 360.0 / N_SENS * i))

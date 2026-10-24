@@ -28,6 +28,7 @@ model = stub.union(flange).union(column).union(tube)
 model = model.cut(cq.Workplane("YZ").center(0, TUBE_Z).circle(TUBE_BORE / 2).extrude(TUBE_L))          # laser bore, from the tip to the axis
 model = model.cut(disc(2 * BORE_R, TUBE_Z, 10.0 - TUBE_Z))                                                # wire bore up through the stub
 model = model.cut(cq.Workplane("XY").workplane(offset=TUBE_Z).center((SLOT_X0 + SLOT_X1) / 2, 0).rect(SLOT_X1 - SLOT_X0, SLOT_W).extrude(tube_r + 1))
+model = model.cut(cq.Workplane("XZ").workplane(offset=-(tube_r + 1)).center((SLOT_X0 + SLOT_X1) / 2, TUBE_Z).rect(SLOT_X1 - SLOT_X0, SLOT_W).extrude(2 * tube_r + 2))   # side window through both walls (balanced)
 model = model.cut(cq.Workplane("XY").workplane(offset=TUBE_Z).center(GRUB_X, 0).circle(GRUB_D / 2).extrude(tube_r + 1))
 
 if __name__ == "__main__":

@@ -85,6 +85,20 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v25 - 2026-10-25 (second pass) - holes only: 3 bigger holes, wider walls with a band, threaded insert hole, laser side window
+Not committed or pushed. Same 4 parts. Re-import all four `.step` files.
+
+**Issues from v24 and fixes**
+- Lid/ring holes too small, one hole in front of a sensor, holes crowding the thread ridge -> 3 equal holes at 60/180/300 deg (60 deg from the sensors at 0/120/240), dia 5.5 (M5), at R67.5 (hole edge R64.75, thread ridge R60.1). Same positions in the sensor ring and in the lid flange (through, 6 mm). The old 4 holes at 45 deg and the 0/90/180/270 holes in the ring are removed. The lid's 4 ear holes (M5) are unchanged.
+- Insert walls too narrow -> +-7 deg to +-10 deg (29.6 mm wide at R85.3). Edge is 1.5 deg from the sensor notch edge; the wall is 8 mm outside the sensor, so only views beyond about 40 deg off-axis are cut. Ears widened to +-13 deg.
+- Insert: added a 20 mm ring at mid-height (z78.5-98.5, R80.3-90.3) linking the 4 walls round the pipe. Inner R80.3 vs pipe R80, so the pipe slides in from the top; it is far below the sensor ring (z130).
+- Missing screw structure in the insert -> the plate hole now has the female thread (z0-4), the same helix as the encoder socket (z4-10): 10 mm of thread = 5 mm in platform 0 (plate + skin) + 5 mm in platform 1. The laser stub (z0-10) screws through both, flange on the plate bottom, so the laser holds insert and encoder together.
+- Laser: second long window (6 x 42) through both sides of the tube, mirrored, on top of the existing top slot, so the tube is easy to print and balanced. Laser still points at 0 deg (sensor 1), axis 150 below the sensor ring.
+
+**Checks**: all 6 solids valid; overlap 0.0 mm3 between every pair (incl. laser thread vs the insert thread and the encoder thread, and lid drop-in orientation). Holes probed open/closed as listed above.
+
+**Open**: ring and lid holes are plain clearance holes (use M5 screw + nut or tap them). The ring now has no holes over the posts, only the 3 at 60/180/300. Appendix 1 R80 is still exceeded by the insert (R90.3) and ears.
+
 ### v24 - 2026-10-25 - small hanger, ears at the tube top, ring/lid fixing holes, laser 150 below the ring
 Not committed or pushed. Parts still 4: `lid.step`, `encoder_housing.step`, `insert.step`, `laser.step`. Re-import all four.
 

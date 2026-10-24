@@ -1,4 +1,4 @@
-"""Insert (v24, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
+"""Insert (v25, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
 A 4 mm plate that fills the underside pocket of platform 0 exactly (centre circle 60 + 4 arms 60 deg wide on the diagonals 45/135/225/315,
 arms run out to R90.3) with a 4 flat walls at the arm ends, OUTSIDE the pipe (inner face R80.3, 0.3 mm off the pipe OD 160), 10 mm thick, smooth inside.
 The walls are on the diagonals so none blocks the sensor notches at 0/120/240. Wall tops stop 0.3 mm under the lid ears; one M3 pilot hole in each."""
@@ -7,7 +7,10 @@ import cadquery as cq
 
 PLATE_T, HUB_D, ARM_HALF, ARM_R = 4.0, 60.0, 30.0, 90.3
 HOLE_D = 20.8                                    # centre hole (laser stub: ridge tip R10, hole R10.4; plate R10.4)
-WALL_R0, WALL_R1, WALL_HALF = 80.3, 90.3, 7.0    # 10 mm thick, +-7 deg (4.5 deg clear of the notch at 120/240)
+WALL_R0, WALL_R1, WALL_HALF = 80.3, 90.3, 10.0   # 10 mm thick, +-10 deg wide (1.5 deg clear of the notch edge at 120/240; sensor view only cut beyond ~40 deg off-axis)
+BAND_Z0, BAND_Z1 = 78.5, 98.5                    # mid-height ring (R80.3-90.3) linking the 4 walls round the pipe
+# female thread continued through the plate (z0-4) with the same helix as the encoder socket (z4-10): 10 mm of thread in total
+L_PITCH, L_ROOT, L_TIP, L_W0, L_W1, L_PHASE, L_Z0 = 2.5, 10.4, 8.4, 1.4, 0.5, 0.1, 4.0
 WALL_TOP = 177.0                                 # = pipe top (z5 + 172); lid ears sit 0.3 above
 PILOT_R, PILOT_D, PILOT_DEPTH = 85.3, 4.2, 20.0   # M5 pilot
 ANGLES = (45, 135, 225, 315)
@@ -29,11 +32,17 @@ def union_all(parts):
 def build():
     plate = union_all([disc(HUB_D, 0, PLATE_T)] + [wedge(a, 0, PLATE_T, ARM_HALF) for a in ANGLES]).intersect(disc(2 * ARM_R, 0, PLATE_T))
     plate = plate.cut(disc(HOLE_D, 0, PLATE_T))
+    helix = cq.Wire.makeHelix(L_PITCH, PLATE_T + 2 * L_PITCH, L_ROOT + 0.3)
+    prof = cq.Workplane("XZ").polyline([(L_ROOT + 0.3, -L_W0 / 2), (L_TIP, -L_W1 / 2), (L_TIP, L_W1 / 2), (L_ROOT + 0.3, L_W0 / 2)]).close()
+    thr = (prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True).translate((0, 0, L_Z0 + L_PHASE - 3 * L_PITCH))
+           .intersect(disc(2 * (L_ROOT + 0.5), 0, PLATE_T)))
+    plate = plate.union(thr)
     parts = [plate]
     for a in ANGLES:
         h = WALL_TOP
         wall = disc(2 * WALL_R1, 0, h).cut(disc(2 * WALL_R0, 0, h)).intersect(wedge(a, 0, h, WALL_HALF))
         parts.append(wall)
+    parts.append(disc(2 * WALL_R1, BAND_Z0, BAND_Z1 - BAND_Z0).cut(disc(2 * WALL_R0, BAND_Z0, BAND_Z1 - BAND_Z0)))
     body = union_all(parts)
     for a in ANGLES:
         x, y = PILOT_R * math.cos(math.radians(a)), PILOT_R * math.sin(math.radians(a))
