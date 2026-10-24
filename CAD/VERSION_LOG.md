@@ -107,6 +107,12 @@ Not committed or pushed. Parts still 4: `lid.step`, `encoder_housing.step`, `ins
 - The pipe is z5-177 on platform 0, so the sensor ring is 47 mm below the pipe top (spec 40 for a 170 pipe at z0-170). Ring not touched.
 - Screwing the lid to the ring from below depends on a short screwdriver between the deck and the ring; not tested.
 
+<img width="610" height="660" alt="image" src="https://github.com/user-attachments/assets/912f8658-6284-43ac-8671-92d09ee3935d" />
+
+<img width="723" height="507" alt="image" src="https://github.com/user-attachments/assets/be04df4a-1490-4dc0-8647-395e08786d51" />
+<img width="545" height="677" alt="image" src="https://github.com/user-attachments/assets/d79243f7-1f09-4b31-ae3b-d92233ef8f46" />
+<img width="740" height="457" alt="image" src="https://github.com/user-attachments/assets/5a5aa9f6-3eb0-4cb2-bb5d-70965cc7c041" />
+
 ### v23 - 2026-10-24 (second pass) - 4 parts only: lid, encoder, insert, laser
 Not committed or pushed. Re-import the 4 `.step` files in Onshape. Parts now: `lid.step`, `encoder_housing.step`, `insert.step` (new, replaces insert_minus1/2), `laser.step` (new, replaces the straw A/B). Removed: insert_minus1/2.step, laser_straw_a/b. Moved to `reference/`: motor_ref.step, motor_tube.step (not printed).
 
