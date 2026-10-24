@@ -86,7 +86,6 @@ Add a new row here and update the module table whenever a new version is exporte
 ## Version history
 
 ### v22 - 2026-10-24 - stronger frame, taller lid with keyhole, 10 mm insert walls, laser straw
-Not committed or pushed (local CAD folder only). Re-import all `.step` files into Onshape.
 
 **1 Frame (`encoder_housing.step`, `encoder_housing.py`)**
 - 1.1 Deck rim (the "ring for platform 4", red circles in image 7 = platform 2 rim): was 4 mm wide, now 15 mm (R60-75, window radius 71 -> 60). Plus a 5 x 6 mm flange under the rim (z80-85, R69-75) so the rim does not flex between the posts.
@@ -94,10 +93,15 @@ Not committed or pushed (local CAD folder only). Re-import all `.step` files int
 - 1.2 + 1.4 Motor centring: the sleeve bore is 38 from the base up to the deck (z54-85, unchanged: it holds the 36 mm encoder). From the deck up (z85-97) there is now a collar with a 36 mm bore (radius 1 mm smaller), and the collar is 2 mm taller (top z95 -> 97). The 35 mm grey body is now held 0.5 mm per side and on the axis (bore centre = housing centre, measured 0.000, 0.000).
 - Needed for the inserts (not asked directly): 4 arc slots R44-55, +-20 deg, through platforms 0/1 at 0/90/180/270 deg so the walls pass; centre hole 10 -> 21 for the laser straw.
 
+<img width="628" height="635" alt="image" src="https://github.com/user-attachments/assets/1438d997-3b14-4dc3-abd5-817767653a5d" />
+<img width="597" height="657" alt="image" src="https://github.com/user-attachments/assets/5aee3776-568c-4814-a7bf-2b322df7290f" />
+
 **2 Lid (`lid.step`, `lid.py`)** - only the height and the hanger changed
 - Top z170 -> 177 (shell 7 mm longer). Reason: tube is 172 mm and sits on platform 0 (z5-177); the lid now ends flush with its top. Sensor ring not touched.
 - Keyhole hanger at the centre: entry hole dia 10, slot 5.5 wide (sliding 14 mm), head pocket behind the 4 mm face, thick boss 30 x 60 x 12 under the disc + 4 diagonal ribs 4 x 10 mm. Replaces the 20 x 8 finger slot (same place).
 - 8 countersunk M3 holes (R49.5, +-12 deg either side of each wall) to screw the four insert walls to the lid.
+<img width="635" height="496" alt="image" src="https://github.com/user-attachments/assets/aaeca7f7-6e5e-4aab-bbca-3bbce65eacaf" />
+<img width="617" height="556" alt="image" src="https://github.com/user-attachments/assets/565e287c-7ef6-49cc-b24c-977a487344f6" />
 
 **3 Inserts (`insert_minus1.step`, `insert_minus2.step`, `inserts.py`)**
 - 3.1/3.2 Plates fill the underside pockets of platform 0 exactly. Plate -1 (z0-2) now fills the whole 0-2 pocket (both shapes), plate -2 is z2-4. Arms reach R80 = 160 mm wide. Bottom face is 100% flush (checked); only the 21 mm centre hole is open.
@@ -105,6 +109,7 @@ Not committed or pushed (local CAD folder only). Re-import all `.step` files int
 - Purple supports: 3 belts per wall (20 mm tall, 10 mm extra inward, z14-34, z100-120, z147-167) placed clear of the deck (z85-90), wire window (z54-74) and flywheel band.
 - 2 x 1 cm hole in each wall kept (yoke -1 z150-160, yoke -2 z135-145), plus 2 M3 pilot holes (dia 2.6, 15 deep) in each wall top for the lid screws.
 - Fit from below: yoke -2 first, then yoke -1, then the lid.
+<img width="558" height="636" alt="image" src="https://github.com/user-attachments/assets/1914d0f9-c9ed-4cff-8f0f-c0d030f8f9c7" />
 
 **5 Laser straw (new, `laser_straw.py` -> `laser_straw_a.step`, `laser_straw_b.step`)**
 - Part A: hollow bolt, flange dia 34 on platform 1 (z10-13), tube OD 18 + ridge to OD 20, bore 10 for the laser, z-14 to 10, goes through platforms 0/1 and both plates.
