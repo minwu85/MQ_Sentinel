@@ -1,4 +1,4 @@
-"""Encoder/motor housing v22 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
+"""Encoder/motor housing v23 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
 Platform numbering (bottom to top): 1 = base, 2 = middle deck, 3 = top sensor ring."""
 import math
 import cadquery as cq
@@ -20,9 +20,12 @@ T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 60.1, 58.5, 2.0, 0.6
 T_SECT = 35.0                                 # half-angle of each ring thread section (gaps at 0/90/180/270 deg)
 SENS_L, SENS_W, N_SENS = 8.0, 7.0, 3          # sensor notch 8 (tangential) x 7 (radial) x ring thickness
 SKIRT_D = 160.0                               # platform 0: 160 mm (R80 limit)
-CENTRE_HOLE_D = 21.0                          # v22 centre hole 21 for the laser straw (OD 20, bore 10)
-SLOT_R0, SLOT_R1, SLOT_HALF = 44.0, 55.0, 20.0  # v22 arc slots for the insert walls (walls R44.5-54.5, +-19 deg)
-INS1_D, INS2_D, P1_WEDGE = 50.0, 60.0, 30.0   # insert plates: 5 cm / 6 cm centre circles, wedges 60 deg wide (half-angle 30)
+# v23 laser socket: threaded centre hole (female thread z4-10) the laser elbow (laser.py) screws into from below.
+# Thread constants must match laser.py: pitch 2.5, male core R8 / tip R10, female root R10.4 / tip R8.4, widths 1.4 / 0.5
+CENTRE_HOLE_D = 20.8
+L_PITCH, L_ROOT, L_TIP, L_W0, L_W1, L_Z0 = 2.5, 10.4, 8.4, 1.4, 0.5, 4.0
+L_PHASE = 0.1                                 # helix start offset from the fit test: free window -0.65..+0.15; 0.1 puts the loaded flank 0.1 mm off contact so the laser seats at 0 deg +-15 deg
+INS_D, P1_WEDGE = 60.0, 30.0                   # v23 one insert plate: 6 cm centre circle + 4 wedges 60 deg wide (half-angle 30) at 45/135/225/315
 
 # motor sleeve: full-round tube, grey body half below / half above platform 2, closed bottom
 MOTOR_D, BORE_D, WALL = 37.0, 38.0, 3.0
@@ -54,10 +57,7 @@ upper = union_all([post(a, POST_R0, POST_R1, P2_Z1, P3_Z0 - POST_STEP_Z - P2_Z1)
                    .union(post(a, RING_ID / 2, POST_R1, P2_Z1, P3_Z0 - P2_Z1)) for a in POST_ANG])
 
 # platform 0 (160 x 10) + platform 1 (150 x 5 on top). Platform 1 top is flat, only the 10 mm centre hole.
-# Underside pockets for the two insert plates (insert_minus1 / insert_minus2, 2 mm plates):
-#   platform -1 plate: 5 cm centre circle + 2 opposite 60 deg wedges at 0/180 deg      -> pocket z 0 to 2
-#   platform -2 plate: 6 cm centre circle + 2 opposite 60 deg wedges at 90/270 deg     -> pocket z 2 to 4
-# (the z 0 to 2 pocket also opens the -2 shape so the -2 plate can be fitted from below first)
+# Underside pocket for the single insert plate (insert.step, 4 mm): centre circle + 4 wedges on the diagonals (clear of the 0/120/240 sensors)
 t = math.tan(math.radians(P1_WEDGE))
 def wedges(angles, z0, h):
     out = None
@@ -66,9 +66,7 @@ def wedges(angles, z0, h):
              .extrude(h).rotate((0, 0, 0), (0, 0, 1), a))
         out = w if out is None else out.union(w)
     return out
-shape_a = lambda z0, h: disc(INS1_D, z0, h).union(wedges((0, 180), z0, h))
-shape_b = lambda z0, h: disc(INS2_D, z0, h).union(wedges((90, 270), z0, h))
-recess = shape_a(0, 2.0).union(shape_b(0, 2.0)).union(shape_b(2.0, 2.0))
+recess = disc(INS_D, 0, 4.0).union(wedges((45, 135, 225, 315), 0, 4.0))
 p1 = disc(SKIRT_D, 0, P0_T).union(disc(D, P0_T, P1_T))
 
 # platform 2 (middle deck): X cross; the four axis wedges are cut away, 3 mm rim kept
@@ -107,11 +105,12 @@ model = model.cut(disc(COLLAR_D, COLLAR_Z0, SLEEVE_Z1 - COLLAR_Z0))
 model = model.cut(cq.Workplane("XY").workplane(offset=SLEEVE_Z0 + WALL).center(0, -(BORE_D / 2 + WALL / 2))
                   .rect(WIN_W, WALL + 2).extrude(WIN_H))
 model = model.cut(recess)
-t_sl = math.tan(math.radians(SLOT_HALF))
-for a in (0, 90, 180, 270):                   # v22 arc slots so the insert walls pass through platforms 0/1
-    model = model.cut(disc(2 * SLOT_R1, 0, BASE_TOP).cut(disc(2 * SLOT_R0, 0, BASE_TOP)).intersect(
-        cq.Workplane('XY').polyline([(0, 0), (200, -200 * t_sl), (200, 200 * t_sl)]).close().extrude(BASE_TOP).rotate((0, 0, 0), (0, 0, 1), a)))
 model = model.cut(cq.Workplane("XY").circle(CENTRE_HOLE_D / 2).extrude(BASE_TOP))
+helix = cq.Wire.makeHelix(L_PITCH, BASE_TOP - L_Z0 + 2 * L_PITCH, L_ROOT + 0.3)
+prof = cq.Workplane("XZ").polyline([(L_ROOT + 0.3, -L_W0 / 2), (L_TIP, -L_W1 / 2), (L_TIP, L_W1 / 2), (L_ROOT + 0.3, L_W0 / 2)]).close()
+l_thread = (prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True).translate((0, 0, L_Z0 + L_PHASE - L_PITCH))
+            .intersect(disc(2 * (L_ROOT + 0.5), L_Z0, BASE_TOP - L_Z0)))
+model = model.union(l_thread)
 
 bb = model.val().BoundingBox()
 print(f"bbox: {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm, solids {len(model.val().Solids())}")

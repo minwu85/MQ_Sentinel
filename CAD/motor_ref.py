@@ -1,5 +1,5 @@
 """Reference bodies (not for printing): FIT0186 motor + flywheel, for fit/interference checks.
-Run: python motor_ref.py -> motor_ref.step. Z positions are in the housing frame. Dimensions from the datasheet drawing."""
+Run from CAD/: python motor_ref.py -> reference/motor_ref.step. Z positions are in the housing frame. Dimensions from the datasheet drawing."""
 import cadquery as cq
 
 Z_BASE = 54.0                          # motor bottom sits on the tube floor (tube z51, 3 mm floor)
@@ -21,4 +21,4 @@ model = (cyl(ENC_D, Z_BASE, ENC_H).union(cyl(GREY_D, z_grey, GREY_H))
          .union(cyl(BOSS_D, z_boss, BOSS_H)).union(cyl(SHAFT_D, z_shaft, SHAFT_H))
          .union(cyl(FLY_D, fly_z0, FLY_T)))
 print(f"motor z {Z_BASE:.1f} to {z_shaft + SHAFT_H:.1f}, flywheel z {fly_z0:.1f} to {fly_z0 + FLY_T:.1f}")
-cq.exporters.export(model, "motor_ref.step")
+cq.exporters.export(model, "reference/motor_ref.step")

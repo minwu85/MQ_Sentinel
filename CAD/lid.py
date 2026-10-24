@@ -1,22 +1,19 @@
 """Cap (lid) for the top ring, 4-section quarter-turn thread like a bottle lid (mm).
 Run from CAD/: python lid.py -> lid.step/.stl. Shown seated on the housing (flange on the ring top, z=133).
-v22: only the cap height (top z177, flush with the top of the 172 mm pipe sitting on platform 0) and a keyhole hanger changed.
-Added: keyhole hanger with a thick boss + ribs in the centre, 8 screw holes for the insert walls (their tops end at the lid underside)."""
+v23: top z197 (20 mm above the 172 mm pipe, which sits on platform 0 and ends at z177); all holes filled; no inner support;
+4 ears on the diagonals with one M3 hole each (screw to the insert walls); arch hanger (loop) on the top instead of the keyhole."""
 import math
 import cadquery as cq
 
-D, Z_RING_TOP, Z_TOP = 150.0, 133.0, 177.0
-FLANGE_T, TOP_T, SHELL_WALL = 3.0, 4.0, 3.0              # flange on the ring, top disc, shell wall
+D, Z_RING_TOP, Z_TOP = 150.0, 133.0, 197.0   # top = pipe top (z177) + 20 mm
+FLANGE_T, TOP_T, SHELL_WALL = 3.0, 6.0, 3.0              # flange on the ring, top disc, shell wall
 SKIRT_IN, SKIRT_OUT, SKIRT_H = 55.0, 58.0, 10.0          # 1 cm threaded skirt, goes into the ring bore
 T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 57.9, 59.7, 2.0, 0.6   # external ridge, mates the ring's 60.1 -> 58.5
 LID_SECT = 8.0                                           # half-angle of each lid section (passes the ring gaps)
-HOLE_R, HOLE_D = 67.5, 3.0                               # same 4 holes as the ring
-WALL_HOLE_R, WALL_HOLE_ANG = 49.5, 12.0                   # insert-wall screw holes: R49.5, +-12 deg either side of 0/90/180/270
-WALL_HOLE_D, WALL_CBORE_D, WALL_CBORE_H = 3.4, 6.5, 2.0   # M3 clearance + counterbore
-KEY_ENTRY_D, KEY_SLOT_W, KEY_C = 10.0, 5.5, 7.0           # keyhole: entry dia 10 at y-7, slot 5.5 wide to y+7 (hang by sliding up)
-KEY_POCKET_W, KEY_POCKET_H = 10.4, 4.5                    # head pocket behind the 4 mm face (head dia <= 9.5)
-BOSS_W, BOSS_L, BOSS_H = 30.0, 60.0, 12.0                 # thick boss under the top disc around the keyhole
-RIB_T, RIB_H, RIB_R = 4.0, 10.0, 58.0                     # 4 ribs on the diagonals, boss to R58 (clear of the R67.5 screw holes)
+EAR_R0, EAR_R1, EAR_HALF = 70.0, 91.3, 12.0              # 4 ears on the diagonals (over the insert walls R80.3-90.3, +-9 deg), flush with the lid top
+SCREW_R, SCREW_D, CBORE_D, CBORE_H = 85.3, 3.4, 6.5, 2.0 # one M3 screw per ear into the wall top
+ARCH_W, ARCH_LEG, ARCH_STRAIGHT, ARCH_T = 32.0, 8.0, 6.0, 10.0   # hanger arch: 32 wide, 8 mm legs, 10 mm thick (Y)
+PAD_L, PAD_W, PAD_T = 44.0, 18.0, 3.0                    # base pad under the arch
 
 def disc(d, z0, t):
     return cq.Workplane("XY").workplane(offset=z0).circle(d / 2).extrude(t)
@@ -50,24 +47,25 @@ thread = (prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True)
           .intersect(disc(2 * T_R1 + 2, z_skirt, SKIRT_H))
           .intersect(sectors((45, 135, 225, 315), LID_SECT, z_skirt, SKIRT_H)))
 
-boss = (cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T - BOSS_H + TOP_T).slot2D(BOSS_L, BOSS_W, 90).extrude(BOSS_H - TOP_T))
-ribs = union_all([cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T - RIB_H).center(RIB_R / 2, 0).rect(RIB_R, RIB_T)
-                  .extrude(RIB_H).rotate((0, 0, 0), (0, 0, 1), a) for a in (45, 135, 225, 315)])
-model = top.union(shell).union(flange).union(skirt).union(thread).union(boss).union(ribs)
-model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).polarArray(HOLE_R, 45, 360, 4).circle(HOLE_D / 2).extrude(TOP_T))
-model = model.cut(cq.Workplane("XY").workplane(offset=Z_RING_TOP).polarArray(HOLE_R, 45, 360, 4).circle(HOLE_D / 2).extrude(FLANGE_T))
-# keyhole (through the 4 mm face) + head pocket behind it in the boss
-def key_shape(z0, h, entry_d, slot_w):
-    entry = cq.Workplane("XY").workplane(offset=z0).center(0, -KEY_C).circle(entry_d / 2).extrude(h)
-    slot = cq.Workplane("XY").workplane(offset=z0).slot2D(2 * KEY_C + slot_w, slot_w, 90).extrude(h)
-    return entry.union(slot)
-model = model.cut(key_shape(Z_TOP - TOP_T, TOP_T, KEY_ENTRY_D, KEY_SLOT_W))
-model = model.cut(key_shape(Z_TOP - TOP_T - KEY_POCKET_H, KEY_POCKET_H, KEY_ENTRY_D, KEY_POCKET_W))
-for base in (0, 90, 180, 270):
-    for off in (-WALL_HOLE_ANG, WALL_HOLE_ANG):
-        pt = (WALL_HOLE_R * math.cos(math.radians(base + off)), WALL_HOLE_R * math.sin(math.radians(base + off)))
-        model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).center(*pt).circle(WALL_HOLE_D / 2).extrude(TOP_T))
-        model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - WALL_CBORE_H).center(*pt).circle(WALL_CBORE_D / 2).extrude(WALL_CBORE_H))
+def ear(a):
+    t = math.tan(math.radians(EAR_HALF))
+    w = (cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).polyline([(0, 0), (200, -200 * t), (200, 200 * t)]).close()
+         .extrude(TOP_T).rotate((0, 0, 0), (0, 0, 1), a))
+    return disc(2 * EAR_R1, Z_TOP - TOP_T, TOP_T).cut(disc(2 * EAR_R0, Z_TOP - TOP_T, TOP_T)).intersect(w)
+ears = union_all([ear(a) for a in (45, 135, 225, 315)])
+
+# hanger arch (a loop, no hole in the face): pad + arch profile in XZ, extruded along Y
+r_out, r_in = ARCH_W / 2, ARCH_W / 2 - ARCH_LEG
+def arch_profile(r, z0):
+    return (cq.Workplane("XZ").workplane(offset=-ARCH_T / 2).moveTo(-r, z0).lineTo(-r, z0 + ARCH_STRAIGHT)
+            .threePointArc((0, z0 + ARCH_STRAIGHT + r), (r, z0 + ARCH_STRAIGHT)).lineTo(r, z0).close().extrude(ARCH_T))
+pad = cq.Workplane("XY").workplane(offset=Z_TOP).rect(PAD_L, PAD_W).extrude(PAD_T)
+arch = arch_profile(r_out, Z_TOP + PAD_T).cut(arch_profile(r_in, Z_TOP + PAD_T - 0.01))
+model = top.union(shell).union(flange).union(skirt).union(thread).union(ears).union(pad).union(arch)
+for a in (45, 135, 225, 315):
+    pt = (SCREW_R * math.cos(math.radians(a)), SCREW_R * math.sin(math.radians(a)))
+    model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - TOP_T).center(*pt).circle(SCREW_D / 2).extrude(TOP_T))
+    model = model.cut(cq.Workplane("XY").workplane(offset=Z_TOP - CBORE_H).center(*pt).circle(CBORE_D / 2).extrude(CBORE_H))
 
 bb = model.val().BoundingBox()
 print(f"cap bbox: {bb.xlen:.1f} x {bb.ylen:.1f} x z {bb.zmin:.1f}..{bb.zmax:.1f}, solids {len(model.val().Solids())}")

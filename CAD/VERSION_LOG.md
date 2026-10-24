@@ -85,6 +85,35 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v23 - 2026-10-24 (second pass) - 4 parts only: lid, encoder, insert, laser
+Not committed or pushed. Re-import the 4 `.step` files in Onshape. Parts now: `lid.step`, `encoder_housing.step`, `insert.step` (new, replaces insert_minus1/2), `laser.step` (new, replaces the straw A/B). Removed: insert_minus1/2.step, laser_straw_a/b. Moved to `reference/`: motor_ref.step, motor_tube.step (not printed).
+
+**Issues from v22 and fixes**
+- Lid had too many holes -> all filled (the 4 screw holes at R67.5 and the 8 wall holes are gone). Only 4 M3 holes remain, one in each ear (see below).
+- Lid inner support (boss + ribs) -> removed.
+- Keyhole was a hole in the flat face -> replaced by a raised arch hanger (loop) on the top: 32 wide, 8 mm legs, 10 mm thick, opening 16 x 14, on a 44 x 18 x 3 pad. Top disc 4 -> 6 mm.
+- Lid height: top z197 = pipe top (z177) + 20 mm. Shell z136-191. Arch top z222.
+- Insert walls were inside the pipe and had belts -> walls are now OUTSIDE the pipe (inner face R80.3, 10 mm thick, to R90.3), smooth inside, belts removed, no holes.
+- Two inserts -> one part: 4 mm plate (centre circle 60 + 4 arms) with 4 walls at the arm ends. It fills the pocket in the bottom of the encoder (100% at z0 except the centre hole).
+- Walls are on the diagonals (45/135/225/315), not 0/90/180/270 as in v22: walls at 0/180 would sit in front of the sensor at 0 deg. +-9 deg wide.
+- Wall top z190.7, lid top z197: the lid has 4 ears (R70-91.3, 6 mm, flush with the top) over the wall tops, one M3 screw per ear into a 2.6 mm pilot hole in the wall (15 deep). 0.3 mm gap so the lid can still turn into place.
+- Encoder: the 4 arc slots (red in image 5) are filled. The underside pocket is now the single-plate shape (4 mm, circle + 4 arms on the diagonals).
+- Encoder: centre hole is now a threaded socket (hole R10.4, female ridge z4-10, pitch 2.5), same ridge method as the lid.
+- Laser: new elbow part. Hollow stub screws into the socket from below (bore 8 for wires), flange 30 against the insert/housing underside, then a column and a horizontal tube along +X (OD 16.5, bore 10.5, 70 long, M3 grub-screw hole). The thread phase is set so that when it is screwed to the flange the tube points at 0 deg = sensor notch 1 (of 0/120/240). Tightening clamps the insert plate to the housing.
+
+**Checks (CadQuery on the exported files)**
+- 6 solids (4 parts + motor/flywheel reference + a 172 mm pipe, R75-80, z5-177, as a check body): all valid, one solid each. Overlap between every pair 0.0 mm3, also with the lid turned to the drop-in orientation.
+- Thread fit scan: the laser stub turns freely when the female phase is -0.65 to +0.15; set to +0.1. Laser tube direction 0.0 deg.
+- Lid top minus pipe top = 20 mm. Wall top 190.7. Lid is 0.3 mm inside the pipe ID, walls 0.3 mm outside the pipe OD.
+
+**Open / please check**
+- The insert is 174.4 wide (R87.2 at the corners, walls to R90.3). Appendix 1 shows R80 as the envelope: this is over it by up to 10 mm. Needed because the walls are outside the pipe.
+- Sensor ring is now 67 mm below the lid top (brief: 40 mm below the top of the body). Not touched, as asked.
+- Wall edge to sensor notch is 2.5 deg (about 4 mm) at 120/240 deg. Narrow walls, but the walls stand on a 4 mm plate: check stiffness.
+- Laser seats at 0 deg +-15 deg (thread play 0.1 mm). Add a mark/flat on the flange if you want a visual stop. The 70 mm tube sticks out at z-24..-8, under the insert.
+- Laser module size (bore 10.5) not confirmed. The 6 mm skin of platform 0/1 (z4-10) gives 2.4 thread turns for the socket.
+- The ring's own 4 screw holes at R67.5 are still in the sensor ring (ring not touched), but the lid no longer has holes over them.
+
 ### v22 - 2026-10-24 - stronger frame, taller lid with keyhole, 10 mm insert walls, laser straw
 
 **1 Frame (`encoder_housing.step`, `encoder_housing.py`)**

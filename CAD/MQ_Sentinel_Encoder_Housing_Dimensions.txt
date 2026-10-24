@@ -66,3 +66,12 @@ REVISION 22 (2026-10-24) CHANGES - these override the lines above where they dif
        belts R34.5-44.5 at z14-34, 100-120, 147-167; 20 x 10 holes (z150-160 / z135-145); 2 pilot holes dia 2.6 in each wall top
   LASER STRAW: A hollow bolt (flange 34 z10-13, tube OD 18/20 thread, bore 10, z-14 to 10); B nut dia 34 z-10 to 0, pitch 2.5
   Interference (all 0.0 mm3): every pair of housing, cap, inserts, straw parts, motor/flywheel reference
+
+REVISION 23 (2026-10-24, second pass) - overrides revision 22 where it differs. 4 parts: lid, encoder_housing, insert, laser
+  CAP: top z197 (disc z191-197), shell z136-191, no holes, no inner support; 4 ears R70-91.3 +-12 deg on the diagonals with 1 x dia 3.4 hole each (R85.3);
+       arch hanger on a 44 x 18 x 3 pad: 32 wide, legs 8, 10 thick, opening 16 x 14, top z222
+  ENCODER: arc slots removed; pocket under platform 0 = circle 60 + 4 arms +-30 deg on 45/135/225/315, 4 deep;
+       centre socket hole R10.4 (z0-10) with female ridge z4-10, pitch 2.5, root R10.4, tip R8.4
+  INSERT (one part): plate 4 thick (circle 60 + 4 arms to R90.3), hole dia 20.8; 4 walls R80.3-90.3, +-9 deg at 45/135/225/315, z0-190.7; pilot dia 2.6 x 15 at R85.3
+  LASER: stub core R8 / ridge R10, bore 8, z0-10; flange dia 30 z-3..0; column dia 20; tube along +X OD 16.5, bore 10.5, 70 long, axis z-16; points at 0 deg (sensor 1)
+  Interference (all 0.0 mm3): housing, lid, insert, laser, motor/flywheel reference, 172 mm pipe on platform 0
