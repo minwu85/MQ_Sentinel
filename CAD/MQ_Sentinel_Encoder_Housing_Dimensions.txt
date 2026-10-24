@@ -75,3 +75,10 @@ REVISION 23 (2026-10-24, second pass) - overrides revision 22 where it differs. 
   INSERT (one part): plate 4 thick (circle 60 + 4 arms to R90.3), hole dia 20.8; 4 walls R80.3-90.3, +-9 deg at 45/135/225/315, z0-190.7; pilot dia 2.6 x 15 at R85.3
   LASER: stub core R8 / ridge R10, bore 8, z0-10; flange dia 30 z-3..0; column dia 20; tube along +X OD 16.5, bore 10.5, 70 long, axis z-16; points at 0 deg (sensor 1)
   Interference (all 0.0 mm3): housing, lid, insert, laser, motor/flywheel reference, 172 mm pipe on platform 0
+
+REVISION 24 (2026-10-25) - overrides revision 23 where it differs
+  CAP: flange 6 thick (z133-139), 4 pilot holes dia 2.6 at R63.5, 0/90/180/270; ears R73-91.3 +-10 deg at z177.3-183.3, hole dia 5.5 (cbore 10) at R85.3;
+       hanger pad 24 x 10 x 3, block 18 x 8 x 14, keyhole dia 8 + slot 4.5; top z197, hanger top z214
+  ENCODER: upper posts R60-75 (z90-127); ring holes dia 3.4 at R63.5, 0/90/180/270 (plus the original 4 at R67.5, 45 deg)
+  INSERT: walls +-7 deg, z0-177, pilot dia 4.2 x 20 at R85.3
+  LASER: tube axis z-20 (150 below the ring centreline z130), slot 6 x 42 on top, grub hole at x63

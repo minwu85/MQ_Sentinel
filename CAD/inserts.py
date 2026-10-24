@@ -1,4 +1,4 @@
-"""Insert (v23, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
+"""Insert (v24, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
 A 4 mm plate that fills the underside pocket of platform 0 exactly (centre circle 60 + 4 arms 60 deg wide on the diagonals 45/135/225/315,
 arms run out to R90.3) with a 4 flat walls at the arm ends, OUTSIDE the pipe (inner face R80.3, 0.3 mm off the pipe OD 160), 10 mm thick, smooth inside.
 The walls are on the diagonals so none blocks the sensor notches at 0/120/240. Wall tops stop 0.3 mm under the lid ears; one M3 pilot hole in each."""
@@ -7,9 +7,9 @@ import cadquery as cq
 
 PLATE_T, HUB_D, ARM_HALF, ARM_R = 4.0, 60.0, 30.0, 90.3
 HOLE_D = 20.8                                    # centre hole (laser stub: ridge tip R10, hole R10.4; plate R10.4)
-WALL_R0, WALL_R1, WALL_HALF = 80.3, 90.3, 9.0    # 10 mm thick, +-9 deg (7 deg clear of the sensor at 120/240 incl. notch)
-WALL_TOP = 190.7                                 # lid ear underside (lid top 197 - 6) minus 0.3
-PILOT_R, PILOT_D, PILOT_DEPTH = 85.3, 2.6, 15.0
+WALL_R0, WALL_R1, WALL_HALF = 80.3, 90.3, 7.0    # 10 mm thick, +-7 deg (4.5 deg clear of the notch at 120/240)
+WALL_TOP = 177.0                                 # = pipe top (z5 + 172); lid ears sit 0.3 above
+PILOT_R, PILOT_D, PILOT_DEPTH = 85.3, 4.2, 20.0   # M5 pilot
 ANGLES = (45, 135, 225, 315)
 
 def disc(d, z0, t):

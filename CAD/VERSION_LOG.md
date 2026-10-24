@@ -85,6 +85,28 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v24 - 2026-10-25 - small hanger, ears at the tube top, ring/lid fixing holes, laser 150 below the ring
+Not committed or pushed. Parts still 4: `lid.step`, `encoder_housing.step`, `insert.step`, `laser.step`. Re-import all four.
+
+**Issues from v23 and fixes**
+- Hanger too big / unbalanced -> smaller block on a 24 x 10 pad: 18 wide, 8 thick, 14 tall (was 32 x 10 x 22). Keyhole flipped as in the reference: round hole (8) at the bottom, narrow slot (4.5) above. Lid hanger top z214.
+- Screw ears were at the very top, hard to reach and not at the lid bottom -> ears moved down to z177.3-183.3, just above the pipe top (z177). They stay outside the lid body, so they can be reached from above. Holes are bigger: M5 (5.5 clearance, 10 counterbore). Lid top stays z197 (20 mm over the pipe).
+- Lid to encoder fixing: 4 holes equally at 0/90/180/270 deg, R63.5. Encoder ring: 4 new through holes dia 3.4 (the old 45 deg holes are unchanged, still there). Lid: 4 matching pilot holes dia 2.6 in the flange, which is now 6 mm thick (was 3) so a screw has something to hold. Positions are the same after the quarter turn because the flange is a full circle. Screws go up from under the ring. At 0 deg the hole (R61.8-65.2) is clear of the sensor notch (R68-75).
+- Insert wall height 190.7 -> 177 (= pipe top). Walls +-9 -> +-7 deg so the edge is 4.5 deg from the 120/240 sensor notches (was 2.5). Pilot holes M5 (4.2 x 20). Walls checked outside the pipe: inner R80.3 vs pipe OD R80.
+- Encoder upper posts: R55-75 -> R60-75 over the full height (z90-127, height unchanged) so nothing is near the flywheel. Cross-section is now 20 x 15, below the 2 x 2 cm asked in v22 (the lid skirt and the flywheel limit it).
+- Laser: axis z-16 -> z-20, so the laser is 150 mm below the sensor ring centreline (z130), as in Appendix 1. Long slot 6 x 42 on top of the tube for printing; grub hole moved to x63.
+- Order of assembly: encoder, then insert (plate in the pocket), then the laser stub through the insert hole into the encoder thread; its flange (z-3..0) clamps the insert plate to the encoder. Checked: plate hole R10.4, stub ridge R10, flange touches the plate bottom at z0.
+
+**Checks**
+- 6 solids (4 parts, motor/flywheel reference, pipe R76-80 z5-177 from Appendix 1): valid; overlap between every pair 0.0 mm3, also lid in drop-in orientation.
+- Bottom pocket filled 98.31% inside R80; the rest is the 20.8 centre hole. All new holes probed open (ring, lid flange, ears, wall pilots), flange solid between them.
+
+**Open**
+- Sensors: the wall still stands in the line of sight at 15 deg from the 120/240 sensors; a wide-angle receiver may see part of it. 4.5 deg is the most the 90 deg wall pattern allows at 45 deg.
+- Insert reaches R87-90, above the R80 in Appendix 1 (lid ears R73-91 are also outside it).
+- The pipe is z5-177 on platform 0, so the sensor ring is 47 mm below the pipe top (spec 40 for a 170 pipe at z0-170). Ring not touched.
+- Screwing the lid to the ring from below depends on a short screwdriver between the deck and the ring; not tested.
+
 ### v23 - 2026-10-24 (second pass) - 4 parts only: lid, encoder, insert, laser
 Not committed or pushed. Re-import the 4 `.step` files in Onshape. Parts now: `lid.step`, `encoder_housing.step`, `insert.step` (new, replaces insert_minus1/2), `laser.step` (new, replaces the straw A/B). Removed: insert_minus1/2.step, laser_straw_a/b. Moved to `reference/`: motor_ref.step, motor_tube.step (not printed).
 

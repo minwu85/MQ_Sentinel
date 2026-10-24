@@ -1,4 +1,4 @@
-"""Encoder/motor housing v23 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
+"""Encoder/motor housing v24 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
 Platform numbering (bottom to top): 1 = base, 2 = middle deck, 3 = top sensor ring."""
 import math
 import cadquery as cq
@@ -53,8 +53,7 @@ P1_STAND = BASE_TOP - 1.0                     # lower posts start 1 mm inside pl
 def post(a, r0, r1, z0, h):
     return (rect_at(a, (r0 + r1) / 2, r1 - r0, POST_W, z0, h)).intersect(disc(D, z0, h))
 lower = union_all([post(a, POST_R0, POST_R1, P1_STAND, P2_Z0 - P1_STAND) for a in POST_ANG])
-upper = union_all([post(a, POST_R0, POST_R1, P2_Z1, P3_Z0 - POST_STEP_Z - P2_Z1)
-                   .union(post(a, RING_ID / 2, POST_R1, P2_Z1, P3_Z0 - P2_Z1)) for a in POST_ANG])
+upper = union_all([post(a, RING_ID / 2, POST_R1, P2_Z1, P3_Z0 - P2_Z1) for a in POST_ANG])   # v24: R60-75 only, clear of the flywheel
 
 # platform 0 (160 x 10) + platform 1 (150 x 5 on top). Platform 1 top is flat, only the 10 mm centre hole.
 # Underside pocket for the single insert plate (insert.step, 4 mm): centre circle + 4 wedges on the diagonals (clear of the 0/120/240 sensors)
@@ -78,6 +77,7 @@ rim_flange = disc(D, P2_Z0 - RIM_FLANGE_H, RIM_FLANGE_H).cut(disc(2 * RIM_FLANGE
 # platform 3 (top sensor ring, never removed): ring only, open top so the motor can be dropped in from above
 p3 = disc(D, P3_Z0, P3_T).cut(disc(RING_ID, P3_Z0, P3_T))
 p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(67.5, 45, 360, 4).circle(1.5).extrude(P3_T))
+p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).polarArray(63.5, 0, 360, 4).circle(1.7).extrude(P3_T))   # v24: 4 lid-fixing holes at 0/90/180/270
 for i in range(N_SENS):
     p3 = p3.cut(cq.Workplane("XY").workplane(offset=P3_Z0).center(D / 2 - SENS_W / 2, 0).rect(SENS_W, SENS_L)
                 .extrude(P3_T).rotate((0, 0, 0), (0, 0, 1), 360.0 / N_SENS * i))
