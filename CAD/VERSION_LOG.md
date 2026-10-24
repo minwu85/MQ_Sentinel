@@ -99,6 +99,21 @@ Not committed or pushed. Same 4 parts. Re-import all four `.step` files.
 
 **Open**: ring and lid holes are plain clearance holes (use M5 screw + nut or tap them). The ring now has no holes over the posts, only the 3 at 60/180/300. Appendix 1 R80 is still exceeded by the insert (R90.3) and ears.
 
+
+Encorder
+<img width="632" height="682" alt="image" src="https://github.com/user-attachments/assets/23ee4ec5-35f6-4adb-83ec-daa78abc6968" />
+
+lid
+<img width="668" height="490" alt="image" src="https://github.com/user-attachments/assets/25aaa6d6-113e-49a9-9ac9-922c7140002e" />
+<img width="525" height="472" alt="image" src="https://github.com/user-attachments/assets/3437396e-662e-44e3-8036-937d9dd9e0f6" />
+
+laser
+<img width="710" height="460" alt="image" src="https://github.com/user-attachments/assets/0c36cd8d-f23f-4345-810d-43a1efb5aec6" />
+
+insert
+<img width="593" height="737" alt="image" src="https://github.com/user-attachments/assets/ae360c14-cef6-44dc-89e1-7960ec171fda" />
+
+
 ### v24 - 2026-10-25 - small hanger, ears at the tube top, ring/lid fixing holes, laser 150 below the ring
 Not committed or pushed. Parts still 4: `lid.step`, `encoder_housing.step`, `insert.step`, `laser.step`. Re-import all four.
 
