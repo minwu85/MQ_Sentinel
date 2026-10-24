@@ -136,6 +136,13 @@ Not committed or pushed. Re-import the 4 `.step` files in Onshape. Parts now: `l
 - Laser module size (bore 10.5) not confirmed. The 6 mm skin of platform 0/1 (z4-10) gives 2.4 thread turns for the socket.
 - The ring's own 4 screw holes at R67.5 are still in the sensor ring (ring not touched), but the lid no longer has holes over them.
 
+<img width="550" height="637" alt="image" src="https://github.com/user-attachments/assets/dcd6edf0-efec-4e0e-9cce-d81977337a33" />
+
+<img width="640" height="580" alt="image" src="https://github.com/user-attachments/assets/e658cb3d-72dd-4536-a316-849adc0ca3ad" />
+<img width="555" height="685" alt="image" src="https://github.com/user-attachments/assets/24d3e629-b9b2-48e1-806c-91c84de6cf66" />
+<img width="853" height="395" alt="image" src="https://github.com/user-attachments/assets/a14a8c6b-4731-4a01-9162-c52c8a854c09" />
+
+
 ### v22 - 2026-10-24 - stronger frame, taller lid with keyhole, 10 mm insert walls, laser straw
 
 **1 Frame (`encoder_housing.step`, `encoder_housing.py`)**
