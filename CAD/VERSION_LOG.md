@@ -98,6 +98,25 @@ Not committed or pushed. Same 4 parts; lid, encoder, insert and laser are re-exp
 
 **Open**: the encoder is symmetric only about the X axis now; the 4 walls are not evenly spaced (105 / 60 / 105 / 90 deg gaps). The insert still exceeds R80 (Appendix 1).
 
+lid
+
+<img width="627" height="532" alt="image" src="https://github.com/user-attachments/assets/5e10109a-d03b-4556-95f5-87099938e7f5" />
+
+Encoder
+
+<img width="536" height="592" alt="image" src="https://github.com/user-attachments/assets/b38c8151-3592-4857-9231-7db3e2c14f64" />
+
+
+Insert 
+
+<img width="558" height="652" alt="image" src="https://github.com/user-attachments/assets/5b5edfef-7986-40d0-91cb-68a58323552b" />
+
+
+laser
+
+<img width="742" height="392" alt="image" src="https://github.com/user-attachments/assets/4ec4ea72-b837-4a1f-a8ce-470bfb06e9dc" />
+
+
 ### v25 - 2026-10-25 (second pass) - holes only: 3 bigger holes, wider walls with a band, threaded insert hole, laser side window
 Not committed or pushed. Same 4 parts. Re-import all four `.step` files.
 
