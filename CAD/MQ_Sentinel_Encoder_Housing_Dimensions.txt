@@ -93,3 +93,5 @@ REVISION 26 (2026-10-25, third pass) - overrides revision 25 where it differs
   ENCODER: underside pocket arms +-20 deg at 45/150/210/315; socket thread z4-10 (230 mm3); ring holes unchanged (60/180/300)
   CAP: ears +-18.5 deg at 45/150/210/315
   LASER: top slot removed; side window and grub hole only
+
+REVISION 27 (2026-10-25): laser = v25 (top slot + side window), stub top z13 (3 mm lead-in); all other parts as revision 26
