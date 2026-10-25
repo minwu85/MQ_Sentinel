@@ -9,7 +9,7 @@ PITCH, W0, W1, CORE_R, TIP_R, BORE_R = 2.5, 1.4, 0.5, 8.0, 10.0, 4.0
 M_PHASE = 0.0                                    # male helix start z (ridge at +X at z = 0, 2.5, ...)
 FLANGE_D, FLANGE_T, COL_D = 30.0, 3.0, 20.0
 TUBE_OD, TUBE_BORE, TUBE_L, TUBE_Z = 16.5, 10.5, 70.0, -20.0   # axis z-20 = 150 below the sensor ring centreline (z130)
-SLOT_X0, SLOT_X1, SLOT_W = 14.0, 56.0, 6.0     # long open slot on top of the tube (easier to print, laser can be pressed in)
+SLOT_X0, SLOT_X1, SLOT_W = 14.0, 56.0, 6.0     # side window (v26: the top slot was removed, only the balanced side window stays)
 GRUB_X, GRUB_D = 63.0, 2.6
 
 def disc(d, z0, t):
@@ -27,7 +27,6 @@ tube = cq.Workplane("YZ").workplane(offset=0).center(0, TUBE_Z).circle(tube_r).e
 model = stub.union(flange).union(column).union(tube)
 model = model.cut(cq.Workplane("YZ").center(0, TUBE_Z).circle(TUBE_BORE / 2).extrude(TUBE_L))          # laser bore, from the tip to the axis
 model = model.cut(disc(2 * BORE_R, TUBE_Z, 10.0 - TUBE_Z))                                                # wire bore up through the stub
-model = model.cut(cq.Workplane("XY").workplane(offset=TUBE_Z).center((SLOT_X0 + SLOT_X1) / 2, 0).rect(SLOT_X1 - SLOT_X0, SLOT_W).extrude(tube_r + 1))
 model = model.cut(cq.Workplane("XZ").workplane(offset=-(tube_r + 1)).center((SLOT_X0 + SLOT_X1) / 2, TUBE_Z).rect(SLOT_X1 - SLOT_X0, SLOT_W).extrude(2 * tube_r + 2))   # side window through both walls (balanced)
 model = model.cut(cq.Workplane("XY").workplane(offset=TUBE_Z).center(GRUB_X, 0).circle(GRUB_D / 2).extrude(tube_r + 1))
 

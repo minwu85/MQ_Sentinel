@@ -10,7 +10,7 @@ FLANGE_T, TOP_T, SHELL_WALL = 6.0, 6.0, 3.0              # flange on the ring, t
 SKIRT_IN, SKIRT_OUT, SKIRT_H = 55.0, 58.0, 10.0          # 1 cm threaded skirt, goes into the ring bore
 T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 57.9, 59.7, 2.0, 0.6   # external ridge, mates the ring's 60.1 -> 58.5
 LID_SECT = 8.0                                           # half-angle of each lid section (passes the ring gaps)
-EAR_R0, EAR_R1, EAR_HALF = 73.0, 91.3, 13.0              # 4 ears on the diagonals, lowered to the level just above the pipe top (z177)
+EAR_R0, EAR_R1, EAR_HALF = 73.0, 91.3, 18.5              # 4 ears on the diagonals, lowered to the level just above the pipe top (z177)
 EAR_Z0, EAR_T = 177.3, 6.0                               # 0.3 mm over the wall tops (z177)
 SCREW_R, SCREW_D, CBORE_D, CBORE_H = 85.3, 5.5, 10.0, 2.0   # one M5 screw per ear into the wall top (bigger holes)
 FL_HOLE_R, FL_HOLE_D = 67.5, 5.5                         # v25: 3 through holes in the lid flange at 60/180/300 deg, same as the ring (M5)
@@ -54,7 +54,7 @@ def ear(a):
     w = (cq.Workplane("XY").workplane(offset=EAR_Z0).polyline([(0, 0), (200, -200 * t), (200, 200 * t)]).close()
          .extrude(EAR_T).rotate((0, 0, 0), (0, 0, 1), a))
     return disc(2 * EAR_R1, EAR_Z0, EAR_T).cut(disc(2 * EAR_R0, EAR_Z0, EAR_T)).intersect(w)
-ears = union_all([ear(a) for a in (45, 135, 225, 315)])
+ears = union_all([ear(a) for a in (45, 150, 210, 315)])
 
 # small hanger on the top centre: pad + rounded block (XZ profile, extruded along Y) with a flipped keyhole through it (round at the bottom, narrow slot above)
 z0 = Z_TOP + PAD_T
@@ -67,7 +67,7 @@ slot = (cq.Workplane("XZ").workplane(offset=-HANGER_T / 2 - 1).center(0, z0 + HA
         .slot2D(HANGER_H - 3.0 - HANGER_HOLE_D + 2 * HANGER_SLOT_W / 2 + 2.0, HANGER_SLOT_W, 90).extrude(HANGER_T + 2))
 hanger = block.cut(hole).cut(slot)
 model = top.union(shell).union(flange).union(skirt).union(thread).union(ears).union(pad).union(hanger)
-for a in (45, 135, 225, 315):
+for a in (45, 150, 210, 315):
     pt = (SCREW_R * math.cos(math.radians(a)), SCREW_R * math.sin(math.radians(a)))
     model = model.cut(cq.Workplane("XY").workplane(offset=EAR_Z0).center(*pt).circle(SCREW_D / 2).extrude(EAR_T))
     model = model.cut(cq.Workplane("XY").workplane(offset=EAR_Z0 + EAR_T - CBORE_H).center(*pt).circle(CBORE_D / 2).extrude(CBORE_H))

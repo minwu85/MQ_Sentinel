@@ -85,6 +85,19 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v26 - 2026-10-25 (third pass) - threads were missing in the encoder and insert (fixed), 45 mm walls moved off the sensors
+Not committed or pushed. Same 4 parts; lid, encoder, insert and laser are re-exported (re-import all four).
+
+**Issues and fixes**
+- Issue (found in your image 2): the screw structure in the bottom hole of the encoder was missing. v23-v25 reported a female thread, but the boolean union silently added nothing, so the encoder socket and the insert hole were plain holes. My earlier checks only measured overlap, so they did not catch it. Fixed (ridge root sunk 1.0 mm into the wall and clipped wider). Now measured: 229.8 mm3 of thread in the encoder (z4-10) and 153.2 mm3 in the insert plate (z0-4), same helix phase, so the laser stub screws through the plate and into the encoder, 5 mm in platform 0 (plate + skin) and 5 mm in platform 1. Laser thread vs both female threads: 0.0 mm3. Laser still points at 0 deg (sensor 1).
+- Insert walls wider: 45 mm each (chord at R85.3; was 30). With 4 walls at 45/135/225/315 the wider walls would cover the sensors at 120 and 240, so the walls moved (not the ring): 45, 150, 210, 315 deg. Wall edges at 29.7-60.3, 134.7-165.3, 194.7-225.3, 299.7-330.3; sensor notches at 0/120/240 (+-3.5) are clear (11 deg from the nearest wall edge at 120/240, 26 deg at 0).
+- Because the walls moved: plate arms are at the same four angles, +-20 deg (was +-30), the encoder underside pocket is the same shape, lid ears are at the same angles (+-18.5 deg) with the M5 holes at R85.3. The lid's 3 flange holes (60/180/300) and its thread sections (45/135/225/315) are unchanged. Everything else in the insert is unchanged (mid ring, height 177, pilot holes).
+- Laser: removed one hole. I took the green mark as the extra top slot (the side window in the red box is unchanged), so the tube keeps only the side window and the small grub-screw hole at x63. If the green meant something else, tell me which hole.
+
+**Checks**: 6 solids valid; 0.0 mm3 overlap between every pair; lid turned -45/-30/-15/-5 deg from seated: 0.0 mm3 with housing, insert and pipe. Pocket fill 98.5% (rest = centre hole). 
+
+**Open**: the encoder is symmetric only about the X axis now; the 4 walls are not evenly spaced (105 / 60 / 105 / 90 deg gaps). The insert still exceeds R80 (Appendix 1).
+
 ### v25 - 2026-10-25 (second pass) - holes only: 3 bigger holes, wider walls with a band, threaded insert hole, laser side window
 Not committed or pushed. Same 4 parts. Re-import all four `.step` files.
 

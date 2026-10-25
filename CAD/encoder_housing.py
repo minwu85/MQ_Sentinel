@@ -25,7 +25,7 @@ SKIRT_D = 160.0                               # platform 0: 160 mm (R80 limit)
 CENTRE_HOLE_D = 20.8
 L_PITCH, L_ROOT, L_TIP, L_W0, L_W1, L_Z0 = 2.5, 10.4, 8.4, 1.4, 0.5, 4.0
 L_PHASE = 0.1                                 # helix start offset from the fit test: free window -0.65..+0.15; 0.1 puts the loaded flank 0.1 mm off contact so the laser seats at 0 deg +-15 deg
-INS_D, P1_WEDGE = 60.0, 30.0                   # v23 one insert plate: 6 cm centre circle + 4 wedges 60 deg wide (half-angle 30) at 45/135/225/315
+INS_D, P1_WEDGE = 60.0, 20.0                   # v23 one insert plate: 6 cm centre circle + 4 wedges 60 deg wide (half-angle 30) at 45/135/225/315
 
 # motor sleeve: full-round tube, grey body half below / half above platform 2, closed bottom
 MOTOR_D, BORE_D, WALL = 37.0, 38.0, 3.0
@@ -65,7 +65,7 @@ def wedges(angles, z0, h):
              .extrude(h).rotate((0, 0, 0), (0, 0, 1), a))
         out = w if out is None else out.union(w)
     return out
-recess = disc(INS_D, 0, 4.0).union(wedges((45, 135, 225, 315), 0, 4.0))
+recess = disc(INS_D, 0, 4.0).union(wedges((45, 150, 210, 315), 0, 4.0))
 p1 = disc(SKIRT_D, 0, P0_T).union(disc(D, P0_T, P1_T))
 
 # platform 2 (middle deck): X cross; the four axis wedges are cut away, 3 mm rim kept
@@ -106,10 +106,10 @@ model = model.cut(cq.Workplane("XY").workplane(offset=SLEEVE_Z0 + WALL).center(0
                   .rect(WIN_W, WALL + 2).extrude(WIN_H))
 model = model.cut(recess)
 model = model.cut(cq.Workplane("XY").circle(CENTRE_HOLE_D / 2).extrude(BASE_TOP))
-helix = cq.Wire.makeHelix(L_PITCH, BASE_TOP - L_Z0 + 2 * L_PITCH, L_ROOT + 0.3)
-prof = cq.Workplane("XZ").polyline([(L_ROOT + 0.3, -L_W0 / 2), (L_TIP, -L_W1 / 2), (L_TIP, L_W1 / 2), (L_ROOT + 0.3, L_W0 / 2)]).close()
+helix = cq.Wire.makeHelix(L_PITCH, BASE_TOP - L_Z0 + 2 * L_PITCH, L_ROOT + 1.0)
+prof = cq.Workplane("XZ").polyline([(L_ROOT + 1.0, -L_W0 / 2), (L_TIP, -L_W1 / 2), (L_TIP, L_W1 / 2), (L_ROOT + 1.0, L_W0 / 2)]).close()
 l_thread = (prof.sweep(cq.Workplane("XY").newObject([helix]), isFrenet=True).translate((0, 0, L_Z0 + L_PHASE - L_PITCH))
-            .intersect(disc(2 * (L_ROOT + 0.5), L_Z0, BASE_TOP - L_Z0)))
+            .intersect(disc(2 * (L_ROOT + 1.1), L_Z0, BASE_TOP - L_Z0)))
 model = model.union(l_thread)
 
 bb = model.val().BoundingBox()

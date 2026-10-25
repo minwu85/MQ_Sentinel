@@ -87,3 +87,9 @@ REVISION 25 (2026-10-25, second pass) - overrides revision 24 where it differs
   RING + CAP FLANGE: 3 holes dia 5.5 at R67.5, 60/180/300 deg (old 45 deg and 0/90/180/270 holes removed); cap ears +-13 deg
   INSERT: walls +-10 deg; mid ring R80.3-90.3 z78.5-98.5; plate hole with female thread z0-4 (same helix as the encoder socket z4-10)
   LASER: side window 6 x 42 through both sides at the axis (z-20), plus the top slot
+
+REVISION 26 (2026-10-25, third pass) - overrides revision 25 where it differs
+  INSERT: walls 45 mm wide (+-15.3 deg at R85.3) at 45/150/210/315 deg; plate arms +-20 deg at the same angles; thread in the plate hole z0-4 (153 mm3)
+  ENCODER: underside pocket arms +-20 deg at 45/150/210/315; socket thread z4-10 (230 mm3); ring holes unchanged (60/180/300)
+  CAP: ears +-18.5 deg at 45/150/210/315
+  LASER: top slot removed; side window and grub hole only
