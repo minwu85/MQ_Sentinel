@@ -106,6 +106,12 @@ Not committed or pushed. Only `laser.step` / `laser.py` changed; lid, encoder an
 - Checks: simulated screwing the laser out of the seated pose for 2 full turns (0-720 deg, 2.5 mm per turn) against the insert and the encoder: overlap 0.0 mm3 at every step, so it does screw through the insert and into the encoder. 6 solids valid, 0.0 mm3 overlap between every pair. The insert lifts straight up into the pocket from below with no collision. Pocket fill 98.5% (rest = centre hole + thread gap).
 - Heights: housing z0-133, sensor ring z127-133 (centre z130), lid top z197, hanger z214, pipe z5-177 (172 on platform 0), laser axis z-20 = exactly 150 below the ring. Platform 0 R80 = the Appendix 1 limit; module R75 inside the pipe ID R76. Not met: ring is 47 mm below the pipe top (Appendix: 40 mm); the 5 mm platform 0 under the pipe plus the 2 mm pipe length difference cause it. The ring was not moved (locked).
 
+
+laser
+
+<img width="751" height="411" alt="image" src="https://github.com/user-attachments/assets/856412fd-814b-4278-a7a3-4ee95c25c12c" />
+
+
 ### v26 - 2026-10-25 (third pass) - threads were missing in the encoder and insert (fixed), 45 mm walls moved off the sensors
 Not committed or pushed. Same 4 parts; lid, encoder, insert and laser are re-exported (re-import all four).
 
