@@ -85,6 +85,19 @@ Add a new row here and update the module table whenever a new version is exporte
 
 ## Version history
 
+### v28 - 2026-10-30 - sensor ring raised 7 mm, insert wall 1 mm looser
+Not committed or pushed. Re-import `encoder_housing.step`, `lid.step`, `insert.step`, `laser.step`.
+
+**Issues from the print (photos) and fixes**
+- Pipe had to be forced into the insert (inner face R80.3 against pipe R80, too tight for a printed ring) -> insert wall and the ring round the walls: inner radius R80.3 -> R81.3 (1.3 mm clear of the pipe). Outer R90.3, wall width, plate, arms, pilot holes (R85.3) and everything else unchanged, so the wall is 9 mm thick. Checked: the pipe lowered through the insert from 40 mm above to seated: 0.0 mm3 overlap all the way.
+- Sensor ring too low (Appendix 1: sensors 40 mm below the pipe top). With the pipe on platform 0 (z5-177) the ring centre has to be z137 (was z130, 47 below). The ring (z134-140, was z127-133) and the sensor notches moved up 7 mm: housing height 140. Measured on the exported file: ring material z134.0-139.6 at R70, notch open z134-140, centre z137 = 40 mm below the pipe top.
+- Consequences of that single change: the 4 upper posts are 7 mm longer (z90-134, same cross-section); the lid seat moves up 7 mm (flange on the ring top at z140). The lid top stays z197 (20 mm over the pipe), ears z177.3, holes and everything else in the lid unchanged, so the lid shell is 7 mm shorter. Nothing else in the encoder changed.
+- Laser: kept the 150 mm below the ring rule, so the axis moves with the ring: z-20 -> z-13 (150 below z137). The stub, thread and tube are unchanged; the column is shorter (tube top z-4.75, 1.75 mm under the flange). Say if you would rather keep the laser at z-20 (then it is 157 below the ring).
+
+**Checks**: 6 solids valid, 0.0 mm3 overlap between every pair (housing, lid, insert, laser, motor + flywheel reference, pipe R76-80 z5-177); lid turned -45/-30/-10 deg: 0.0 mm3; laser screwed out for 2 turns through the insert and the encoder: 0.0 mm3. Ear holes (R85.3) sit on the wall (R81.3-90.3).
+
+**Open**: if the pipe is the 170 mm of the brief (top z175), the ring should be z135 instead (a one-number change, H = 138). The insert is still outside R80 (Appendix 1).
+
 ### v27 - 2026-10-25 (fourth pass) - laser back to v25, stub 3 mm longer, fit checks
 Not committed or pushed. Only `laser.step` / `laser.py` changed; lid, encoder and insert are as in v26.
 - Laser reverted to v25: long slot on top + side window (red box) as in v25.

@@ -1,11 +1,11 @@
 """Cap (lid) for the top ring, 4-section quarter-turn thread like a bottle lid (mm).
-Run from CAD/: python lid.py -> lid.step/.stl. Shown seated on the housing (flange on the ring top, z=133).
+Run from CAD/: python lid.py -> lid.step/.stl. Shown seated on the housing (flange on the ring top, z=140).
 v24: ears lowered to z177.3-183.3 (M5), 4 flange pilot holes, small hanger. v23: top z197 (20 mm above the 172 mm pipe, which sits on platform 0 and ends at z177); all holes filled; no inner support;
 4 ears on the diagonals with one M3 hole each (screw to the insert walls); arch hanger (loop) on the top instead of the keyhole."""
 import math
 import cadquery as cq
 
-D, Z_RING_TOP, Z_TOP = 150.0, 133.0, 197.0   # top = pipe top (z177) + 20 mm
+D, Z_RING_TOP, Z_TOP = 150.0, 140.0, 197.0   # top = pipe top (z177) + 20 mm
 FLANGE_T, TOP_T, SHELL_WALL = 6.0, 6.0, 3.0              # flange on the ring, top disc, shell wall
 SKIRT_IN, SKIRT_OUT, SKIRT_H = 55.0, 58.0, 10.0          # 1 cm threaded skirt, goes into the ring bore
 T_PITCH, T_R0, T_R1, T_W0, T_W1 = 4.0, 57.9, 59.7, 2.0, 0.6   # external ridge, mates the ring's 60.1 -> 58.5

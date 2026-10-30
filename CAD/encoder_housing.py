@@ -1,15 +1,15 @@
-"""Encoder/motor housing v25 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
+"""Encoder/motor housing v28 (mm). Run from CAD/: python encoder_housing.py -> encoder_housing.step/.stl
 Platform numbering (bottom to top): 1 = base, 2 = middle deck, 3 = top sensor ring."""
 import math
 import cadquery as cq
 
 D = 150.0            # overall diameter
-H = 133.0            # housing height = ring top. Sensor ring centreline z130 = 40 mm below the 170 mm top (Appendix 1); the cap adds 37 mm
+H = 140.0            # housing height = ring top. v28: sensor ring centreline z137 = 40 mm below the pipe top (z177 = 5 + 172 mm pipe on platform 0)
 P0_T, P1_T, P2_T, P3_T = 5.0, 5.0, 5.0, 6.0    # platform 0 (160 mm) now 5 mm, platform 1 (150 mm) 5 mm on top of it
 BASE_TOP = P0_T + P1_T                        # 10
 P2_Z0 = 85.0                 # platform 2 underside
 P2_Z1 = P2_Z0 + P2_T         # 80
-P3_Z0 = H - P3_T             # 127
+P3_Z0 = H - P3_T             # 134
 POST_W, POST_R0, POST_R1 = 20.0, 55.0, 75.0    # v22 posts 2 x 2 cm (tangential x radial, R55-75, trimmed to the 150 mm body)
 POST_STEP_Z = 5.0                              # the last 5 mm under the ring only reach R60 (lid skirt R55-58 sits there)
 RIM_FLANGE_R, RIM_FLANGE_H = 69.0, 5.0         # v22 stiffening flange under the deck rim (R69-75)

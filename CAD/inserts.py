@@ -1,4 +1,4 @@
-"""Insert (v26, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
+"""Insert (v28, mm) - ONE part (was yoke -1 + yoke -2). Run from CAD/: python inserts.py -> insert.step (run after encoder_housing.py).
 A 4 mm plate that fills the underside pocket of platform 0 exactly (centre circle 60 + 4 arms 60 deg wide on the diagonals 45/135/225/315,
 arms run out to R90.3) with a 4 flat walls at the arm ends, OUTSIDE the pipe (inner face R80.3, 0.3 mm off the pipe OD 160), 10 mm thick, smooth inside.
 The walls are on the diagonals so none blocks the sensor notches at 0/120/240. Wall tops stop 0.3 mm under the lid ears; one M3 pilot hole in each."""
@@ -7,7 +7,7 @@ import cadquery as cq
 
 PLATE_T, HUB_D, ARM_HALF, ARM_R = 4.0, 60.0, 20.0, 90.3
 HOLE_D = 20.8                                    # centre hole (laser stub: ridge tip R10, hole R10.4; plate R10.4)
-WALL_R0, WALL_R1, WALL_HALF = 80.3, 90.3, 15.3   # 10 mm thick, +-10 deg wide (1.5 deg clear of the notch edge at 120/240; sensor view only cut beyond ~40 deg off-axis)
+WALL_R0, WALL_R1, WALL_HALF = 81.3, 90.3, 15.3   # v28: inner face 1 mm further out (R81.3, 1.3 mm clear of the pipe OD) so the pipe slides in; outer R90.3 and pilot holes unchanged (wall 9 thick)
 BAND_Z0, BAND_Z1 = 78.5, 98.5                    # mid-height ring (R80.3-90.3) linking the 4 walls round the pipe
 # female thread continued through the plate (z0-4) with the same helix as the encoder socket (z4-10): 10 mm of thread in total
 L_PITCH, L_ROOT, L_TIP, L_W0, L_W1, L_PHASE, L_Z0 = 2.5, 10.4, 8.4, 1.4, 0.5, 0.1, 4.0

@@ -95,3 +95,9 @@ REVISION 26 (2026-10-25, third pass) - overrides revision 25 where it differs
   LASER: top slot removed; side window and grub hole only
 
 REVISION 27 (2026-10-25): laser = v25 (top slot + side window), stub top z13 (3 mm lead-in); all other parts as revision 26
+
+REVISION 28 (2026-10-30)
+  ENCODER: height 140; sensor ring z134-140 (centre z137 = 40 below the pipe top z177); upper posts z90-134
+  CAP: seat z140 (flange z140-146), top z197 unchanged, ears z177.3-183.3 unchanged
+  INSERT: wall + mid ring R81.3-90.3 (was R80.3)
+  LASER: tube axis z-13 (150 below the ring centre)

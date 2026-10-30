@@ -9,7 +9,7 @@ PITCH, W0, W1, CORE_R, TIP_R, BORE_R = 2.5, 1.4, 0.5, 8.0, 10.0, 4.0
 STUB_TOP = 13.0                                  # stub top (platform 1 top is z10): 3 mm lead-in above it, so it is fully engaged in plate + encoder
 M_PHASE = 0.0                                    # male helix start z (ridge at +X at z = 0, 2.5, ...)
 FLANGE_D, FLANGE_T, COL_D = 30.0, 3.0, 20.0
-TUBE_OD, TUBE_BORE, TUBE_L, TUBE_Z = 16.5, 10.5, 70.0, -20.0   # axis z-20 = 150 below the sensor ring centreline (z130)
+TUBE_OD, TUBE_BORE, TUBE_L, TUBE_Z = 16.5, 10.5, 70.0, -13.0   # v28: axis z-13 = 150 below the sensor ring centreline (z137)
 SLOT_X0, SLOT_X1, SLOT_W = 14.0, 56.0, 6.0     # long open slot on top of the tube (easier to print, laser can be pressed in)
 GRUB_X, GRUB_D = 63.0, 2.6
 
